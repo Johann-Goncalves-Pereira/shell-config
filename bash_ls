@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#           *.file_extension=text_type;text_clr;background_clr:
-# So * for any name-file.x = ↑ ↑ ↑ ↑ ; ↑ ↑ ↑ ↑ ; ↑ ↑ ↑ ↑ ↑ ↑ ↑ and ands with one :
+# ••••••••• *.file_extension=text_type;text_clr;background_clr: •••••••••••••••••
+# So * for any name-file.x = ↑ ↑ ↑ ↑ ; ↑ ↑ ↑ ↑ ; ↑ ↑ ↑ ↑ ↑ ↑ ↑ and ends with one :
 
 
 #: Possible text_clr
@@ -64,7 +64,9 @@
 # 97  = white
 
 
+# Function to show all LS Colors combinations
 function show_ls_colors() {
+    # Font: https://askubuntu.com/questions/466198/how-do-i-change-the-color-for-directories-with-ls-in-the-console
     for i in 00{2..8} {0{3,4,9},10}{0..7}
         do echo -e "$i \e[0;${i}mSubdermatoglyphic text\e[00m  \e[1;${i}mSubdermatoglyphic text\e[00m"
     done
@@ -74,7 +76,6 @@ function show_ls_colors() {
         do echo -e "$j;$i \e[$j;${i}mSubdermatoglyphic text\e[00m"
         done
     done
-
 }
 
 LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;
