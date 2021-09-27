@@ -1,3 +1,12 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+
+# The /path/to/your/blerc will be used
+[[ $- == *i* ]] && source ~/.local/share/blesh/ble.sh --noattach --rcfile ~/.ble.sh/blerc
+
+
 # If not running interactively, don't do anything
 case $- in
 *i*) ;;
@@ -120,3 +129,6 @@ LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:c
 36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;
 36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:'
 export LS_COLORS
+
+# Add this line at the end of .bashrc:
+[[ ${BLE_VERSION-} ]] && ble-attach
