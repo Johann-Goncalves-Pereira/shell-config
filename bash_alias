@@ -1,0 +1,53 @@
+#!/bin/bash
+# Aliases
+
+# Git
+alias gd="git diff | code"
+
+alias gcl="git clone"
+alias gst="git status"
+
+alias gl="git pull"
+alias gp="git push"
+
+alias gb="git branch"
+alias gba="git branch -a"
+alias gbb="git branch -b"
+
+alias gc="git commit -c"
+alias gca="git commit -c -a"
+alias gcm="git commit -m"
+alias gcam="git commit -am"
+
+alias gadd="git add ."
+alias gadda="git add -A"
+
+# LS
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Navegation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+alias dev="cd ~/Development"
+alias web="cd ~/Development/web"
+alias mobile="cd ~/Development/mobile"
+alias FlameShot="cd ~/Pictures/FlameShot"
+
+# Air - https://github.com/cosmtrek/air air confg.
+alias air='~/.air'
+
+# Open Programns
+alias materialize-pf="code ~/Development/web/materialize-frontend"
+
+# Etc...
+alias compressVideo="for i in *.{avi,flv,m4v,mov,wmv,mp4,MP4,TS,mkv}; do ffmpeg -n -loglevel error -i "$i" -vcodec libx264 -crf 28 -preset faster -tune film "compressed-${i}"; done"
+
+# colored GCC warnings and errors
+#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
