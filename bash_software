@@ -1,17 +1,37 @@
 #!/bin/bash
 
-# Android Emulator confg. https://developer.android.com/studio/install?hl=pt-br
+#* Softwarers that I use.
+
+#: Android Emulator confg.
+# https://developer.android.com/studio/install?hl=pt-br
+
+# Android Studio give to you the a virtual android machine.
 [ -d "$HOME/Library/Android/sdk" ] && ANDROID_SDK=$HOME/Library/Android/sdk || ANDROID_SDK=$HOME/Android/Sdk
 echo "export ANDROID_SDK=$ANDROID_SDK" >>~/$([[ $SHELL == *"bash" ]] && echo '.bashenv' || echo '.bashrc')
 
-# Asdf confg.
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
 
-# Confg. NVM
+#: Asdf confg.
+# source: https://github.com/asdf-vm/asdf
+# source: http://asdf-vm.com/guide/getting-started.html#core-installation-complete
+
+# Asdf is a tool for versioning languages in a simple way.
+# Manage multiple runtime versions with a single CLI tool, extendable via plugins.
+[[ $- == *i* ]] && source $HOME/.asdf/asdf.sh
+[[ $- == *i* ]] && source $HOME/.asdf/completions/asdf.bash
+
+
+#: NVM confg.
+# Source:  https://github.com/nvm-sh/nvm
+
+# Nvm is a version manager for node.js, designed to be installed per-user, 
+# and invoked per-shell. nvm works on any POSIX-compliant shell (sh, dash, ksh, zsh, bash), 
+# in particular on these platforms: unix, macOS, and windows WSL.
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
-# Confg. Yarn
+#: Yarn confg. 
+# https://classic.yarnpkg.com/lang/en/docs/install/#debian-stable
+
+# Yarn is a package manager that doubles down as project manager.
 export PATH="$PATH:$(yarn global bin)"
