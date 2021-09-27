@@ -35,6 +35,7 @@ alias ....="cd ../../.."
 alias dev="cd ~/Development"
 alias web="cd ~/Development/web"
 alias mobile="cd ~/Development/mobile"
+alias back="cd ~/Development/back-end"
 alias FlameShot="cd ~/Pictures/FlameShot"
 
 # Air - https://github.com/cosmtrek/air air confg.
