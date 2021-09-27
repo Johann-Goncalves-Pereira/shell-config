@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Android Emulator confg. https://developer.android.com/studio/install?hl=pt-br
 [ -d "$HOME/Library/Android/sdk" ] && ANDROID_SDK=$HOME/Library/Android/sdk || ANDROID_SDK=$HOME/Android/Sdk
 echo "export ANDROID_SDK=$ANDROID_SDK" >>~/$([[ $SHELL == *"bash" ]] && echo '.bashenv' || echo '.bashrc')
