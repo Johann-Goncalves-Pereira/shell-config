@@ -1,58 +1,66 @@
 #!/bin/bash
 # Aliases
 
-# Git alias
-alias gd="git diff"
+# # Git alias
+# alias gd="git diff"
 
-alias gcl="git clone"
-alias gst="git status"
+# alias gcl="git clone"
+# alias gst="git status"
 
-alias gl="git pull"
-alias gp="git push"
+# alias gl="git pull"
+# alias gp="git push"
 
-alias gb="git branch"
-alias gba="git branch -a"
-alias gbb="git branch -b"
+# alias gb="git branch"
+# alias gba="git branch -a"
+# alias gbb="git branch -b"
 
-alias gc="git commit -c"
-alias gca="git commit -c -a"
-alias gcm="git commit -m"
-alias gcam="git commit -am"
+# alias gc="git commit -c"
+# alias gca="git commit -c -a"
+# alias gcm="git commit -m"
+# alias gcam="git commit -am"
 
-alias gadd="git add ."
-alias gadda="git add -A"
+# alias gfo="git fetch origin"
 
-# LS
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
+# alias gadd="git add ."
+# alias gadda="git add -A"
 
-# Navegation
-alias ..="cd .."
-alias ...="cd ../.."
-alias ....="cd ../../.."
-# Personal navegation
-alias dev="cd ~/Development"
-alias web="cd ~/Development/web"
-alias mobile="cd ~/Development/mobile"
-alias back="cd ~/Development/back-end"
-alias FlameShot="cd ~/Pictures/FlameShot"
+# alias gcdp="git checkout develop && git pull"
 
-# Air - https://github.com/cosmtrek/air air confg.
-alias air='~/.air'
+# # LS
+# alias ll='ls -alF'
+# alias la='ls -A'
+# alias l='ls -CF'
 
-# Open VsCode folder
-alias materialize="code ~/Development/web/materialize-frontend"
+# # Navegation
+# alias ..="cd .."
+# alias ...="cd ../.."
+# alias ....="cd ../../.."
+# # Personal navegation
+# alias dev="cd ~/Development"
+# alias web="cd ~/Development/web"
+# alias mobile="cd ~/Development/mobile"
+# alias back="cd ~/Development/back-end"
+# alias FlameShot="cd ~/Pictures/FlameShot"
 
-# colored GCC warnings and errors
-# export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+# # Air - https://github.com/cosmtrek/air air confg.
+# # alias air='~/.air'
 
-# Add an "alert" alias for long running commands.  Use like so:
-# leep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+# # Open VsCode folder
+# alias bash_settings="code ~/.bash-settings"
+# alias portfolio="code ~/Development/web/portfolio"
+# alias materialize="code ~/Development/web/materialize-frontend"
 
 
-# Functions
+# # Start XMR mining
+# alias xmrig="~/.xmrig-6.15.1/xmrig"
+
+# # Add an "alert" alias for long running commands.  Use like so:
+# # leep 10; alert
+# alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# alias emulator="~/Android/Sdk/tools/emulator"
+
+# # Functions
 
 # Comporess
 function compress_video () {
