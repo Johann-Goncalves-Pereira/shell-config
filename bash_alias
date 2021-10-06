@@ -1,66 +1,66 @@
 #!/bin/bash
 # Aliases
 
-# # Git alias
-# alias gd="git diff"
+# Git alias
+alias gd="git diff"
 
-# alias gcl="git clone"
-# alias gst="git status"
+alias gcl="git clone"
+alias gst="git status"
 
-# alias gl="git pull"
-# alias gp="git push"
+alias gl="git pull"
+alias gp="git push"
 
-# alias gb="git branch"
-# alias gba="git branch -a"
-# alias gbb="git branch -b"
+alias gb="git branch"
+alias gba="git branch -a"
+alias gbb="git branch -b"
 
-# alias gc="git commit -c"
-# alias gca="git commit -c -a"
-# alias gcm="git commit -m"
-# alias gcam="git commit -am"
+alias gc="git commit -c"
+alias gca="git commit -c -a"
+alias gcm="git commit -m"
+alias gcam="git commit -am"
 
-# alias gfo="git fetch origin"
+alias gfo="git fetch origin"
 
-# alias gadd="git add ."
-# alias gadda="git add -A"
+alias gadd="git add ."
+alias gadda="git add -A"
 
-# alias gcdp="git checkout develop && git pull"
+alias gcdp="git checkout develop && git pull"
 
-# # LS
-# alias ll='ls -alF'
-# alias la='ls -A'
-# alias l='ls -CF'
+# LS
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
 
-# # Navegation
-# alias ..="cd .."
-# alias ...="cd ../.."
-# alias ....="cd ../../.."
-# # Personal navegation
-# alias dev="cd ~/Development"
-# alias web="cd ~/Development/web"
-# alias mobile="cd ~/Development/mobile"
-# alias back="cd ~/Development/back-end"
-# alias FlameShot="cd ~/Pictures/FlameShot"
+# Navegation
+alias ..="cd .."
+alias ...="cd ../.."
+alias ....="cd ../../.."
+# Personal navegation
+alias dev="cd ~/Development"
+alias web="cd ~/Development/web"
+alias mobile="cd ~/Development/mobile"
+alias back="cd ~/Development/back-end"
+alias FlameShot="cd ~/Pictures/FlameShot"
 
-# # Air - https://github.com/cosmtrek/air air confg.
-# # alias air='~/.air'
+# Air - https://github.com/cosmtrek/air air confg.
+# alias air='~/.air'
 
-# # Open VsCode folder
-# alias bash_settings="code ~/.bash-settings"
-# alias portfolio="code ~/Development/web/portfolio"
-# alias materialize="code ~/Development/web/materialize-frontend"
+# Open VsCode folder
+alias bash_settings="code ~/.bash-settings"
+alias portfolio="code ~/Development/web/portfolio"
+alias materialize="code ~/Development/web/materialize-frontend"
 
 
-# # Start XMR mining
-# alias xmrig="~/.xmrig-6.15.1/xmrig"
+# Start XMR mining
+alias xmrig="~/.xmrig-6.15.1/xmrig"
 
-# # Add an "alert" alias for long running commands.  Use like so:
-# # leep 10; alert
-# alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+# Add an "alert" alias for long running commands.  Use like so:
+# leep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
-# alias emulator="~/Android/Sdk/tools/emulator"
+alias emulator="~/Android/Sdk/tools/emulator"
 
-# # Functions
+# Functions
 
 # Comporess
 function compress_video () {
