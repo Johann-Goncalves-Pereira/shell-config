@@ -23,89 +23,89 @@
 # Aliases
 
 # Git alias
-gd:
-  command: git diff
-gcl:
-  command: git clone
-gst:
-  command: git status
-gl:
-  command: git  pull
-gp:
-  command: git push
-gb:
-  command: git branch
-gba:
-  command: git branch -a
-gbb:
-  command: git branch -b
+# gd:
+#   command: git diff
+# gcl:
+#   command: git clone
+# gst:
+#   command: git status
+# gl:
+#   command: git  pull
+# gp:
+#   command: git push
+# gb:
+#   command: git branch
+# gba:
+#   command: git branch -a
+# gbb:
+#   command: git branch -b
 
-gc:
-  command: git commit -c
+# gc:
+#   command: git commit -c
 
-gca:
-  command: git commit -c -a
+# gca:
+#   command: git commit -c -a
 
-gcm:
-  command: git commit -m
-gcam:
-  command: git commit -am
+# gcm:
+#   command: git commit -m
+# gcam:
+#   command: git commit -am
 
-gfo:
-  command: git fetch origin
+# gfo:
+#   command: git fetch origin
 
-gadd:
-  command: git add .
+# gadd:
+#   command: git add .
 
-gadda:
-  command: git add -A
+# gadda:
+#   command: git add -A
 
-gcdp:
-  command: git checkout develop && git pull
+# gcdp:
+#   command: git checkout develop && git pull
 
-# LS
-ll:
-  command: ls -alF
-la:
-  command: ls -A
-l:
-  command: ls -CF
+# # LS
+# ll:
+#   command: ls -alF
+# la:
+#   command: ls -A
+# l:
+#   command: ls -CF
 
-# Navegation
-..:
-  command: cd ..
-...:
-  command: cd ../..
-....:
-  command: cd ../../..
-# Personal navegation
-dev:
-  command: cd ~/Development
-web:
-  command: cd ~/Development/web
-mobile:
-  command: cd ~/Development/mobile
-back:
-  command: cd ~/Development/back-end
-FlameShot:
-  command: cd ~/Pictures/FlameShot
+# # Navegation
+# ..:
+#   command: cd ..
+# ...:
+#   command: cd ../..
+# ....:
+#   command: cd ../../..
+# # Personal navegation
+# dev:
+#   command: cd ~/Development
+# web:
+#   command: cd ~/Development/web
+# mobile:
+#   command: cd ~/Development/mobile
+# back:
+#   command: cd ~/Development/back-end
+# FlameShot:
+#   command: cd ~/Pictures/FlameShot
 
-# Open VsCode folder
-bash_settings:
-  command: code ~/.bash-settings
-portfolio:
-  command: code ~/Development/web/portfolio
-materialize:
-  command: code ~/Development/web/materialize-frontend
+# # Open VsCode folder
+# bash_settings:
+#   command: code ~/.bash-settings
+# portfolio:
+#   command: code ~/Development/web/portfolio
+# materialize:
+#   command: code ~/Development/web/materialize-frontend
 
-# Start XMR mining
-xmrig:
-  command: ~/.xmrig-6.15.1/xmrig
+# # Start XMR mining
+# xmrig:
+#   command: ~/.xmrig-6.15.1/xmrig
 
-# Add an "alert"  for long running  commands.  Use like so:
-# leep 10; alert
-alert:
-  command: notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"
+# # Add an "alert"  for long running  commands.  Use like so:
+# # leep 10; alert
+# alert:
+#   command: notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"
 
-emulator:
-  command: ~/Android/Sdk/tools/emulator
+# emulator:
+#   command: ~/Android/Sdk/tools/emulator
