@@ -50,7 +50,6 @@ alias bash_settings="code ~/.bash-settings"
 alias portfolio="code ~/Development/web/portfolio"
 alias materialize="code ~/Development/web/materialize-frontend"
 
-
 # Start XMR mining
 alias xmrig="~/.xmrig-6.15.1/xmrig"
 
@@ -63,9 +62,13 @@ alias emulator="~/Android/Sdk/tools/emulator"
 # Functions
 
 # Comporess
-function compress_video () {
-    for i in *.{avi,flv,m4v,mov,wmv,mp4,MP4,TS,mkv};
-        do ffmpeg -n -loglevel error -i "$i" -vcodec libx264 -crf 28 -preset faster -tune film "compressed-${i}";
+function compress_video() {
+    for i in *.{avi,flv,m4v,mov,wmv,mp4,MP4,TS,mkv}; do
+        ffmpeg -n -loglevel error -i "$i" -vcodec libx264 -crf 28 -preset faster -tune film "compressed-${i}"
     done
 }
 
+function reload() {
+    source ~/.bashrc
+    clear
+}
