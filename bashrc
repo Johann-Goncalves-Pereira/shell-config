@@ -4,10 +4,8 @@
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
-
 # The /path/to/your/blerc will be used
 [[ $- == *i* ]] && source ~/.local/share/blesh/ble.sh --noattach --rcfile ~/.ble.sh/blerc
-
 
 # If not running interactively, don't do anything
 case $- in
@@ -29,7 +27,6 @@ shopt -s checkwinsize
 
 # append to the history file, don't overwrite it
 shopt -s histappend
-
 
 # Alias folder confg.
 [[ $- == *i* ]] && source ~/.bash-settings/bash_alias
@@ -70,10 +67,8 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-
 # colored GCC warnings and errors
 # export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
 
 if [ "$color_prompt" = yes ]; then
     PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
@@ -103,7 +98,6 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
-
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
@@ -112,7 +106,7 @@ if ! shopt -oq posix; then
         . /usr/share/bash-completion/bash_completion
     elif [ -f /etc/bash_completion ]; then
         . /etc/bash_completion
-    fiddgr
+        fiddgr
     fi
 fi
 
@@ -120,7 +114,6 @@ export GIT_PS1_SHOWDIRTYSTATE=true
 export PS1="\n"'$(date)'"\n\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w \[\033[1;31m\]"'$(__git_ps1 "- on branch [%s]")'"\[\033[m\]\n\$ "
 
 [[ $- == *i* ]] && source ~/.bash-settings/bash_ls
-
 
 # Add this line at the end of .bashrc:
 [[ ${BLE_VERSION-} ]] && ble-attach
