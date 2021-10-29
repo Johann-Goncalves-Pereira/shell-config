@@ -29,10 +29,10 @@ shopt -s checkwinsize
 shopt -s histappend
 
 # Alias folder confg.
-[[ $- == *i* ]] && source ~/.bash-settings/bash_alias
+[[ $- == *i* ]] && source ~/.shell-config/bash_alias
 
 # Software folder confg.
-[[ $- == *i* ]] && source ~/.bash-settings/bash_software
+[[ $- == *i* ]] && source ~/.shell-config/bash_software
 
 # If set, the pattern "**" used in a pathname expansion context will
 # match all files and zero or more directories and subdirectories.
@@ -113,7 +113,7 @@ fi
 export GIT_PS1_SHOWDIRTYSTATE=true
 export PS1="\n"'$(date)'"\n\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\]\w \[\033[1;31m\]"'$(__git_ps1 "- on branch [%s]")'"\[\033[m\]\n\$ "
 
-[[ $- == *i* ]] && source ~/.bash-settings/bash_ls
+[[ $- == *i* ]] && source ~/.shell-config/bash_ls
 
 # Add this line at the end of .bashrc:
 [[ ${BLE_VERSION-} ]] && ble-attach
