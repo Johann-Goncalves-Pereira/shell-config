@@ -63,8 +63,9 @@ alias emulator="~/Android/Sdk/tools/emulator"
 
 # Comporess
 function compress_video() {
+    # -loglevel error
     for i in *.{avi,flv,m4v,mov,wmv,mp4,MP4,TS,mkv}; do
-        ffmpeg -n -loglevel error -i "$i" -vcodec libx264 -crf 28 -preset faster -tune film "compressed-${i}"
+        ffmpeg -n -i "$i" -vcodec libx264 -crf 28 -preset faster -tune film "c-${i}"
     done
 }
 
