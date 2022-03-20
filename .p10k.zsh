@@ -78,10 +78,9 @@
     todo                    # todo items (https://github.com/todotxt/todo.txt-cli)
     timewarrior             # timewarrior tracking status (https://timewarrior.net/)
     taskwarrior             # taskwarrior task count (https://taskwarrior.org/)
-    #echo(date +%D)
     time                    # current time
     node_version            # node.js version
-    package                 # name@version from package.json (https://docs.npmjs.com/files/package.json)
+    # package                 # name@version from package.json (https://docs.npmjs.com/files/package.json)
     go_version              # go version (https://golang.org)
     rust_version            # rustc version (https://www.rust-lang.org)
     dotnet_version          # .NET version (https://dotnet.microsoft.com)
@@ -212,7 +211,7 @@
 
   ##################################[ dir: current directory ]##################################
   # Default current directory color.
-  typeset -g POWERLEVEL9K_DIR_FOREGROUND=31
+  typeset -g POWERLEVEL9K_DIR_FOREGROUND=198
   # If directory is too long, shorten some of its segments to the shortest possible unique
   # prefix. The shortened directory can be tab-completed to the original.
   typeset -g POWERLEVEL9K_SHORTEN_STRATEGY=truncate_to_unique
@@ -222,7 +221,7 @@
   typeset -g POWERLEVEL9K_DIR_SHORTENED_FOREGROUND=103
   # Color of the anchor directory segments. Anchor segments are never shortened. The first
   # segment is always an anchor.
-  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=39
+  typeset -g POWERLEVEL9K_DIR_ANCHOR_FOREGROUND=197
   # Display anchor directory segments in bold.
   typeset -g POWERLEVEL9K_DIR_ANCHOR_BOLD=true
   # Don't shorten directories that contain any of these files. They are anchors.
@@ -1541,7 +1540,7 @@
   # Current time color.
   typeset -g POWERLEVEL9K_TIME_FOREGROUND=66
   # Format for the current time: 09:51:02. See `man 3 strftime`.
-  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%D} %D{%H:%M:%S}'
+  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%D} • %D{%H:%M:%S}'
   # If set to true, time will update when you hit enter. This way prompts for the past
   # commands will contain the start times of their commands as opposed to the default
   # behavior where they contain the end times of their preceding commands.
@@ -1603,6 +1602,7 @@
   #              zsh initialization. Choose this if you've never tried instant prompt, haven't
   #              seen the warning, or if you are unsure what this all means.
   typeset -g POWERLEVEL9K_INSTANT_PROMPT=verbose
+  # typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
 
   # Hot reload allows you to change POWERLEVEL9K options after Powerlevel10k has been initialized.
   # For example, you can type POWERLEVEL9K_BACKGROUND=red and see your prompt turn red. Hot reload
