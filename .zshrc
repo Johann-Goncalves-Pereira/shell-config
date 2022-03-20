@@ -111,10 +111,9 @@ plugins=(
   ubuntu  
   torrent
   web-search
-  copydir
+  copypath
   copyfile
   history
-
 )
 
 emulate sh -c 'source /etc/profile'
@@ -192,21 +191,21 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-# Personal navegation
-alias dev="cd ~/Development"
-alias web="cd ~/Development/web"
-alias mobile="cd ~/Development/mobile"
-alias back="cd ~/Development/back-end"
-alias FlameShot="cd ~/Pictures/FlameShot"
+alias exag="exa --long --header --git"
+alias exal="exa -l"
+alias exall="exa -abghHliS"
 
-# Open VsCode folder
-alias bash_settings="code ~/.bash-settings"
-alias portfolio="code ~/Development/web/portfolio"
-alias materialize="code ~/Development/web/materialize-frontend"
+# Personal navegation
+alias web="j web"
+alias mobile="j mobile"
+alias back="j back-end"
+alias dev="j Development"
+alias FlameShot="j FlameShot"
+alias shell-config="j .shell-config"
+alias materialize="j plataform-frontend"
 
 
 alias gcdp="git checkout develop && git pull"
-
 
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
