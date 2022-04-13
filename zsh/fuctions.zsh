@@ -36,7 +36,7 @@ function get-default-branch() {
 function gcdp() {
   get-default-branch
 
-  echo -e "${UPurple}Going to \"$DEFAULT_BRANCH_NAME\" branch, and making a pull/fetch of your porject.${Color_Off}\n"
+  echo -e "${UPurple}Going to the branch \"$DEFAULT_BRANCH_NAME\", and making a pull/fetch of your porject.${Color_Off}\n"
   git checkout $DEFAULT_BRANCH_NAME && git pull origin && git fetch origin
 }
 
