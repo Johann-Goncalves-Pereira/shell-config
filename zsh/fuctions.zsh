@@ -23,7 +23,7 @@ function get-default-branch() {
 function gcdp() {
   get-default-branch
 
-  echo -e "${Red}Going to $DEFAULT_BRANCH_NAME branch, and making a pull/fetch of your porject.${Color_Off}\n"
+  echo -e "${UPurple}Going to $DEFAULT_BRANCH_NAME branch, and making a pull/fetch of your porject.${Color_Off}\n"
   git checkout $DEFAULT_BRANCH_NAME && git pull && git fetch origin
 }
 
@@ -31,7 +31,7 @@ function gcdp() {
 function git-purge() {
   get-default-branch
 
-  echo -e "${Red}Purging all branchs, except $DEFAULT_BRANCH_NAME - from your local storage.${Color_Off}\n"
+  echo -e "${BRed}Purging all branchs, except $DEFAULT_BRANCH_NAME - from your local storage.${Color_Off}\n"
   git branch | grep -v $DEFAULT_BRANCH_NAME | xargs git branch -D
   git remote prune origin
 }
