@@ -125,32 +125,23 @@ source $ZSH/oh-my-zsh.sh
 source ~/.zplug/init.zsh
 
 # Syntax Highlighting
-source /home/johann/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 # LSCOLORS
 source ~/.local/share/lscolors.sh
 
+# User Config
+USER_CONFIG_DIRECTORY="$HOME/.shell-config/zsh"
+
+source $USER_CONFIG_DIRECTORY/aliases.zsh
+source $USER_CONFIG_DIRECTORY/behaviors.zsh
+source $USER_CONFIG_DIRECTORY/colors.zsh
+source $USER_CONFIG_DIRECTORY/fuctions.zsh
+
 # Auto Jump
 [[ -s /home/johann/.autojump/etc/profile.d/autojump.sh ]] && source /home/johann/.autojump/etc/profile.d/autojump.sh
 
-# User configuration
-
 autoload -U compinit && compinit -u
-
-function reload(){
-  source ~/.zshrc
-  clear
-}
-
-# Ctrl+Backspace: kill the word backward
-bindkey -M emacs '^H' backward-kill-word
-bindkey -M viins '^H' backward-kill-word
-bindkey -M vicmd '^H' backward-kill-word
-
-# Ctrl+Delete: kill the word forward
-bindkey -M emacs '^[[3;5~' kill-word
-bindkey -M viins '^[[3;5~' kill-word
-bindkey -M vicmd '^[[3;5~' kill-word
 
 # # append
 # path+=('/home/david/pear/bin')
@@ -185,47 +176,8 @@ bindkey -M vicmd '^[[3;5~' kill-word
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-
-# LS
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-alias exag="exa --long --header --git"
-alias exal="exa -l"
-alias exall="exa -abghHliS"
-
-alias gcdp="git checkout $(basename $(git symbolic-ref --short refs/remotes/origin/HEAD)) && git pull && git fetch origin $(basename $(git symbolic-ref --short refs/remotes/origin/HEAD))"
-
-alias bat="batcat"
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-
-# Config the auto cd path
-function expand-dots() {
-    local MATCH
-    if [[ $LBUFFER =~ '\.\.\.+' ]]; then
-        LBUFFER=$LBUFFER:fs%\.\.\.%../..%
-    fi
-}
-
-function expand-dots-then-expand-or-complete() {
-    zle expand-dots
-    zle expand-or-complete
-}
-
-function expand-dots-then-accept-line() {
-    zle expand-dots
-    zle accept-line
-}
-
-zle -N expand-dots
-zle -N expand-dots-then-expand-or-complete
-zle -N expand-dots-then-accept-line
-bindkey '^I' expand-dots-then-expand-or-complete
-bindkey '^M' expand-dots-then-accept-line
 
 ### ZNT's installer added snippet ###
 fpath=( "$fpath[@]" "$HOME/.config/znt/zsh-navigation-tools" )
