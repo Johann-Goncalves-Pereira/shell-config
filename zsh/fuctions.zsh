@@ -40,7 +40,7 @@ function git-purge() {
 function gps() {
   CURRENT_BRANCH=$(git branch --show-current)
 
-  echo -e "${Cyan}Pushing to remote...\e${Color_Off}"
+  echo -e "${Cyan}Pushing to remote...\n${Color_Off}"
   git push origin $CURRENT_BRANCH
 }
 
