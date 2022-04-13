@@ -1,5 +1,6 @@
 # Reload shell
 function reload() {
+  clear
   echo -e "${Cyan}Reloading."
   sleep .5s
   clear
@@ -12,19 +13,31 @@ function reload() {
   clear
 }
 
+DEFAULT_NO="[${Green}y${Color_Off}/${Red}N${Color_Off}]"
+
 function get-default-branch() {
   DEFAULT_BRANCH=$(git symbolic-ref --short refs/remotes/origin/HEAD)
-  DEFAULT_BRANCH_NAME=$(basename $DEFAULT_BRANCH)
+  status_simbolic=$?
 
-  echo $DEFAULT_BRANCH_NAME
+  if [ $status_simbolic -eq 0 ]; then
+    DEFAULT_BRANCH_NAME=$(basename $DEFAULT_BRANCH)
+  else
+    echo -e "\n"
+    echo "${Red}[Error]:${Color_Off} could not find your default branch automatically!"
+    echo -n "Type your default branch name: "
+    read opt
+    # echo "$opt"
+
+    DEFAULT_BRANCH_NAME=$opt
+  fi
 }
 
 # This func go to default branch pull/fetche everyting from base.
 function gcdp() {
   get-default-branch
 
-  echo -e "${UPurple}Going to $DEFAULT_BRANCH_NAME branch, and making a pull/fetch of your porject.${Color_Off}\n"
-  git checkout $DEFAULT_BRANCH_NAME && git pull && git fetch origin
+  echo -e "${UPurple}Going to \"$DEFAULT_BRANCH_NAME\" branch, and making a pull/fetch of your porject.${Color_Off}\n"
+  git checkout $DEFAULT_BRANCH_NAME && git pull origin && git fetch origin
 }
 
 # This will purge all the git branches that are not usefull anymore.
@@ -32,8 +45,15 @@ function git-purge() {
   get-default-branch
 
   echo -e "${BRed}Purging all branchs, except $DEFAULT_BRANCH_NAME - from your local storage.${Color_Off}\n"
-  git branch | grep -v $DEFAULT_BRANCH_NAME | xargs git branch -D
-  git remote prune origin
+
+  echo -n "Are you sure you want to remove all containers? $DEFAULT_NO "
+  read -r answer
+  if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    git branch | grep -v $DEFAULT_BRANCH_NAME | xargs git branch -D
+    git remote prune origin
+  else
+    echo -e "${Cyan}Aborted.${Color_Off}\n"
+  fi
 }
 
 # Push to remote
@@ -48,16 +68,30 @@ function gps() {
 function docker-clean() {
   echo -e "${BYellow}Stopping all containers from your local storage.${Color_Off}\n"
   docker ps -a -q | xargs docker stop
-  echo -e "${BRed}Removing all containers from your local storage.${Color_Off}\n"
-  docker system prune -f
+
+  echo -n "\nAre you sure you want to remove all containers? $DEFAULT_NO "
+  read -r answer
+  if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    echo -e "${BRed}Removing all containers from your local storage.${Color_Off}\n"
+    docker system prune -f
+  else
+    echo -e "${Cyan}Process canceled.${Color_Off}\n"
+  fi
 }
 
 # Clean full Docker
 function docker-full-clean() {
-  echo -e "${BRed}Cleaning all containers and images from your local storage.${Color_Off}\n"
-  # docker rmi $(docker images -q)
-  docker ps -a -q | xargs docker rm -f
-  docker images -q | xargs docker rmi -f
+  echo -e "${BRed}This will clean all containers and images from your local storage.${Color_Off}\n"
+
+  echo -n "Are you sure you want to remove all containers? $DEFAULT_NO "
+  read -r answer
+  if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+    # docker rmi $(docker images -q)
+    docker ps -a -q | xargs docker rm -f
+    docker images -q | xargs docker rmi -f
+  else
+    echo -e "${Cyan}Process canceled.${Color_Off}\n"
+  fi
 }
 
 # Config the auto cd path
