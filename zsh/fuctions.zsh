@@ -1,13 +1,13 @@
 # Reload shell
 function reload() {
   echo -e "${Cyan}Reloading."
-  sleep .2s
+  sleep .5s
   clear
   echo -e "${Cyan}Reloading.."
-  sleep .2s
+  sleep .5s
   clear
-  echo -e "${Cyan}Reloading..."
-  sleep .2s
+  echo -e "${Cyan}Reloading...${Color_Off}"
+  sleep .5s
   source ~/.zshrc
   clear
 }
@@ -15,13 +15,15 @@ function reload() {
 function get-default-branch() {
   DEFAULT_BRANCH=$(git symbolic-ref --short refs/remotes/origin/HEAD)
   DEFAULT_BRANCH_NAME=$(basename $DEFAULT_BRANCH)
+
+  echo $DEFAULT_BRANCH_NAME
 }
 
 # This func go to default branch pull/fetche everyting from base.
 function gcdp() {
   get-default-branch
 
-  echo -e "${Red}Going to $DEFAULT_BRANCH_NAME branch, and making a pull/fetch of your porject.\n"
+  echo -e "${Red}Going to $DEFAULT_BRANCH_NAME branch, and making a pull/fetch of your porject.${Color_Off}\n"
   git checkout $DEFAULT_BRANCH_NAME && git pull && git fetch origin
 }
 
@@ -29,7 +31,7 @@ function gcdp() {
 function git-purge() {
   get-default-branch
 
-  echo -e "${Red}Purging all branchs, except $DEFAULT_BRANCH_NAME - from your local storage.\n"
+  echo -e "${Red}Purging all branchs, except $DEFAULT_BRANCH_NAME - from your local storage.${Color_Off}\n"
   git branch | grep -v $DEFAULT_BRANCH_NAME | xargs git branch -D
   git remote prune origin
 }
@@ -38,30 +40,21 @@ function git-purge() {
 function gps() {
   CURRENT_BRANCH=$(git branch --show-current)
 
-  echo -e "${Red}Pushing to remote...\e"
+  echo -e "${Cyan}Pushing to remote...\e${Color_Off}"
   git push origin $CURRENT_BRANCH
-}
-
-# Push to remote and execute gcdp()
-function gpso() {
-  CURRENT_BRANCH=$(git branch --show-current)
-
-  echo -e "${Red}Pushing to remote...\n"
-  git push origin $CURRENT_BRANCH
-  gcdp
 }
 
 # Stop all docker containers and remove them.
 function docker-clean() {
-  echo -e "${BYellow}Stopping all containers from your local storage.\n"
+  echo -e "${BYellow}Stopping all containers from your local storage.${Color_Off}\n"
   docker ps -a -q | xargs docker stop
-  echo -e "${BRed}Removing all containers from your local storage.\n"
+  echo -e "${BRed}Removing all containers from your local storage.${Color_Off}\n"
   docker system prune -f
 }
 
 # Clean full Docker
 function docker-full-clean() {
-  echo -e "${BRed}Cleaning all containers and images from your local storage.\n"
+  echo -e "${BRed}Cleaning all containers and images from your local storage.${Color_Off}\n"
   # docker rmi $(docker images -q)
   docker ps -a -q | xargs docker rm -f
   docker images -q | xargs docker rmi -f
