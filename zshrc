@@ -195,22 +195,37 @@ alias exag="exa --long --header --git"
 alias exal="exa -l"
 alias exall="exa -abghHliS"
 
-# Personal navegation
-alias web="j web"
-alias mobile="j mobile"
-alias back="j back-end"
-alias dev="j Development"
-alias FlameShot="j FlameShot"
-alias shell-config="j .shell-config"
-alias materialize="j plataform-frontend"
+alias gcdp="git checkout $(basename $(git symbolic-ref --short refs/remotes/origin/HEAD)) && git pull && git fetch origin $(basename $(git symbolic-ref --short refs/remotes/origin/HEAD))"
 
-
-alias gcdp="git checkout develop && git pull"
-
+alias bat="batcat"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+
+# Config the auto cd path
+function expand-dots() {
+    local MATCH
+    if [[ $LBUFFER =~ '\.\.\.+' ]]; then
+        LBUFFER=$LBUFFER:fs%\.\.\.%../..%
+    fi
+}
+
+function expand-dots-then-expand-or-complete() {
+    zle expand-dots
+    zle expand-or-complete
+}
+
+function expand-dots-then-accept-line() {
+    zle expand-dots
+    zle accept-line
+}
+
+zle -N expand-dots
+zle -N expand-dots-then-expand-or-complete
+zle -N expand-dots-then-accept-line
+bindkey '^I' expand-dots-then-expand-or-complete
+bindkey '^M' expand-dots-then-accept-line
 
 ### ZNT's installer added snippet ###
 fpath=( "$fpath[@]" "$HOME/.config/znt/zsh-navigation-tools" )
@@ -237,6 +252,8 @@ fi
 source "$HOME/.zinit/bin/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
+
+
 
 # Load a few important annexes, without Turbo
 # (this is currently required for annexes)
