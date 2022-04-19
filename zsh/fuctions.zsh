@@ -13,8 +13,6 @@ function reload() {
   clear
 }
 
-DEFAULT_NO="[${Green}y${Color_Off}/${Red}N${Color_Off}]"
-
 function get-default-branch() {
   DEFAULT_BRANCH=$(git symbolic-ref --short refs/remotes/origin/HEAD)
   status_simbolic=$?
@@ -36,9 +34,11 @@ function get-default-branch() {
 function gcdp() {
   get-default-branch
 
-  echo -e "${UPurple}Going to the branch \"$DEFAULT_BRANCH_NAME\", and making a pull/fetch of your porject.${Color_Off}\n"
+  echo -e "${BPurple}Going to the branch \"$DEFAULT_BRANCH_NAME\", and making a pull/fetch of your porject.${Color_Off}\n"
   git checkout $DEFAULT_BRANCH_NAME && git pull origin && git fetch origin
 }
+
+DEFAULT_NO="[${Green}y${Color_Off}/${Red}N${Color_Off}]"
 
 # This will purge all the git branches that are not usefull anymore.
 function git-purge() {
