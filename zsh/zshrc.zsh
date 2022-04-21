@@ -90,6 +90,7 @@ plugins=(
   # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git-flow  
   git-flow  
   git-flow-avh
+  gitignore
 
   catimg
   compleat
