@@ -94,7 +94,7 @@ plugins=(
 
   catimg
   compleat
-  timer
+  # timer
 
   colorize
   colored-man-pages
@@ -110,6 +110,7 @@ plugins=(
   npm 
   yarn 
   asdf
+  zsh-asdf-prompt
   zsh-nvm 
 
   elm
@@ -119,6 +120,8 @@ plugins=(
   coffee
 
   docker 
+  # https://github.com/Cloudstek/zsh-plugin-appup
+  # appup
   flutter
   react-native
 
@@ -133,9 +136,13 @@ plugins=(
   history
 )
 
+  
+#? Profiles Emulation
+# emulate sh -c 'source /etc/profile'
+# emulate sh -c 'source /etc/profile.d/apps-bin-path.sh'
+# emulate sh -c 'source /etc/profile.d/flatpak.sh'
 
 #? Base of all settings
-emulate sh -c 'source /etc/profile'
 source $ZSH/oh-my-zsh.sh
 
 #* User Config variable Path
@@ -147,22 +154,19 @@ source $USER_CONFIG_DIRECTORY/colors.zsh
 source $USER_CONFIG_DIRECTORY/fuctions.zsh
 # source $USER_CONFIG_DIRECTORY/lscolor.zsh
 
+PATH="$PATH:~/.asdf/bin"
 
-
-###? ZNT's installer added snippet ###
+# ###? ZNT's installer added snippet ###
 fpath=( "$fpath[@]" "$HOME/.config/znt/zsh-navigation-tools" )
+# Load Commands
 autoload n-aliases n-cd n-env n-functions n-history n-kill n-list n-list-draw n-list-input n-options n-panelize n-help
 autoload znt-usetty-wrapper znt-history-widget znt-cd-widget znt-kill-widget
-alias naliases=n-aliases ncd=n-cd nenv=n-env nfunctions=n-functions nhistory=n-history
-alias nkill=n-kill noptions=n-options npanelize=n-panelize nhelp=n-help
+# Super History tool config
 zle -N znt-history-widget
 bindkey '^R' znt-history-widget
 setopt AUTO_PUSHD HIST_IGNORE_DUPS PUSHD_IGNORE_DUPS
 zstyle ':completion::complete:n-kill::bits' matcher 'r:|=** l:|=*'
-### END ###
-
-#? Zsh Manager
-source ~/.zplug/init.zsh
+# ### END ###
 
 ###? Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -174,19 +178,22 @@ if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
 fi
 
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-autoload -Uz _zinit
+#? For zPlugin "Plugins Aria" =(
+zpl load Cloudstek/zsh-plugin-appup 
+zpl ice wait lucid
+zpl load redxtech/zsh-asdf-direnv
+# zpl load marlonrichert/zsh-autocomplete
+#? ) 
+autoload -Uz _zinit && autoload -Uz compinit
+compinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
+zplugin cdreplay -q 
 
-# Load a few important annexes, without Turbo
-# (this is currently required for annexes)
+#? Load a few important annexes, without Turbo
+#? (this is currently required for annexes)
 zinit light-mode for \
     zdharma-continuum/zinit-annex-as-monitor \
     zdharma-continuum/zinit-annex-bin-gem-node \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
-
-  
-#? flatpak config 
-emulate sh -c 'source /etc/profile.d/apps-bin-path.sh'
-emulate sh -c 'source /etc/profile.d/flatpak.sh'
 
