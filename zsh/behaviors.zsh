@@ -12,7 +12,7 @@ bindkey -M vicmd '^[[3;5~' kill-word
 source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 #? LSCOLORS
-source ~/.local/share/lscolors.sh
+# source ~/.local/share/lscolors.sh
 
 #? Config Auto Jump
 [[ -s /home/johann/.autojump/etc/profile.d/autojump.sh ]] && source /home/johann/.autojump/etc/profile.d/autojump.sh
