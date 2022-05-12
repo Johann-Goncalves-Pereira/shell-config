@@ -13,3 +13,6 @@ alias bat="batcat"
 # zsh-navigation-tools
 alias naliases=n-aliases ncd=n-cd nenv=n-env nfunctions=n-functions nhistory=n-history
 alias nkill=n-kill noptions=n-options npanelize=n-panelize nhelp=n-help
+
+# GIT
+alias gwt="git worktree"

@@ -22,3 +22,8 @@ autoload -U compinit && compinit -u
 ZSH_COLORIZE_TOOL=chroma
 ZSH_COLORIZE_STYLE="colorful"
 ZSH_COLORIZE_CHROMA_FORMATTER=terminal256
+
+# noisetorch
+if [ -d "$HOME/.local/bin" ]; then
+  PATH="$HOME/.local/bin:$PATH"
+fi
