@@ -1,3 +1,5 @@
+export FLUTTER_ROOT="$(~/.asdf/shims/flutter)"
+
 # Ctrl+Backspace: kill the word backward
 bindkey -M emacs '^H' backward-kill-word
 bindkey -M viins '^H' backward-kill-word
