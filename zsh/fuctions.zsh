@@ -39,6 +39,7 @@ function gcdp() {
 }
 
 DEFAULT_NO="[${Green}y${Color_Off}/${Red}N${Color_Off}]"
+DEFAULT_YES="[${Green}Y${Color_Off}/${Red}n${Color_Off}]"
 
 # This will purge all the git branches that are not usefull anymore.
 function git-purge() {
@@ -46,9 +47,9 @@ function git-purge() {
 
   echo -e "${BRed}Purging all branchs, except $DEFAULT_BRANCH_NAME - from your local storage.${Color_Off}\n"
 
-  echo -n "Are you sure you want to remove all containers? $DEFAULT_NO "
+  echo -n "Are you sure you want to remove all containers? $DEFAULT_YES "
   read -r answer
-  if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+  if [[ $answer =~ ^([nN]|[nN])$ ]]; then
     git branch | grep -v $DEFAULT_BRANCH_NAME | xargs git branch -D
     git remote prune origin
   else
@@ -69,9 +70,9 @@ function docker-clean() {
   echo -e "${BYellow}Stopping all containers from your local storage.${Color_Off}\n"
   docker ps -a -q | xargs docker stop
 
-  echo -n "\nAre you sure you want to remove all containers? $DEFAULT_NO "
+  echo -n "\nAre you sure you want to remove all containers? $DEFAULT_YES "
   read -r answer
-  if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
+  if [[ $answer =~ ^([nN]|[nN])$ ]]; then
     echo -e "${BRed}Removing all containers from your local storage.${Color_Off}\n"
     docker system prune -f
   else
@@ -117,3 +118,7 @@ zle -N expand-dots-then-expand-or-complete
 zle -N expand-dots-then-accept-line
 bindkey '^I' expand-dots-then-expand-or-complete
 bindkey '^M' expand-dots-then-accept-line
+
+if [ -d "$HOME/.local/bin" ]; then
+  PATH="$HOME/.local/bin:$PATH"
+fi
