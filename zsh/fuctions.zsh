@@ -50,10 +50,10 @@ function git-purge() {
   echo -n "Are you sure you want to remove all containers? $DEFAULT_YES "
   read -r answer
   if [[ $answer =~ ^([nN]|[nN])$ ]]; then
+    echo -e "${Cyan}Aborted.${Color_Off}\n"
+  else
     git branch | grep -v $DEFAULT_BRANCH_NAME | xargs git branch -D
     git remote prune origin
-  else
-    echo -e "${Cyan}Aborted.${Color_Off}\n"
   fi
 }
 
@@ -73,10 +73,10 @@ function docker-clean() {
   echo -n "\nAre you sure you want to remove all containers? $DEFAULT_YES "
   read -r answer
   if [[ $answer =~ ^([nN]|[nN])$ ]]; then
+    echo -e "${Cyan}Process canceled.${Color_Off}\n"
+  else
     echo -e "${BRed}Removing all containers from your local storage.${Color_Off}\n"
     docker system prune -f
-  else
-    echo -e "${Cyan}Process canceled.${Color_Off}\n"
   fi
 }
 
