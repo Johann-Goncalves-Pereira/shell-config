@@ -122,3 +122,14 @@ bindkey '^M' expand-dots-then-accept-line
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
 fi
+
+# Fun
+function fun-clock() {
+  while true; do
+    # Toilet make colors
+    echo "$(date '+%D %T' | toilet -f term -F border --gay)"
+    sleep 1
+    clear
+  done
+
+}
