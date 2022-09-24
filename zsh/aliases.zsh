@@ -18,6 +18,7 @@ alias ls='colorls --group-directories-first'
 alias la='colorls --group-directories-first --almost-all'
 alias ll='colorls --group-directories-first --almost-all --long' # detailed list view
 alias lt='colorls --group-directories-first --tree'              # tree view
+alias l='colorls --group-directories-first --almost-all --long --tree'
 
 # Enable tab completion for flags
 source $(dirname $(gem which colorls))/tab_complete.sh

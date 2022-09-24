@@ -31,6 +31,8 @@
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+# ~/. ~/.asdf/plugins/java/set-java-home.zsh
+
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
 #go configuration
@@ -40,7 +42,6 @@ export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOPATH/bin
 
 [[ -s "/home/johann/.gvm/scripts/gvm" ]] && source "/home/johann/.gvm/scripts/gvm"
-source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
 
 # export FLUTTER_ROOT="$(~/.asdf/shims/flutter)"
 
