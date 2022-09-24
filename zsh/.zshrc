@@ -11,7 +11,7 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/johann/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 
 #? To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
@@ -85,11 +85,11 @@ plugins=(
   man
   
   git 
-  git-extras 
+  # git-extras 
   git-auto-fetch
   # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/git-flow  
-  git-flow  
-  git-flow-avh
+  # git-flow  
+  # git-flow-avh
   gitignore
 
   catimg
