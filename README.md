@@ -21,3 +21,14 @@ My personal settings
 4. ls cool display.
  - ![image](https://user-images.githubusercontent.com/62612685/173672089-2ee7e91f-094f-4401-ba9d-2dbebf2ae4fa.png)
 
+## SetUp
+
+Clone in your home directory.
+
+Fist make the symbolic link.
+
+```zsh
+ln -s .shell-config/zsh/.zshrc .zshrc
+ln -s .shell-config/zsh/.bash .bashrc
+ln -s .shell-config/zsh/.p10k.zsh .p10k.zsh
+```
