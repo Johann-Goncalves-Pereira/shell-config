@@ -29,6 +29,6 @@ Fist make the symbolic link.
 
 ```zsh
 ln -s .shell-config/zsh/.zshrc .zshrc
-ln -s .shell-config/zsh/.bash .bashrc
+ln -s .shell-config/zsh/.bashrc .bashrc
 ln -s .shell-config/zsh/.p10k.zsh .p10k.zsh
 ```
