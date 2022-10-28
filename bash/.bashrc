@@ -119,3 +119,8 @@ export PS1="\n"'$(date)'"\n\[\033[36m\]\u\[\033[m\]@\[\033[32m\]\h:\[\033[33;1m\
 [[ ${BLE_VERSION-} ]] && ble-attach
 export ANDROID_SDK=/home/johann/Android/Sdk
 export ANDROID_SDK=/home/johann/Android/Sdk
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+export ANDROID_SDK=/home/johann/Android/Sdk
