@@ -7,6 +7,19 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 
+# Send cache to XDG_CACHE_HOME if set or $HOME/.cache
+() {
+  emulate -L zsh
+  local -r cache_dir=${XDG_CACHE_HOME:-$HOME/.cache}/zsh
+  autoload -Uz _store_cache compinit
+  zstyle ':completion:*' use-cache true
+  zstyle ':completion:*' cache-path $cache_dir/.zcompcache
+  [[ -f $cache_dir/.zcompcache/.make-cache-dir ]] || _store_cache .make-cache-dir
+  compinit -C -d $cache_dir/.zcompdump
+}
+
+
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -96,13 +109,13 @@ plugins=(
   compleat
   # timer
 
-  colorize
+  # colorize
   colored-man-pages
 
   command-not-found
   
-  zsh-completions 
-  zsh-autosuggestions
+  # zsh-completions 
+  # zsh-autosuggestions
 
   aliases
   common-aliases
@@ -111,13 +124,13 @@ plugins=(
   yarn 
   asdf
   zsh-asdf-prompt
-  zsh-nvm 
+  # zsh-nvm 
 
   elm
   node 
   golang 
 
-  coffee
+  # coffee
 
   docker 
   # https://github.com/Cloudstek/zsh-plugin-appup
@@ -136,11 +149,6 @@ plugins=(
   history
 )
 
-  
-#? Profiles Emulation
-# emulate sh -c 'source /etc/profile'
-# emulate sh -c 'source /etc/profile.d/apps-bin-path.sh'
-# emulate sh -c 'source /etc/profile.d/flatpak.sh'
 
 #? Base of all settings
 source $ZSH/oh-my-zsh.sh
@@ -152,21 +160,11 @@ source $USER_CONFIG_DIRECTORY/aliases.zsh
 source $USER_CONFIG_DIRECTORY/behaviors.zsh
 source $USER_CONFIG_DIRECTORY/colors.zsh
 source $USER_CONFIG_DIRECTORY/fuctions.zsh
-# source $USER_CONFIG_DIRECTORY/lscolor.zsh
+# source $USER_CONFIG_DIRECTZSH_AUTOSUGGEST_STRATEGYORY/lscolor.zsh
 
+# ? Garden
+ export PATH=$PATH:$HOME/.garden/bin
 
-
-# ###? ZNT's installer added snippet ###
-fpath=( "$fpath[@]" "$HOME/.config/znt/zsh-navigation-tools" )
-# Load Commands
-autoload n-aliases n-cd n-env n-functions n-history n-kill n-list n-list-draw n-list-input n-options n-panelize n-help
-autoload znt-usetty-wrapper znt-history-widget znt-cd-widget znt-kill-widget
-# Super History tool config
-zle -N znt-history-widget
-bindkey '^R' znt-history-widget
-setopt AUTO_PUSHD HIST_IGNORE_DUPS PUSHD_IGNORE_DUPS
-zstyle ':completion::complete:n-kill::bits' matcher 'r:|=** l:|=*'
-# ### END ###
 
 ###? Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -178,25 +176,38 @@ if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
 fi
 
 source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-#? For zPlugin "Plugins Aria" =(
-zpl load Cloudstek/zsh-plugin-appup 
-zpl ice wait lucid
-zpl load redxtech/zsh-asdf-direnv
+
+
+
+zinit load Cloudstek/zsh-plugin-appup 
+zinit ice wait lucid
+zinit load redxtech/zsh-asdf-direnv
+
+zinit load jspears/worktree
+
 # zpl load marlonrichert/zsh-autocomplete
-#? ) 
-autoload -Uz _zinit && autoload -Uz compinit
-compinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
-zplugin cdreplay -q 
+zinit load zsh-users/zsh-autosuggestions
+zinit load zsh-users/zsh-completions
 
-#? Load a few important annexes, without Turbo
-#? (this is currently required for annexes)
-zinit light-mode for \
-    zdharma-continuum/zinit-annex-as-monitor \
-    zdharma-continuum/zinit-annex-bin-gem-node \
-    zdharma-continuum/zinit-annex-patch-dl \
-    zdharma-continuum/zinit-annex-rust
+zinit light zdharma-continuum/fast-syntax-highlighting
+zinit load zdharma-continuum/history-search-multi-word
 
+
+ZSH_AUTOSUGGEST_STRATEGY=match_prev_cmd
 
 
 source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
+
+# # bun completions
+# [ -s "/home/johann/.bun/_bun" ] && source "/home/johann/.bun/_bun"
+
+# # bun
+# export BUN_INSTALL="$HOME/.bun"
+# export PATH="$BUN_INSTALL/bin:$PATH"
+
+
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
