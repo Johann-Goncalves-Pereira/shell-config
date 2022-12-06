@@ -9,6 +9,7 @@ alias nkill=n-kill noptions=n-options npanelize=n-panelize nhelp=n-help
 
 # GIT
 alias gwt="git worktree"
+alias glz="lazygit"
 
 # exa
 alias exag="exa -l -h -g"

@@ -65,6 +65,13 @@ function gps() {
   git push origin $CURRENT_BRANCH
 }
 
+function gpo() {
+  CURRENT_BRANCH=$(git branch --show-current)
+
+  echo -e "${Cyan}Pull from remote origin ${CURRENT_BRANCH} \n${Color_Off}"
+  git pull origin $CURRENT_BRANCH
+}
+
 # Stop all docker containers and remove them.
 function docker-clean() {
   echo -e "${BYellow}Stopping all containers from your local storage.${Color_Off}\n"
@@ -132,4 +139,19 @@ function fun-clock() {
     clear
   done
 
+}
+
+function killport() {
+  vared -p "What port do you want to kill? " -c port
+
+  kill $(lsof -t -i:$port)
+  status_simbolic=$?
+
+  if [ $status_simbolic -eq 0 ]; then
+    echo -e "${White}Killing port ${UGreen}$port${Color_Off}\n"
+  else
+    echo -e "${BRed}Fail to kill port"
+  fi
+
+  # kill -9 $(lsof -t -i:8080)
 }
