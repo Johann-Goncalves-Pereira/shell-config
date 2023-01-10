@@ -35,7 +35,9 @@ function gcdp() {
   get-default-branch
 
   echo -e "${BPurple}Going to the branch \"$DEFAULT_BRANCH_NAME\", and making a pull/fetch of your porject.${Color_Off}\n"
-  git checkout $DEFAULT_BRANCH_NAME && git pull origin && git fetch origin
+  git checkout $DEFAULT_BRANCH_NAME
+  gpo
+  git fetch origin
 }
 
 DEFAULT_NO="[${Green}y${Color_Off}/${Red}N${Color_Off}]"

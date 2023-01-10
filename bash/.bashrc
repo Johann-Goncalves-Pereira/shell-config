@@ -124,3 +124,8 @@ export ANDROID_SDK=/home/johann/Android/Sdk
 export SDKMAN_DIR="$HOME/.sdkman"
 [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
 export ANDROID_SDK=/home/johann/Android/Sdk
+export ANDROID_SDK=/home/johann/Android/Sdk
+export ANDROID_SDK=/home/johann/Android/Sdk
+export ANDROID_SDK=/home/johann/Android/Sdk
+export ANDROID_SDK=/home/johann/Android/Sdk
+. "$HOME/.cargo/env"

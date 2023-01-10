@@ -43,10 +43,6 @@ export PATH=$PATH:$GOPATH/bin
 
 [[ -s "/home/johann/.gvm/scripts/gvm" ]] && source "/home/johann/.gvm/scripts/gvm"
 
-# export FLUTTER_ROOT="$(~/.asdf/shims/flutter)"
-# . ~/.asdf/plugins/java/set-java-home.zsh
-# . ~/.asdf/asdf.sh
-
 # Ctrl+Backspace: kill the word backward
 bindkey -M emacs '^H' backward-kill-word
 bindkey -M viins '^H' backward-kill-word
