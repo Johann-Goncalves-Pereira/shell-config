@@ -1,7 +1,6 @@
 # application
 alias bat="batcat"
 alias batcat="batcat --style=numbers,changes,grid"
-alias obs="flatpak run com.obsproject.Studio"
 
 # zsh-navigation-tools
 alias naliases=n-aliases ncd=n-cd nenv=n-env nfunctions=n-functions nhistory=n-history
@@ -18,11 +17,11 @@ alias exall="exa -abghHliS"
 
 # LS
 alias l="exa"
-alias ls='colorls --group-directories-first'
-alias la='colorls --group-directories-first --almost-all'
+alias ls='colorls --sd'
+alias la='colorls --sd -A'
 alias lx="exa -abghHliS"
-alias ll="colorls --group-directories-first --almost-all --long"
-alias lt='colorls --group-directories-first --tree' # tree view
+alias ll="colorls --sd -A --long"
+alias lt='colorls --sd --tree' # tree view
 
 # Enable tab completion for flags
 source $(dirname $(gem which colorls))/tab_complete.sh
