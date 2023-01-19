@@ -1,37 +1,14 @@
-# # append
-# path+=('/home/david/pear/bin')
-# # or prepend
-# path=('/home/david/pear/bin' $path)
-# # export to sub-processes (make it inherited by child processes)
-# export PATH
+eval "$(direnv hook zsh)"
 
-# typeset -T LD_LIBRARY_PATH ld_library_path :
+PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
 
-# export MANPATH="/usr/local/man:$MANPATH"
+zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' special-dirs true
+autoload -Uz compinit && compinit
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+set -o AUTO_CD
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# ~/. ~/.asdf/plugins/java/set-java-home.zsh
+ZSH_AUTOSUGGEST_STRATEGY=match_prev_cmd
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 
@@ -54,7 +31,7 @@ bindkey -M viins '^[[3;5~' kill-word
 bindkey -M vicmd '^[[3;5~' kill-word
 
 #? Syntax Highlighting
-source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+# source ~/.oh-my-zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
 #? LSCOLORS
 # source ~/.local/share/lscolors.sh
