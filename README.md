@@ -10,7 +10,7 @@ My personal settings
 ## Zsh Settings
 
 1. Usefull plugins.
-2. Cool ans usefull theme.
+2. Cool and usefull theme.
   - ![image](https://user-images.githubusercontent.com/62612685/173672501-b030f955-8995-447d-b58a-4a0c45b997e4.png)
 3. Personal functions to automate tasks.
   - Clean docker.
