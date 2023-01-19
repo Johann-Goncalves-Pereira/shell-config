@@ -1,16 +1,6 @@
 # Reload shell
 function reload() {
-  clear
-  echo -e "${Cyan}Reloading."
-  sleep .5s
-  clear
-  echo -e "${Cyan}Reloading.."
-  sleep .5s
-  clear
-  echo -e "${Cyan}Reloading...${Color_Off}"
-  sleep .5s
   source ~/.zshrc
-  clear
 }
 
 function get-default-branch() {
@@ -108,8 +98,9 @@ function docker-full-clean() {
 function expand-dots() {
   local MATCH
   if [[ $LBUFFER =~ '\.\.\.+' ]]; then
-    LBUFFER=$LBUFFER:fs%\.\.\.%../..%
+    LBUFFER=$LBUFFER:fs%\.\.\.%../../%
   fi
+
 }
 
 function expand-dots-then-expand-or-complete() {
@@ -156,4 +147,11 @@ function killport() {
   fi
 
   # kill -9 $(lsof -t -i:8080)
+}
+
+direnv-nvm() {
+  vared -p "What version do you want to use? " -c version
+ 
+  echo "use nodejs $version" >.envrc
+  direnv allow
 }
