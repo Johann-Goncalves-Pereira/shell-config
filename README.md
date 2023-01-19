@@ -18,6 +18,9 @@ My personal settings
   - reload shell.
   - cd just with dots.
   - clock.
+  - direnv.
+  - git sortcuts.
+  - jumptofile.
 4. ls cool display.
  - ![image](https://user-images.githubusercontent.com/62612685/173672089-2ee7e91f-094f-4401-ba9d-2dbebf2ae4fa.png)
 
