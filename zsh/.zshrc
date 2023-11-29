@@ -43,42 +43,42 @@ zinit light-mode depth"1" for \
 
 # Oh My Zsh
 zinit for \
-		OMZL::correction.zsh \
-		OMZL::directories.zsh \
-		OMZL::history.zsh \
-		OMZL::key-bindings.zsh \
-		OMZL::theme-and-appearance.zsh \
-		OMZP::common-aliases\
-		OMZ::plugins/git/git.plugin.zsh \
-		OMZ::plugins/sudo/sudo.plugin.zsh \
-		OMZ::plugins/man/man.plugin.zsh \
-		OMZ::plugins/gitignore/gitignore.plugin.zsh \
-		OMZ::plugins/git-auto-fetch/git-auto-fetch.plugin.zsh \
-		OMZ::plugins/catimg/catimg.plugin.zsh \
-		OMZ::plugins/compleat/compleat.plugin.zsh \
-		OMZ::plugins/colored-man-pages/colored-man-pages.plugin.zsh \
-		OMZ::plugins/command-not-found/command-not-found.plugin.zsh \
-		OMZ::plugins/npm/npm.plugin.zsh \
-		OMZ::plugins/yarn/yarn.plugin.zsh \
-		OMZ::plugins/node/node.plugin.zsh \
-		OMZ::plugins/golang/golang.plugin.zsh \
-		OMZ::plugins/flutter/flutter.plugin.zsh \
-		OMZ::plugins/react-native/react-native.plugin.zsh \
-		OMZ::plugins/vscode/vscode.plugin.zsh \
-		OMZ::plugins/torrent/torrent.plugin.zsh \
-		OMZ::plugins/web-search/web-search.plugin.zsh \
-		OMZ::plugins/copypath/copypath.plugin.zsh \
-		OMZ::plugins/copyfile/copyfile.plugin.zsh \
-		OMZ::plugins/history/history.plugin.zsh \
-		OMZ::plugins/common-aliases/common-aliases.plugin.zsh \
+	OMZL::correction.zsh \
+	OMZL::directories.zsh \
+	OMZL::history.zsh \
+	OMZL::key-bindings.zsh \
+	OMZL::theme-and-appearance.zsh \
+	OMZP::common-aliases\
+		
 ..
 zinit wait lucid for \
-	  OMZP::colored-man-pages \
-	  OMZP::cp \
-	  OMZP::extract \
-	  OMZP::fancy-ctrl-z \
-	  OMZP::git \
-	  OMZP::sudo
+	OMZP::colored-man-pages \
+	OMZP::cp \
+	OMZP::extract \
+	OMZP::fancy-ctrl-z \
+	OMZP::git \
+	OMZP::sudo \
+	OMZP::man \
+	OMZP::gitignore \
+	OMZP::git-auto-fetch \
+	OMZP::catimg \
+	OMZP::compleat \
+	OMZP::colored-man-pages \
+	OMZP::command-not-found \
+	OMZP::npm \
+	OMZP::yarn \
+	OMZP::node \
+	OMZP::golang \
+	OMZP::flutter \
+	OMZP::react-native \
+	OMZP::vscode \
+	OMZP::torrent \
+	OMZP::web-search \
+	OMZP::copypath \
+	OMZP::copyfile \
+	OMZP::history \
+	OMZP::common-aliases \
+	  
 
 zinit ice wait lucid
 
