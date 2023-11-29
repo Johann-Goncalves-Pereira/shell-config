@@ -1,6 +1,6 @@
 # Reload shell
 function reload() {
-  source ~/.zshrc
+  exec zsh
 }
 
 function get-default-branch() {
@@ -151,7 +151,7 @@ function killport() {
 
 direnv-nvm() {
   vared -p "What version do you want to use? " -c version
- 
+
   echo "use nodejs $version" >.envrc
   direnv allow
 }
