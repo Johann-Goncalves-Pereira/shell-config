@@ -70,3 +70,7 @@ On_IBlue='\033[0;104m'   # Blue
 On_IPurple='\033[0;105m' # Purple
 On_ICyan='\033[0;106m'   # Cyan
 On_IWhite='\033[0;107m'  # White
+
+# Default options
+DEFAULT_NO="[${Green}y${Color_Off}/${Red}N${Color_Off}]"
+DEFAULT_YES="[${Green}Y${Color_Off}/${Red}n${Color_Off}]"
