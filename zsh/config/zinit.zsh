@@ -94,7 +94,7 @@ zinit light extrawurst/gitui
 
 # : Prettify ls
 if (( $+commands[exa] )); then
-	alias ls='exa --icons'
+	alias ls='exa --icons --time-style=long-iso --group-directories-first'
 elif (( $+commands[gls] )); then
 	alias ls='gls --color=tty --group-directories-first'
 else
