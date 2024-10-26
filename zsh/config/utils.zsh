@@ -1,1 +1,0 @@
-../../../.dotfile/.shell-config/zsh/config/function.zsh
