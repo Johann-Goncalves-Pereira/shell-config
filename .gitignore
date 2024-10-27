@@ -388,3 +388,6 @@ FodyWeavers.xsd
 *.sln.iml
 .vscode
 .vscode/**
+
+# User
+.workdtree
