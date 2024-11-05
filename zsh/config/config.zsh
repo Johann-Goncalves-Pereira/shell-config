@@ -1,8 +1,8 @@
 # > Config GPG key export GPG_TTY=$(tty) gpgconf --launch gpg-agent
 
 # > Autojump command -> J
-[ -f /opt/homebrew/etc/profile.d/autojump.sh ] && . /opt/homebrew/etc/profile.d/autojump.sh
-autoload -U compinit && compinit -u
+# [ -f /opt/homebrew/etc/profile.d/autojump.sh ] && . /opt/homebrew/etc/profile.d/autojump.sh
+# autoload -U compinit && compinit -u
 
 # > Zoxide
 typeset -A ZEC
@@ -26,11 +26,19 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 # > HomeBrew GNU packages
 if ! brew="$(command -v brew)" || [[ -z $brew ]]; then
+    # HOMEBREW_NO_INSTALL_FROM_API=1
     HOMEBREW_PREFIX=$(brew --prefix)
     # gnubin; gnuman
     for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnubin; do export PATH=$d:$PATH; done
     # I actually like that man grep gives the BSD grep man page
     #for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnuman; do export MANPATH=$d:$MANPATH; done
+
+    # Brew completions
+    export PATH="/opt/homebrew/opt/icu4c@76/bin:$PATH"
+    export PATH="/opt/homebrew/opt/icu4c@76/sbin:$PATH"
+    export LDFLAGS="-L/opt/homebrew/opt/icu4c@76/lib"
+    export CPPFLAGS="-I/opt/homebrew/opt/icu4c@76/include"
+    export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c@76/lib/pkgconfig"
 fi
 
 # > PNPM
@@ -45,22 +53,3 @@ EMACSD=$HOME/.emacs.d
 
 # > GOROOT
 export GOROOT="$(brew --prefix golang)/libexec"
-
-# // # > Asdf Golang GOPATH config
-# // . ~/.asdf/plugins/golang/set-env.zsh
-# // ASDF_GOLANG_MOD_VERSION_ENABLED=true
-
-# // # > Yarn bin path
-# // export PATH="$PATH:$(yarn global bin)"
-
-# // #   > Homebrew completion
-# // if ! type "$brew" >/dev/null; then
-# //     FPATH="$(brew --prefix)/share/zsh/site-functions:${FPATH}"
-# //     autoload -Uz compinit
-# //     compinit
-# // fi
-
-# // eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# // Colors LS
-# // source $(dirname $(gem which colorls))/tab_complete.sh

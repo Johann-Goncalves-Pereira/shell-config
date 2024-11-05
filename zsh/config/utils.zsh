@@ -18,7 +18,7 @@ function update() {
 
   npm install -g npm@latest
   npm install -g yarn@latest
-  pnpm install -g pnpm@latest
+  # pnpm self-update
 
   echo "\n\n${BGreen}Updating Asdf...${Color_Off}\n\n"
 

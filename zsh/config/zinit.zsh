@@ -27,7 +27,6 @@ zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 zi ice as'null' from"gh-r" sbin
 zi light ajeetdsouza/zoxide		
-zi light zsh-users/zsh-completions
 
 # : Oh My Zsh
 zinit for \
