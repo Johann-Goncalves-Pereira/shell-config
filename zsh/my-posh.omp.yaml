@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+
+blocks:
+- type: rprompt
+  segments:
+  - properties:
+      time_format: "15:04:05"
+    style: plain
+    template: " {{ .CurrentDate | date .Format }} "
+    foreground: "#007ACC"
+    type: time
+- type: prompt
+  alignment: left
+  segments:
+  - style: diamond
+    leading_diamond: 
+    trailing_diamond: 
+    template: " {{ .UserName }} "
+    foreground: "#ffffff"
+    background: "#ffb300"
+    type: session
+  - properties:
+      style: folder
+    style: powerline
+    template: " {{ .Path }} "
+    foreground: "#ffffff"
+    powerline_symbol: 
+    background: "#61AFEF"
+    type: path
+  - properties:
+      branch_max_length: 25
+      fetch_status: true
+    style: powerline
+    template: " {{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }} "
+    foreground: "#193549"
+    powerline_symbol: 
+    background: "#2e9599"
+    type: git
+    foreground_templates:
+    - "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#ffffff{{ end }}"
+    background_templates:
+    - "{{ if or (.Working.Changed) (.Staging.Changed) }}#f36943{{ end }}"
+    - "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#a8216b{{ end }}"
+    - "{{ if gt .Ahead 0 }}#35b5ff{{ end }}"
+    - "{{ if gt .Behind 0 }}#f89cfa{{ end }}"
+  - properties:
+      always_enabled: true
+    style: diamond
+    trailing_diamond: 
+    template: "<parentBackground>\ue0b0</> \ue23a "
+    foreground: "#ffffff"
+    background: "#00897b"
+    type: status
+    background_templates:
+    - "{{ if gt .Code 0 }}#e91e63{{ end }}"
+  newline: true
+version: 3
+final_space: true

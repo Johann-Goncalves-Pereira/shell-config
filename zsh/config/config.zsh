@@ -53,3 +53,5 @@ EMACSD=$HOME/.emacs.d
 
 # > GOROOT
 export GOROOT="$(brew --prefix golang)/libexec"
+
+

@@ -21,9 +21,6 @@ zinit light-mode depth"1" for \
 
 # : End of Zinit's installer chunk
 
-# > List of plugins
-zinit ice wait lucid
-zinit ice depth=1; zinit light romkatv/powerlevel10k
 
 zi ice as'null' from"gh-r" sbin
 zi light ajeetdsouza/zoxide		
