@@ -28,6 +28,8 @@ USER_CONFIG_DIRECTORY="$HOME/.shell-config/zsh"
 
 [ -f $USER_CONFIG_DIRECTORY/config/work.zsh ] && source $USER_CONFIG_DIRECTORY/config/work.zsh
 
-[ -f $USER_CONFIG_DIRECTORY/config/prompt/p10k-config.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/p10k-config.zsh
+[ -f $USER_CONFIG_DIRECTORY/config/prompt/.p10k-config.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/.p10k-config.zsh
 # [ -f $USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh
+
+
 
