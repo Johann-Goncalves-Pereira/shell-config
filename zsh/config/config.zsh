@@ -4,6 +4,13 @@
 # [ -f /opt/homebrew/etc/profile.d/autojump.sh ] && . /opt/homebrew/etc/profile.d/autojump.sh
 # autoload -U compinit && compinit -u
 
+# > Env
+# Load local environment variables
+if [[ -f "$HOME/.local/bin/env" ]]; then
+    . "$HOME/.local/bin/env"
+fi
+
+
 # > Zoxide
 typeset -A ZEC
 eval "$(zoxide init --cmd cd zsh)"
@@ -55,3 +62,7 @@ EMACSD=$HOME/.emacs.d
 export GOROOT="$(brew --prefix golang)/libexec"
 
 
+# > FastAnime
+if ! fastanime="$(command -v fastanime)" || [[ -z $fastanime ]]; then
+fastanime completions
+fi
