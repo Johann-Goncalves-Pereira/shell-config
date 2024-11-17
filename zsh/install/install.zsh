@@ -178,6 +178,15 @@ else
     echo -n "\n${ICyan}Skiping Ruby installation${Color_Off}\n"
 fi
 
+# Python UV
+if ! uv="$(command -v uv)" || [[ -z $uv ]]; then
+    echo -e "${BGreen}Installing UV${Color_Off}"
+    sleep 5
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+else
+    echo -n "\n${ICyan}Skiping UV installation${Color_Off}\n"
+fi
+
 # > ------- < #
 # >  Fonts  < #
 # > ------- < #
