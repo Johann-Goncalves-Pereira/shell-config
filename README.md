@@ -27,5 +27,19 @@ My personal settings
 
 Clone in your home directory.
 
+```sh
+git@github.com:Johann-Goncalves-Pereira/shell-config.git ~/.shell-config
+```
+
+or
+
+```sh
+https://github.com/Johann-Goncalves-Pereira/shell-config.git ~/.shell-config
+```
+
 First make the symbolic link.
 
+```sh
+ln -s .shell-config/zsh/base.zsh .zshrc
+ln -s .shell-config/zsh/config/prompt/.p10k.zsh .p10k.zsh
+```
