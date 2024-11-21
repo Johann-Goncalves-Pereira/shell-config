@@ -21,7 +21,6 @@ zinit light-mode depth"1" for \
 
 # : End of Zinit's installer chunk
 
-
 zi ice as'null' from"gh-r" sbin
 zi light ajeetdsouza/zoxide		
 
@@ -113,7 +112,6 @@ zinit wait as"null" lucid from"gh-r" for \
 	  cp"**/hyperfine.1 -> $ZPFX/share/man/man1" completions sbin"**/hyperfine" @sharkdp/hyperfine \
 	  cp"**/doc/rg.1 -> $ZPFX/share/man/man1" completions sbin"**/rg" BurntSushi/ripgrep \
 	  atload"alias top=btm" completions sbin"**/btm" ClementTsang/bottom \
-	  atload"alias help=tldr" mv"tealdeer* -> tldr" dl'https://github.com/dbrgn/tealdeer/releases/latest/download/completions_zsh -> _tldr;' completions sbin"tldr" dbrgn/tealdeer \
 	  atload"alias diff=delta" sbin"**/delta" dandavison/delta \
 	  atload"alias df=duf" bpick"*(.zip|tar.gz)" sbin muesli/duf \
 	  atload"alias du=dust" sbin"**/dust" bootandy/dust \
@@ -121,6 +119,7 @@ zinit wait as"null" lucid from"gh-r" for \
 	  atload"alias la='ls --long --icons --all'; ll='la --header'" \
 	  atload"alias lt='eza -T -L=3 --icons'" \
 	  bpick"*.zip" sbin"**/procs" if'(( $+commands[unzip] )) && [[ $CPUTYPE != aarch* ]]' dalance/procs	
+	  # atload"alias help=tldr" mv"tealdeer* -> tldr" dl'https://github.com/dbrgn/tealdeer/releases/latest/download/completions_zsh -> _tldr;' completions sbin"tldr" dbrgn/tealdeer \
 
 # FZF: fuzzy finderls
 zinit ice wait lucid as"null" from"gh-r" src'key-bindings.zsh' completions sbin'**/fzf' \
