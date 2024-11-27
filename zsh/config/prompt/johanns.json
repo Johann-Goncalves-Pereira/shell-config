@@ -6,25 +6,84 @@
       "newline": true,
       "segments": [
         {
+          "type": "shell",
+          "style": "plain",
+          "foreground": "#E06C75",
+          "properties": {
+            "mapped_shell_names": {
+              "pwsh": "Shell",
+              "powershell": "Shell",
+              "cmd": "Cmd",
+              "bash": "Bash"
+            }
+          },
+          "template": "\ue795 {{ .Name }}"
+        },
+        {
+          "foreground": "#b8ff75",
+          "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
+          "properties": {
+            "style": "roundrock",
+            "always_enabled": true
+          },
+          "style": "diamond",
+          "template": "<#cc7eda> \u00bb </>{{ .FormattedMs }}",
+          "type": "executiontime"
+        },
+        {
+          "foreground": "#E5C07B",
+          "properties": {
+            "time_format": "15:04:05"
+          },
+          "style": "plain",
+          "template": "<#cc7eda> \u00bb </>[{{ .CurrentDate | date .Format }}]",
+          "type": "time"
+        },
+        {
+          "foreground": "#F3C267",
+          "foreground_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#FF9248{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#ff4500{{ end }}",
+            "{{ if gt .Ahead 0 }}#B388FF{{ end }}",
+            "{{ if gt .Behind 0 }}#B388FF{{ end }}"
+          ],
+          "properties": {
+            "branch_max_length": 25,
+            "fetch_stash_count": true,
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "style": "plain",
+          "template": "<#cc7eda> \u00bb </>{{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
+          "type": "git"
+        },
+        {
+          "type": "status",
+          "style": "plain",
+          "foreground": "#b8ff75",
+          "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
+          "template": " x{{ reason .Code }}"
+        },
+        {
           "foreground": "#81ff91",
           "properties": {
             "fetch_version": true
           },
           "style": "powerline",
-          "template": "<#7eb8da>\ue718</> {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
+          "template": "<#cc7eda>\u00bb </><#7eb8da>\ue718</> {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
           "type": "node"
-        },
-        {
-          "type": "php",
-          "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue73d</> {{ .Full }}"
         },
         {
           "type": "npm",
           "style": "powerline",
           "foreground": "#81ff91",
           "template": "<#cc7eda> \u00bb </><#7eb8da>\ue71e </> {{ .Full }}"
+        },
+        {
+          "type": "php",
+          "style": "powerline",
+          "foreground": "#81ff91",
+          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue73d</> {{ .Full }}"
         },
         {
           "type": "python",
@@ -100,72 +159,6 @@
       "newline": true,
       "segments": [
         {
-          "type": "shell",
-          "style": "plain",
-          "foreground": "#E06C75",
-          "properties": {
-            "mapped_shell_names": {
-              "pwsh": "Shell",
-              "powershell": "Shell",
-              "cmd": "Cmd",
-              "bash": "Bash"
-            }
-          },
-          "template": "\ue795 {{ .Name }}"
-        },
-        {
-          "foreground": "#b8ff75",
-          "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
-          "properties": {
-            "style": "roundrock",
-            "always_enabled": true
-          },
-          "style": "diamond",
-          "template": "<#cc7eda> \u00bb </>{{ .FormattedMs }}",
-          "type": "executiontime"
-        },
-        {
-          "foreground": "#E5C07B",
-          "properties": {
-            "time_format": "15:04:05"
-          },
-          "style": "plain",
-          "template": "<#cc7eda> \u00bb </>[{{ .CurrentDate | date .Format }}]",
-          "type": "time"
-        },
-        {
-          "foreground": "#F3C267",
-          "foreground_templates": [
-            "{{ if or (.Working.Changed) (.Staging.Changed) }}#FF9248{{ end }}",
-            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#ff4500{{ end }}",
-            "{{ if gt .Ahead 0 }}#B388FF{{ end }}",
-            "{{ if gt .Behind 0 }}#B388FF{{ end }}"
-          ],
-          "properties": {
-            "branch_max_length": 25,
-            "fetch_stash_count": true,
-            "fetch_status": true,
-            "fetch_upstream_icon": true
-          },
-          "style": "plain",
-          "template": "<#cc7eda> \u00bb </>{{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
-          "type": "git"
-        },
-        {
-          "type": "status",
-          "style": "plain",
-          "foreground": "#b8ff75",
-          "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
-          "template": " x{{ reason .Code }}"
-        }
-      ],
-      "type": "prompt"
-    },
-    {
-      "alignment": "left",
-      "newline": true,
-      "segments": [
-        {
           "foreground": "#61AFEF",
           "properties": {
             "style": "full"
@@ -197,7 +190,6 @@
       "type": "prompt"
     }
   ],
-  "postfix": "\n",
   "final_space": true,
   "version": 3
 }
