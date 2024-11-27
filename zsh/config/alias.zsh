@@ -31,7 +31,7 @@ if command -v ugrep >/dev/null; then
     alias xdump='ugrep -X ""' # hexdump files without searching
 fi
 
-alias q='exit'
+# alias q='exit'
 alias vi="vim"
 alias vim="nvim"
 

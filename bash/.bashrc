@@ -135,3 +135,4 @@ export ANDROID_SDK=/Users/johannpereira/Android/Sdk
 export ANDROID_SDK=/Users/johannpereira/Android/Sdk
 
 . "$HOME/.local/bin/env"
+export ANDROID_SDK=/Users/johannpereira/Library/Android/sdk
