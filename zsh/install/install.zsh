@@ -9,12 +9,31 @@ IRed='\033[0;91m'        # Red
 ICyan='\033[0;96m'       # Cyan
 On_IPurple='\033[0;105m' # Purple
 
+
+
+# Current machine type
+check_machine() {
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        Linux*)     machine=Linux;;
+        Darwin*)    machine=Mac;;
+        CYGWIN*)    machine=Cygwin;;
+        MINGW*)     machine=MinGw;;
+        MSYS_NT*)   machine=MSys;;
+        *)          machine="UNKNOWN:${unameOut}"
+    esac
+    
+    echo $machine
+}
+
+
 set -e
 
 # > -------- < #
 # >  Basics  < #
 # > -------- < #
-if ! brew="$(command -v brew)" || [[ -z $brew ]]; then
+
+if [[ "$machine" == "Mac" ]] && ! brew="$(command -v brew)" || [[ -z $brew ]]; then
     echo "${BGreen}Installing Homebrew${Color_Off}"
     sleep 5
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || {
@@ -22,7 +41,7 @@ if ! brew="$(command -v brew)" || [[ -z $brew ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Homebrew installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Homebrew installation${Color_Off}\n"
 fi
 
 if ! git="$(command -v git)" || [[ -z $git ]]; then
@@ -116,7 +135,7 @@ if ! go="$(command -v go)" || [[ -z $go ]]; then
         echo "${IRed}Setting Golang version failed${Color_Off}"
         exit 1
     }
-
+    
 else
     echo -n "\n${ICyan}Skiping Golang installation${Color_Off}\n"
 fi
@@ -193,12 +212,12 @@ fi
 echo -n "${On_IPurple}Do you want to install nerd-fonts? (yY/n): ${Color_Off}"
 read install_nerd_fonts
 case $install_nerd_fonts in
-[yY] | [yY][eE][sS] | [yY][eE][aA] | [yY][uU][pP])
-    brew tap homebrew/cask-fonts
-    brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
+    [yY] | [yY][eE][sS] | [yY][eE][aA] | [yY][uU][pP])
+        brew tap homebrew/cask-fonts
+        brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
     ;;
-*)
-    echo -n "\n${ICyan}Skiping nerd-fonts installation${Color_Off}\n"
+    *)
+        echo -n "\n${ICyan}Skiping nerd-fonts installation${Color_Off}\n"
     ;;
 esac
 
