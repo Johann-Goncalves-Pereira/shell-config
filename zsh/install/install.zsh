@@ -9,23 +9,20 @@ IRed='\033[0;91m'        # Red
 ICyan='\033[0;96m'       # Cyan
 On_IPurple='\033[0;105m' # Purple
 
-
-
 # Current machine type
 check_machine() {
     unameOut="$(uname -s)"
     case "${unameOut}" in
-        Linux*)     machine=Linux;;
-        Darwin*)    machine=Mac;;
-        CYGWIN*)    machine=Cygwin;;
-        MINGW*)     machine=MinGw;;
-        MSYS_NT*)   machine=MSys;;
-        *)          machine="UNKNOWN:${unameOut}"
+    Linux*) machine=Linux ;;
+    Darwin*) machine=Mac ;;
+    CYGWIN*) machine=Cygwin ;;
+    MINGW*) machine=MinGw ;;
+    MSYS_NT*) machine=MSys ;;
+    *) machine="UNKNOWN:${unameOut}" ;;
     esac
-    
+
     echo $machine
 }
-
 
 set -e
 
@@ -52,7 +49,7 @@ if ! git="$(command -v git)" || [[ -z $git ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Git installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Git installation${Color_Off}\n"
 fi
 
 if ! curl="$(command -v curl)" || [[ -z $curl ]]; then
@@ -63,7 +60,7 @@ if ! curl="$(command -v curl)" || [[ -z $curl ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Curl installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Curl installation${Color_Off}\n"
 fi
 
 # > ------------------- < #
@@ -78,7 +75,7 @@ if ! nvm="$(type -p nvm)" || [[ -z $nvm ]] && ! [ -d "$HOME/.nvm" ]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping NVM installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping NVM installation${Color_Off}\n"
 fi
 
 if ! asdf="$(type -p asdf)" || [[ -z $asdf ]]; then
@@ -102,7 +99,7 @@ if ! node="$(command -v node)" || [[ -z $node ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Node.js installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Node.js installation${Color_Off}\n"
 fi
 
 if ! direnv="$(command -v direnv)" || [[ -z $direnv ]]; then
@@ -117,7 +114,7 @@ if ! direnv="$(command -v direnv)" || [[ -z $direnv ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Direnv installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Direnv installation${Color_Off}\n"
 fi
 
 if ! go="$(command -v go)" || [[ -z $go ]]; then
@@ -135,9 +132,9 @@ if ! go="$(command -v go)" || [[ -z $go ]]; then
         echo "${IRed}Setting Golang version failed${Color_Off}"
         exit 1
     }
-    
+
 else
-    echo -n "\n${ICyan}Skiping Golang installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Golang installation${Color_Off}\n"
 fi
 
 if ! elm="$(command -v elm)" || [[ -z $elm ]]; then
@@ -156,7 +153,7 @@ if ! elm="$(command -v elm)" || [[ -z $elm ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Elm installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Elm installation${Color_Off}\n"
 fi
 
 if ! python="$(command -v python)" || [[ -z $python ]]; then
@@ -175,7 +172,7 @@ if ! python="$(command -v python)" || [[ -z $python ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Python installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Python installation${Color_Off}\n"
 fi
 
 if ! ruby="$(command -v ruby)" || [[ -z $ruby ]] && ! [ -d "$HOME/.asdf/shims/ruby" ]; then
@@ -194,7 +191,7 @@ if ! ruby="$(command -v ruby)" || [[ -z $ruby ]] && ! [ -d "$HOME/.asdf/shims/ru
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Ruby installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Ruby installation${Color_Off}\n"
 fi
 
 # Python UV
@@ -203,7 +200,7 @@ if ! uv="$(command -v uv)" || [[ -z $uv ]]; then
     sleep 5
     curl -LsSf https://astral.sh/uv/install.sh | sh
 else
-    echo -n "\n${ICyan}Skiping UV installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping UV installation${Color_Off}\n"
 fi
 
 # > ------- < #
@@ -212,12 +209,12 @@ fi
 echo -n "${On_IPurple}Do you want to install nerd-fonts? (yY/n): ${Color_Off}"
 read install_nerd_fonts
 case $install_nerd_fonts in
-    [yY] | [yY][eE][sS] | [yY][eE][aA] | [yY][uU][pP])
-        brew tap homebrew/cask-fonts
-        brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
+[yY] | [yY][eE][sS] | [yY][eE][aA] | [yY][uU][pP])
+    brew tap homebrew/cask-fonts
+    brew search '/font-.*-nerd-font/' | awk '{ print $1 }' | xargs -I{} brew install --cask {} || true
     ;;
-    *)
-        echo -n "\n${ICyan}Skiping nerd-fonts installation${Color_Off}\n"
+*)
+    echo -n "\n${ICyan}Skipping nerd-fonts installation${Color_Off}\n"
     ;;
 esac
 
@@ -233,7 +230,7 @@ if ! lazygit="$(command -v lazygit)" || [[ -z $lazygit ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Lazygit installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Lazygit installation${Color_Off}\n"
 fi
 
 if ! bat="$(command -v bat)" || [[ -z $bat ]]; then
@@ -244,7 +241,7 @@ if ! bat="$(command -v bat)" || [[ -z $bat ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Bat installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Bat installation${Color_Off}\n"
 fi
 
 if ! yarn="$(command -v yarn)" || [[ -z $yarn ]]; then
@@ -255,7 +252,7 @@ if ! yarn="$(command -v yarn)" || [[ -z $yarn ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Yarn installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Yarn installation${Color_Off}\n"
 fi
 
 if ! pnpm="$(command -v pnpm)" || [[ -z $pnpm ]]; then
@@ -266,5 +263,5 @@ if ! pnpm="$(command -v pnpm)" || [[ -z $pnpm ]]; then
         exit 1
     }
 else
-    echo -n "\n${ICyan}Skiping Pnpm installation${Color_Off}\n"
+    echo -n "\n${ICyan}Skipping Pnpm installation${Color_Off}\n"
 fi

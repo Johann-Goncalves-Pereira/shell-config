@@ -6,7 +6,10 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
 
 function update() {
-  echo -e "${BGreen}Updating Homebrew...${Color_Off}\n"
+  echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
+  mas upgrade
+
+  echo -e "${BGreen}Updating with Homebrew...${Color_Off}\n"
   brew update
   brew upgrade
   brew cleanup
@@ -17,8 +20,7 @@ function update() {
   echo "\n\n${BGreen}Updating Javascript...${Color_Off}\n\n"
 
   npm install -g npm@latest
-  npm install -g yarn@latest
-  # pnpm self-update
+  corepack install -g pnpm@latest
 
   echo "\n\n${BGreen}Updating Asdf...${Color_Off}\n\n"
 

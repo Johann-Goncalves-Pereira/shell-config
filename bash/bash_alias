@@ -31,11 +31,11 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
-# Navegation
+# Navigation
 alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
-# Personal navegation
+# Personal navigation
 alias dev="cd ~/Development"
 alias web="cd ~/Development/web"
 alias mobile="cd ~/Development/mobile"
@@ -54,14 +54,14 @@ alias materialize="code ~/Development/web/materialize-frontend"
 alias xmrig="~/.xmrig-6.15.1/xmrig"
 
 # Add an "alert" alias for long running commands.  Use like so:
-# leep 10; alert
+# leap 10; alert
 alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
 
 alias emulator="~/Android/Sdk/tools/emulator"
 
 # Functions
 
-# Comporess
+# Compress
 function compress_video() {
     # -loglevel error
     for i in *.{avi,flv,m4v,mov,wmv,mp4,MP4,TS,mkv}; do
