@@ -22,9 +22,9 @@ source <(fzf --zsh)
 ASDF_DIR="$HOME/.asdf"
 
 # > Direnv for Asdf
-source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
+# source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
 # load asdf direnv integration on shell oppening
-eval "$(direnv hook zsh)"
+# eval "$(direnv hook zsh)"
 
 # > Bun is a JavaScript runtime
 [ -s "/Users/johannpereira/.bun/_bun" ] && source "/Users/johannpereira/.bun/_bun"
@@ -32,21 +32,21 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
 # > HomeBrew GNU packages
-if ! brew="$(command -v brew)" || [[ -z $brew ]]; then
-    # HOMEBREW_NO_INSTALL_FROM_API=1
-    HOMEBREW_PREFIX=$(brew --prefix)
-    # gnubin; gnuman
-    for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnubin; do export PATH=$d:$PATH; done
-    # I actually like that man grep gives the BSD grep man page
-    #for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnuman; do export MANPATH=$d:$MANPATH; done
+# if ! brew="$(command -v brew)" || [[ -z $brew ]]; then
+#     # HOMEBREW_NO_INSTALL_FROM_API=1
+#     HOMEBREW_PREFIX=$(brew --prefix)
+#     # gnubin; gnuman
+#     for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnubin; do export PATH=$d:$PATH; done
+#     # I actually like that man grep gives the BSD grep man page
+#     #for d in ${HOMEBREW_PREFIX}/opt/*/libexec/gnuman; do export MANPATH=$d:$MANPATH; done
 
-    # Brew completions
-    export PATH="/opt/homebrew/opt/icu4c@76/bin:$PATH"
-    export PATH="/opt/homebrew/opt/icu4c@76/sbin:$PATH"
-    export LDFLAGS="-L/opt/homebrew/opt/icu4c@76/lib"
-    export CPPFLAGS="-I/opt/homebrew/opt/icu4c@76/include"
-    export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c@76/lib/pkgconfig"
-fi
+#     # Brew completions
+#     export PATH="/opt/homebrew/opt/icu4c@76/bin:$PATH"
+#     export PATH="/opt/homebrew/opt/icu4c@76/sbin:$PATH"
+#     export LDFLAGS="-L/opt/homebrew/opt/icu4c@76/lib"
+#     export CPPFLAGS="-I/opt/homebrew/opt/icu4c@76/include"
+#     export PKG_CONFIG_PATH="/opt/homebrew/opt/icu4c@76/lib/pkgconfig"
+# fi
 
 # > PNPM
 export PNPM_HOME="/Users/johannpereira/Library/pnpm"
@@ -59,10 +59,10 @@ esac
 EMACSD=$HOME/.emacs.d
 
 # > GOROOT
-export GOROOT="$(brew --prefix golang)/libexec"
+# export GOROOT="$(brew --prefix golang)/libexec"
 
 
 # > FastAnime
-if ! fastanime="$(command -v fastanime)" || [[ -z $fastanime ]]; then
-fastanime completions
-fi
+# if ! fastanime="$(command -v fastanime)" || [[ -z $fastanime ]]; then
+# fastanime completions
+# fi

@@ -38,4 +38,4 @@ alias vim="nvim"
 # Git
 alias gtr='git tag -d $(git tag) && git fetch --tags' # Refresh local tags from remote
 
-export PATH=$PATH:$(go env GOPATH)/bin
+# export PATH=$PATH:$(go env GOPATH)/bin
