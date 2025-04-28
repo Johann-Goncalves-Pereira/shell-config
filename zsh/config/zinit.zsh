@@ -71,8 +71,9 @@ zinit wait lucid depth"1" for \
 	  zsh-users/zsh-autosuggestions \
 	  zdharma-continuum/history-search-multi-word \
 	  jspears/worktree \
-	  lukechilds/zsh-nvm \
-		unixorn/fzf-zsh-plugin
+		unixorn/fzf-zsh-plugin \
+		dominik-schwabe/zsh-fnm
+	  # lukechilds/zsh-nvm \ 
 
 
 
@@ -80,6 +81,7 @@ zinit wait lucid light-mode depth"1" for \
 	  zsh-users/zsh-history-substring-search \
 	  hlissner/zsh-autopair \
     sobolevn/wakatime-zsh-plugin
+
 
 zinit ice wait lucid
 

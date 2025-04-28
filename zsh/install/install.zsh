@@ -67,16 +67,16 @@ fi
 # >  Languages Manager  < #
 # > ------------------- < #
 
-if ! nvm="$(type -p nvm)" || [[ -z $nvm ]] && ! [ -d "$HOME/.nvm" ]; then
-    echo -e "${BGreen}Installing NVM${Color_Off}"
-    sleep 5
-    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash || {
-        echo "${IRed}NVM installation failed${Color_Off}"
-        exit 1
-    }
-else
-    echo -n "\n${ICyan}Skipping NVM installation${Color_Off}\n"
-fi
+# if ! nvm="$(type -p nvm)" || [[ -z $nvm ]] && ! [ -d "$HOME/.nvm" ]; then
+#     echo -e "${BGreen}Installing NVM${Color_Off}"
+#     sleep 5
+#     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.6/install.sh | bash || {
+#         echo "${IRed}NVM installation failed${Color_Off}"
+#         exit 1
+#     }
+# else
+#     echo -n "\n${ICyan}Skipping NVM installation${Color_Off}\n"
+# fi
 
 if ! asdf="$(type -p asdf)" || [[ -z $asdf ]]; then
     git clone https://github.com/asdf-vm/asdf.git ~/.asdf --branch v0.13.1
@@ -87,20 +87,20 @@ fi
 # >  Languages  < #
 # > ----------- < #
 
-if ! node="$(command -v node)" || [[ -z $node ]]; then
-    echo -e "${BGreen}Installing Node.js${Color_Off}"
-    sleep 5
-    nvm install --lts || {
-        echo "${IRed}Node.js installation failed${Color_Off}"
-        exit 1
-    }
-    nvm alias default node || {
-        echo "${IRed}Setting Node.js version failed${Color_Off}"
-        exit 1
-    }
-else
-    echo -n "\n${ICyan}Skipping Node.js installation${Color_Off}\n"
-fi
+# if ! node="$(command -v node)" || [[ -z $node ]]; then
+#     echo -e "${BGreen}Installing Node.js${Color_Off}"
+#     sleep 5
+#     nvm install --lts || {
+#         echo "${IRed}Node.js installation failed${Color_Off}"
+#         exit 1
+#     }
+#     nvm alias default node || {
+#         echo "${IRed}Setting Node.js version failed${Color_Off}"
+#         exit 1
+#     }
+# else
+#     echo -n "\n${ICyan}Skipping Node.js installation${Color_Off}\n"
+# fi
 
 if ! direnv="$(command -v direnv)" || [[ -z $direnv ]]; then
     echo -e "${BGreen}Installing Direnv${Color_Off}"

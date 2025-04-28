@@ -65,3 +65,6 @@ export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 if ! fastanime="$(command -v fastanime)" || [[ -z $fastanime ]]; then
     fastanime completions
 fi
+
+# > Python
+export PATH="$(brew --prefix python)/libexec/bin:$PATH"
