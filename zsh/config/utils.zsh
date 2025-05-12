@@ -55,6 +55,10 @@ function update() {
   asdf plugin update --all
 
   update_webui
+
+  brew cleanup && rm -f $ZSH_COMPDUMP
+
+  echo "\n\n${BGreen}Update completed.${Color_Off}\n\n"
 }
 
 direnv_nvm() {

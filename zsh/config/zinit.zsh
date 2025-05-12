@@ -72,7 +72,7 @@ zinit wait lucid depth"1" for \
 	  zdharma-continuum/history-search-multi-word \
 	  jspears/worktree \
 		unixorn/fzf-zsh-plugin \
-		dominik-schwabe/zsh-fnm
+		dominik-schwabe/zsh-fnm 
 	  # lukechilds/zsh-nvm \ 
 
 
