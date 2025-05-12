@@ -2,9 +2,13 @@ set -o AUTO_CD
 
 ZSH_AUTOSUGGEST_STRATEGY=match_prev_cmd
 
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' special-dirs true
 autoload -Uz compinit && compinit
+autoload -Uz compinit && compinit
+# autoload -Uz bashcompinit && bashcompinit
 
 # Ctrl+Backspace: kill the word backward
 bindkey -M emacs '^H' backward-kill-word

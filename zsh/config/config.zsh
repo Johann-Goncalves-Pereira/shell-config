@@ -10,7 +10,6 @@ if [[ -f "$HOME/.local/bin/env" ]]; then
     . "$HOME/.local/bin/env"
 fi
 
-
 # > Zoxide
 typeset -A ZEC
 eval "$(zoxide init --cmd cd zsh)"
@@ -23,7 +22,7 @@ ASDF_DIR="$HOME/.asdf"
 
 # > Direnv for Asdf
 source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
-# load asdf direnv integration on shell oppening
+# load asdf direnv integration on shell opening
 eval "$(direnv hook zsh)"
 
 # > Bun is a JavaScript runtime
@@ -59,10 +58,13 @@ esac
 EMACSD=$HOME/.emacs.d
 
 # > GOROOT
-export GOROOT="$(brew --prefix golang)/libexec"
-
+# export GOROOT="$(brew --prefix golang)/libexec"
+export ASDF_GOLANG_MOD_VERSION_ENABLED=true
 
 # > FastAnime
 if ! fastanime="$(command -v fastanime)" || [[ -z $fastanime ]]; then
-fastanime completions
+    fastanime completions
 fi
+
+# > Python
+export PATH="$(brew --prefix python)/libexec/bin:$PATH"

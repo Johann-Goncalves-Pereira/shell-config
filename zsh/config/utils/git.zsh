@@ -1,7 +1,7 @@
 NOT_IN_GIT="\n ${Red}[Error]:${Color_Off} There is not a git repository in this folder!\n"
 
 _git_var() {
-  if [ -d .git ]; then
+  if [ -d .git ] || [ -d ../.git ]; then
     CURRENT_BRANCH=$(git branch --show-current)
 
     if [ -z "$CURRENT_BRANCH" ]; then
@@ -71,7 +71,7 @@ git_squash_all_commits() {
 }
 
 function print_default_branch() {
-  if [ -d .git ]; then
+  if [ -d .git ] || [ -d ../.git ]; then
     if ! _git_var; then
       echo -e "\n${Red}[Error]:${Color_Off} Could not determine the default branch. Please check the remote settings.\n"
       return 1
@@ -85,7 +85,7 @@ function print_default_branch() {
 
 # Push to remote
 function gps() {
-  if [ -d .git ]; then
+  if [ -d .git ] || [ -d ../.git ]; then
     _git_var
     if [ -n "$CURRENT_BRANCH" ]; then
       echo -e "\n${Cyan}[Progress]:${Color_Off} Pushing to remote...\n"
@@ -99,7 +99,7 @@ function gps() {
 }
 
 function gpo() {
-  if [ -d .git ]; then
+  if [ -d .git ] || [ -d ../.git ]; then
     _git_var
     if [ -n "$CURRENT_BRANCH" ]; then
       echo -e "\n${Cyan}[Progress]:${Color_Off} Pulling from remote origin ${UGreen}$CURRENT_BRANCH${Color_Off}\n"
@@ -114,7 +114,7 @@ function gpo() {
 }
 
 function gcdp() {
-  if [ -d .git ]; then
+  if [ -d .git ] || [ -d ../.git ]; then
     if ! _git_var; then
       echo -e "\n${Red}[Error]:${Color_Off} Failed to retrieve git variables.\n"
       return 1

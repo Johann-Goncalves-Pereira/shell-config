@@ -19,7 +19,7 @@
 # Dark Grey = 1;30
 
 #: Possible text_type
-# 0 = default colour
+# 0 = default color
 # 1 = bold
 # 4 = underlined
 # 5 = flashing text (disabled on some terminals)

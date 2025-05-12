@@ -20,6 +20,15 @@
           "template": "\ue795 {{ .Name }}"
         },
         {
+          "foreground": "#E5C07B",
+          "properties": {
+            "time_format": "06ʸ 1ᵐ 2ᵈ · 15:04:05"
+          },
+          "style": "plain",
+          "template": "<#cc7eda> » </>[{{ .CurrentDate | date .Format }}]",
+          "type": "time"
+        },
+        {
           "foreground": "#b8ff75",
           "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
           "properties": {
@@ -27,35 +36,8 @@
             "always_enabled": true
           },
           "style": "diamond",
-          "template": "<#cc7eda> \u00bb </>{{ .FormattedMs }}",
+          "template": "<#cc7eda> » </>{{ .FormattedMs }}",
           "type": "executiontime"
-        },
-        {
-          "foreground": "#E5C07B",
-          "properties": {
-            "time_format": "15:04:05"
-          },
-          "style": "plain",
-          "template": "<#cc7eda> \u00bb </>[{{ .CurrentDate | date .Format }}]",
-          "type": "time"
-        },
-        {
-          "foreground": "#F3C267",
-          "foreground_templates": [
-            "{{ if or (.Working.Changed) (.Staging.Changed) }}#FF9248{{ end }}",
-            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#ff4500{{ end }}",
-            "{{ if gt .Ahead 0 }}#B388FF{{ end }}",
-            "{{ if gt .Behind 0 }}#B388FF{{ end }}"
-          ],
-          "properties": {
-            "branch_max_length": 25,
-            "fetch_stash_count": true,
-            "fetch_status": true,
-            "fetch_upstream_icon": true
-          },
-          "style": "plain",
-          "template": "<#cc7eda> \u00bb </>{{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
-          "type": "git"
         },
         {
           "type": "status",
@@ -65,91 +47,81 @@
           "template": " x{{ reason .Code }}"
         },
         {
-          "foreground": "#81ff91",
+          "foreground": "#417E37",
           "properties": {
             "fetch_version": true
           },
           "style": "powerline",
-          "template": "<#cc7eda>\u00bb </><#7eb8da>\ue718</> {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
+          "template": "<#cc7eda> » </><#68BD4A></> {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
           "type": "node"
         },
         {
-          "type": "npm",
+          "type": "pnpm",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue71e </> {{ .Full }}"
+          "foreground": "#BB6400",
+          "template": "<#cc7eda> » </><#F69220></> {{ .Full }}",
+          "display_mode": "files",
+          "extensions": ["pnpm-lock.yaml"]
+        },
+        {
+          "type": "bun",
+          "style": "powerline",
+          "foreground": "#F471B5",
+          "template": "<#cc7eda> » </><#FAF1E1></> {{ .Full }}"
         },
         {
           "type": "php",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue73d</> {{ .Full }}"
+          "foreground": "#7eb8da",
+          "template": "<#cc7eda> » </><#4F5B93></> {{ .Full }}"
         },
         {
           "type": "python",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#75A8D3",
+          "template": "<#cc7eda> » </><#FFDF76></> {{ .Full }}"
         },
         {
           "type": "ruby",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#9B1C16",
+          "template": "<#cc7eda> » </><#CC342D></> {{ .Full }}"
         },
         {
           "type": "go",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#027D9C",
+          "template": "<#cc7eda> » </><#79D4FD>󰟓 </> {{ .Full }}"
         },
         {
           "type": "rust",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#AA2901",
+          "template": "<#cc7eda> » </><#F64D01></> {{ .Full }}"
         },
         {
           "type": "haskell",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#8F4E8B",
+          "template": "<#cc7eda> » </><#453A62></> {{ .Full }}"
         },
         {
           "type": "java",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#5484A2",
+          "template": "<#cc7eda> » </><#E76F00></> {{ .Full }}"
         },
         {
           "type": "lua",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#010181",
+          "template": "<#cc7eda> » </><#00185D></> {{ .Full }}"
         },
         {
           "type": "elixir",
           "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
-        },
-        {
-          "type": "dart",
-          "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
-        },
-        {
-          "type": "python",
-          "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
-        },
-        {
-          "type": "zig",
-          "style": "powerline",
-          "foreground": "#81ff91",
-          "template": "<#cc7eda> \u00bb </><#7eb8da>\ue7a3</> {{ .Full }}"
+          "foreground": "#66539E",
+          "template": "<#cc7eda> » </><#8B5CF6>\ue62d</> {{ .Full }}"
         }
       ],
       "type": "prompt"
@@ -166,6 +138,24 @@
           "style": "plain",
           "template": "\ue5ff {{ .Path }}",
           "type": "path"
+        },
+        {
+          "foreground": "#F3C267",
+          "foreground_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}#FF9248{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}#ff4500{{ end }}",
+            "{{ if gt .Ahead 0 }}#B388FF{{ end }}",
+            "{{ if gt .Behind 0 }}#B388FF{{ end }}"
+          ],
+          "properties": {
+            "branch_max_length": 25,
+            "fetch_stash_count": true,
+            "fetch_status": true,
+            "fetch_upstream_icon": true
+          },
+          "style": "plain",
+          "template": "<#cc7eda> » </>{{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
+          "type": "git"
         }
       ],
       "type": "prompt"
