@@ -92,3 +92,5 @@ zle -N _expand_dots_then_accept_line
 # - '^M' is the Enter key.
 bindkey '^I' _expand_dots_then_expand_or_complete
 bindkey '^M' _expand_dots_then_accept_line
+
+# ${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration

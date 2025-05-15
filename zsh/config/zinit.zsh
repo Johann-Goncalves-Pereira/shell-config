@@ -1,4 +1,3 @@
-
 # > --------------- < #
 # >  Plugins Zinit  < #
 # > --------------- < #
@@ -187,3 +186,11 @@ export FZF_DEFAULT_OPTS='--height 90% --border'
 export FZF_CTRL_T_OPTS="--preview '(bat --style=numbers --color=always {} || cat {} || tree -NC {}) 2> /dev/null | head -200'"
 export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:5:hidden:wrap --bind '?:toggle-preview' --exact"
 export FZF_ALT_C_OPTS="--preview 'tree -NC {} | head -200'"
+
+# Load official git completion for zsh if available
+if [ -f /opt/homebrew/share/zsh/site-functions/_git ]; then
+  fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
+elif [ -f /usr/local/share/zsh/site-functions/_git ]; then
+  fpath=(/usr/local/share/zsh/site-functions $fpath)
+fi
+autoload -Uz compinit && compinit
