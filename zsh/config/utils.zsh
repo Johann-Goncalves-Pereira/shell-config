@@ -45,9 +45,8 @@ function update() {
   echo "\n\n${BGreen}Updating Javascript...${Color_Off}\n\n"
 
   corepack install -g npm@latest
-  corepack use npm@latest
   corepack install -g pnpm@latest
-  corepack use pnpm@latest
+  corepack up
 
   echo "\n\n${BGreen}Updating Asdf...${Color_Off}\n\n"
 
