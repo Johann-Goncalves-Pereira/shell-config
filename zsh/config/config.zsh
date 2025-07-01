@@ -70,6 +70,9 @@ fi
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
+# > Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
+
 # > Python
 # export PATH="$(brew --prefix python)/libexec/bin:$PATH"
 
