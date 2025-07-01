@@ -66,5 +66,13 @@ if ! fastanime="$(command -v fastanime)" || [[ -z $fastanime ]]; then
     fastanime completions
 fi
 
+# > Languages
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+
 # > Python
-export PATH="$(brew --prefix python)/libexec/bin:$PATH"
+# export PATH="$(brew --prefix python)/libexec/bin:$PATH"
+
+# if [ -f .venv/bin/activate ]; then
+#     source .venv/bin/activate
+# fi

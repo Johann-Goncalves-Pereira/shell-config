@@ -137,3 +137,7 @@ export ANDROID_SDK=/Users/johannpereira/Android/Sdk
 . "$HOME/.local/bin/env"
 export ANDROID_SDK=/Users/johannpereira/Library/Android/sdk
 export ANDROID_SDK=/Users/johannpereira/Library/Android/sdk
+
+# > Languages
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"

@@ -7,6 +7,8 @@ alias batcat="bat --style=numbers,changes,grid"
 alias pn="pnpm"
 alias ffmpeg="ffmpeg-bar"
 alias m4b-tool='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest'
+alias convert='magick'
+alias fd="fd -H"
 
 # Ugrep
 if command -v ugrep >/dev/null; then
