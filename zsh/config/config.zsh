@@ -88,3 +88,5 @@ export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/tool
 # Added by LM Studio CLI (lms)
 export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
 # End of LM Studio CLI section
+
+export PATH="/usr/local/bin:$PATH"

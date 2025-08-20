@@ -30,3 +30,13 @@ USER_CONFIG_DIRECTORY="$HOME/.shell-config/zsh"
 
 # [ -f $USER_CONFIG_DIRECTORY/config/prompt/.p10k-config.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/.p10k-config.zsh
 [ -f $USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
+# End of LM Studio CLI section
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/johannpereira/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
