@@ -16,7 +16,8 @@ autoload -Uz _zinit
 #? Load a few important annexes, without Turbo (this is currently required for annexes)
 zinit light-mode depth"1" for \
 	  zdharma-continuum/zinit-annex-bin-gem-node \
-	  zdharma-continuum/zinit-annex-patch-dl
+	  zdharma-continuum/zinit-annex-patch-dl \
+	  zdharma-continuum/zinit-annex-readurl
 
 # : End of Zinit's installer chunk
 
