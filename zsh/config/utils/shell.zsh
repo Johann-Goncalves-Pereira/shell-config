@@ -94,3 +94,13 @@ bindkey '^I' _expand_dots_then_expand_or_complete
 bindkey '^M' _expand_dots_then_accept_line
 
 # ${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration
+
+
+# Function to search torrents using magnetfinder without needing quotes
+torrent() {
+  if [ $# -eq 0 ]; then
+    echo -e "${BRed}Error:${Color_Off} No search query provided"
+    return 1
+  fi
+  magnetfinder --all --query "$*"
+}

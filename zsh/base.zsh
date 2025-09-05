@@ -35,6 +35,9 @@ USER_CONFIG_DIRECTORY="$HOME/.shell-config/zsh"
 export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
 # End of LM Studio CLI section
 
+
+# Added Docker CLI to PATH
+export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
 fpath=(/Users/johannpereira/.docker/completions $fpath)
 autoload -Uz compinit

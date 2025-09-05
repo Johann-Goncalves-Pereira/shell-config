@@ -9,7 +9,7 @@ alias ffmpeg="ffmpeg-bar"
 alias m4b-tool='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest'
 alias convert='magick'
 alias fd="fd -H"
-alias tordl='docker run --rm -it -v ~/Developer/programs/cli-torrent-dl:/app tordl'
+alias gdu="gdu-go"
 
 # Ugrep
 if command -v ugrep >/dev/null; then
