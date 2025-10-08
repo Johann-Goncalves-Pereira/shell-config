@@ -97,10 +97,22 @@ bindkey '^M' _expand_dots_then_accept_line
 
 
 # Function to search torrents using magnetfinder without needing quotes
+# The search query will be passed wrapped in " or ' so the program receives the quotes.
 torrent() {
   if [ $# -eq 0 ]; then
     echo -e "${BRed}Error:${Color_Off} No search query provided"
     return 1
   fi
-  magnetfinder --all --query "$*"
+
+  local q="$*"
+  local wrapped
+
+  # If the query contains a double quote, wrap with single quotes; otherwise wrap with double quotes.
+  if [[ "$q" == *'"'* ]]; then
+    wrapped="'$q'"
+  else
+    wrapped="\"$q\""
+  fi
+
+  magnetfinder --all --query "$wrapped"
 }
