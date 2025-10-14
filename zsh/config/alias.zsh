@@ -10,6 +10,7 @@ alias m4b-tool='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandre
 alias convert='magick'
 alias fd="fd -H"
 alias gdu="gdu-go"
+alias matrix='cmatrix -ba -u 2 -C red'
 
 # Ugrep
 if command -v ugrep >/dev/null; then
