@@ -1,3 +1,19 @@
+# > -------------------------- < #
+# >  Docker CLI Configuration  < #
+# > -------------------------- < #
+
+# Added Docker CLI to PATH
+export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
+
+# Docker CLI completions
+fpath=(/Users/johannpereira/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+
+# > --------------- < #
+# >  Docker Utils  < #
+# > --------------- < #
+
 # Stop all docker containers and remove them.
 function docker_clean() {
   echo -e "${BYellow}Stopping all containers from your local storage.${Color_Off}\n"
