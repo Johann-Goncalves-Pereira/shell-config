@@ -96,7 +96,7 @@ bindkey '^M' _expand_dots_then_accept_line
 # ${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration
 
 
-# Function to search torrents using magnetfinder without needing quotes
+# Function to search torrents using magnetfinder with safer provider handling
 # The search query will be passed wrapped in " or ' so the program receives the quotes.
 torrent() {
   if [ $# -eq 0 ]; then
@@ -114,5 +114,26 @@ torrent() {
     wrapped="\"$q\""
   fi
 
-  magnetfinder --all --query "$wrapped"
+  if ! command -v magnetfinder >/dev/null 2>&1; then
+    echo -e "${BRed}Error:${Color_Off} magnetfinder not found in PATH"
+    return 1
+  fi
+
+  # Try scraping all providers first. If it fails due to YTS DNS issues,
+  # retry without the YTS provider (explicit provider flags).
+  local output exitcode
+  output=$(magnetfinder --all --query "$wrapped" 2>&1)
+  exitcode=$?
+
+  # If output contains YTS/DNS related errors, magnetfinder may still exit 0.
+  # Detect those messages in the output and retry without YTS provider.
+  if printf "%s" "$output" | grep -qiE "Error requesting data from yts|yts\.mx|resolve dns name|failed to lookup|nodename nor servname"; then
+    echo -e "${BRed}Warning:${Color_Off} YTS lookup failed, retrying without YTS provider"
+    magnetfinder --piratebay --nyaa --query "$wrapped"
+    return $?
+  fi
+
+  # Otherwise, return magnetfinder's output and exit code.
+  printf "%s\n" "$output"
+  return $exitcode
 }

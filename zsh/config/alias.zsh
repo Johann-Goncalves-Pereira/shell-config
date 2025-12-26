@@ -9,6 +9,7 @@ alias ffmpeg="ffmpeg-bar"
 alias m4b-tool='docker run -it --rm -u $(id -u):$(id -g) -v "$(pwd)":/mnt sandreas/m4b-tool:latest'
 alias convert='magick'
 alias fd="fd -H"
+# ncdu alternative
 alias gdu="gdu-go"
 alias matrix='cmatrix -ba -u 2 -C red'
 

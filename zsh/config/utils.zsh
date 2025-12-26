@@ -31,14 +31,15 @@ function update_webui() {
 }
 
 function update() {
-  echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
-  mas upgrade
-
   echo -e "${BGreen}Updating with Homebrew...${Color_Off}\n"
   brew update
   brew upgrade
   brew cleanup
   echo "\n\n${BGreen}Updating Zinit...${Color_Off}\n\n"
+
+  echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
+  mas upgrade
+
 
   zinit update --parallel
 
