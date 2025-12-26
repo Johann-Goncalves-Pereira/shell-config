@@ -67,3 +67,16 @@ direnv_nvm() {
   echo "use nodejs $version" >.envrc
   direnv allow
 }
+
+clean_node_modules() {
+  local target_dir
+  target_dir="${1:-.}"
+
+  echo "Searching for node_modules under: $target_dir"
+
+  # Find and delete all node_modules directories under target_dir
+  find "$target_dir" -type d -name node_modules -prune -print | while read -r dir; do
+    echo "Removing: $dir"
+    trash "$dir"
+  done
+}
