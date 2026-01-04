@@ -194,4 +194,6 @@ if [ -f /opt/homebrew/share/zsh/site-functions/_git ]; then
 elif [ -f /usr/local/share/zsh/site-functions/_git ]; then
   fpath=(/usr/local/share/zsh/site-functions $fpath)
 fi
-autoload -Uz compinit && compinit
+if ! type zinit >/dev/null 2>&1; then
+	autoload -Uz compinit && compinit
+fi

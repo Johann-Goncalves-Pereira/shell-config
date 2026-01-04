@@ -7,8 +7,10 @@ export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
 
 # Docker CLI completions
 fpath=(/Users/johannpereira/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
+if ! type zinit >/dev/null 2>&1; then
+  autoload -Uz compinit
+  compinit -i 2>/dev/null || true
+fi
 
 # > --------------- < #
 # >  Docker Utils  < #

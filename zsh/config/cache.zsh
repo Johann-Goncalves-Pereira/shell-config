@@ -10,5 +10,9 @@ export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
   zstyle ':completion:*' use-cache true
   zstyle ':completion:*' cache-path $cache_dir/.zcompcache
   [[ -f $cache_dir/.zcompcache/.make-cache-dir ]] || _store_cache .make-cache-dir
-  compinit -C -d $cache_dir/.zcompdump
+  # If zinit is installed, let zinit manage completions; otherwise run compinit safely
+  if ! type zinit >/dev/null 2>&1; then
+    # -C use the cache, -d set dump file, -i ignore insecure directories
+    compinit -C -i -d $cache_dir/.zcompdump 2>/dev/null || true
+  fi
 }
