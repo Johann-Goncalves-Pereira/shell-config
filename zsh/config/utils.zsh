@@ -5,6 +5,36 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/file.zsh ] && source $UTILS/file.zsh
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
 
+update_spicetify() {
+  echo "\n\n${BGreen}Updating Spicetify...${Color_Off}\n\n"
+
+  # Check if Spotify is running
+  if ! pgrep -x "Spotify" > /dev/null; then
+    echo "Spotify is not open. Skipping update."
+    return
+  fi
+
+  # Wait for Spotify to be open for at least 60 seconds
+  local start_time=$(date +%s)
+  while true; do
+    if pgrep -x "Spotify" > /dev/null; then
+      local current_time=$(date +%s)
+      if (( current_time - start_time >= 60 )); then
+        break
+      fi
+    else
+      start_time=$(date +%s)
+    fi
+    sleep 5
+  done
+
+  if command -v spicetify &>/dev/null; then
+    spicetify upgrade
+    spicetify backup apply
+}
+
+
+
 function update_webui() {
   echo "\n\n${BGreen}Updating WebUI...${Color_Off}\n\n"
   # Check if Open WebUI container exists
@@ -56,10 +86,14 @@ function update() {
 
   update_webui
 
+  update_spicetify
+
   brew cleanup && rm -f $ZSH_COMPDUMP
 
   echo "\n\n${BGreen}Update completed.${Color_Off}\n\n"
 }
+
+
 
 direnv_nvm() {
   vared -p "What version do you want to use? " -c version

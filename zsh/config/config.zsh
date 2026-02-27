@@ -90,3 +90,6 @@ export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
 # End of LM Studio CLI section
 
 export PATH="/usr/local/bin:$PATH"
+
+# > Spicetify
+export PATH=$PATH:/Users/johannpereira/.spicetify
