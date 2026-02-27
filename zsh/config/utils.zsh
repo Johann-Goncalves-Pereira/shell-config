@@ -5,7 +5,7 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/file.zsh ] && source $UTILS/file.zsh
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
 
-update_spicetify() {
+function update_spicetify() {
   echo "\n\n${BGreen}Updating Spicetify...${Color_Off}\n\n"
 
   # Check if Spotify is running
@@ -31,6 +31,7 @@ update_spicetify() {
   if command -v spicetify &>/dev/null; then
     spicetify upgrade
     spicetify backup apply
+  fi
 }
 
 
