@@ -65,8 +65,35 @@ function update_webui() {
   fi
 }
 
+function optimize_homebrew_taps() {
+  if ! command -v brew &>/dev/null; then
+    return
+  fi
+
+  local did_untap=false
+
+  if brew tap | command grep -qx "homebrew/core"; then
+    echo "Untapping homebrew/core to use Homebrew API by default..."
+    brew untap homebrew/core
+    did_untap=true
+  fi
+
+  if brew tap | command grep -qx "homebrew/cask"; then
+    echo "Untapping homebrew/cask to use Homebrew API by default..."
+    brew untap homebrew/cask
+    did_untap=true
+  fi
+
+  if [[ "$did_untap" == false ]]; then
+    echo "Homebrew taps already optimized for API installs."
+  fi
+}
+
 function update() {
-  echo -e "${BGreen}Updating with Homebrew...${Color_Off}\n"
+  echo -e "${BGreen}Optimizing Homebrew taps...${Color_Off}\n"
+  optimize_homebrew_taps
+
+  echo -e "\n\n${BGreen}Updating with Homebrew...${Color_Off}\n"
   brew update
   brew upgrade
   brew cleanup
