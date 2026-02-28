@@ -9,7 +9,7 @@ function update_spicetify() {
   echo "\n\n${BGreen}Updating Spicetify...${Color_Off}\n\n"
 
   # Check if Spotify is running
-  if ! pgrep -x "Spotify" > /dev/null; then
+  if ! command pgrep -x "Spotify" > /dev/null; then
     echo "Spotify is not open. Skipping update."
     return
   fi
@@ -17,7 +17,7 @@ function update_spicetify() {
   # Wait for Spotify to be open for at least 60 seconds
   local start_time=$(date +%s)
   while true; do
-    if pgrep -x "Spotify" > /dev/null; then
+    if command pgrep -x "Spotify" > /dev/null; then
       local current_time=$(date +%s)
       if (( current_time - start_time >= 60 )); then
         break
@@ -29,17 +29,21 @@ function update_spicetify() {
   done
 
   if command -v spicetify &>/dev/null; then
-    spicetify upgrade
-    spicetify backup apply
+    local upgrade_output
+    upgrade_output=$(spicetify upgrade 2>&1)
+    echo "$upgrade_output"
+
+    if echo "$upgrade_output" | command grep -Eiq "(backup apply|spicetify apply|spotify.*updated)"; then
+      echo "Running spicetify backup apply..."
+      spicetify backup apply
+    fi
   fi
 }
-
-
 
 function update_webui() {
   echo "\n\n${BGreen}Updating WebUI...${Color_Off}\n\n"
   # Check if Open WebUI container exists
-  if docker ps -q --filter "name=open-webui" | grep -q .; then
+  if docker ps -q --filter "name=open-webui" | command grep -q .; then
     # Container exists, proceed with update
     current_image=$(docker inspect open-webui 2>/dev/null | jq -r '.[0].Image')
     latest_image="ghcr.io/open-webui/open-webui:main"

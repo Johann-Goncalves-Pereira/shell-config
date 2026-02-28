@@ -13,6 +13,13 @@ source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
 autoload -Uz _zinit
 (( ${+_comps} )) && _comps[zinit]=_zinit
 
+# Compatibility shim for legacy atpull hooks that call +zi-message
+if ! whence +zi-message >/dev/null 2>&1; then
+	function +zi-message() {
+		print -P "%F{33}$*%f"
+	}
+fi
+
 #? Load a few important annexes, without Turbo (this is currently required for annexes)
 zinit light-mode depth"1" for \
 	  zdharma-continuum/zinit-annex-bin-gem-node \
