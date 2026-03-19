@@ -97,3 +97,8 @@ export PATH=$PATH:/Users/johannpereira/.spicetify
 
 export PATH="/opt/homebrew/opt/imagemagick-full/bin:$PATH"
 export PATH="/opt/homebrew/opt/imagemagick-full/bin:$PATH"
+export PATH="/opt/homebrew/opt/ffmpeg-full/bin:$PATH"
+export PATH="/opt/homebrew/opt/curl/bin:$PATH"
+export PKG_CONFIG_PATH="/opt/homebrew/opt/curl/lib/pkgconfig"
+export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
