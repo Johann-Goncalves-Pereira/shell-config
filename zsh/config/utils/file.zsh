@@ -184,3 +184,71 @@ function compress_mov() {
     fi
   done
 }
+
+function compress_mp4_to_webm() {
+  if ! command -v ffmpeg >/dev/null; then
+    echo "${BIRed}[Error]:${Color_Off} ffmpeg is not installed. Please install it and try again."
+    return 1
+  fi
+
+  local codec="both"
+  local scale=""
+  local target_files=()
+  local usage="Usage: compress_mp4_to_webm [av1|vp9|both] [scale WxH] [file]
+  Codecs:
+    av1  - libsvtav1, CRF 36, Opus audio 96k (best compression, slowest encode)
+    vp9  - libvpx-vp9, CRF 32, Opus audio 96k (faster encode, broad support)
+    both - generate both AV1 and VP9 outputs (default)
+  Optionally, add a scale (e.g. 1280:720 or 1920:1080) to resize video.
+  Optionally, specify a single mp4 file to compress.
+  Example: compress_mp4_to_webm both 1280:720 myvideo.mp4"
+
+  if [[ "$1" == "help" || "$1" == "--help" ]]; then
+    echo "$usage"
+    return 0
+  fi
+
+  [[ "$1" =~ ^(av1|vp9|both)$ ]] && codec="$1" && shift
+  [[ "$1" =~ ^[0-9]+x[0-9]+$ || "$1" =~ ^[0-9]+:[0-9]+$ ]] && scale="$1" && shift
+
+  if [[ -n "$1" && -f "$1" ]]; then
+    target_files=("$1")
+  else
+    shopt -s globstar nullglob
+    target_files=(**/*.mp4)
+    shopt -u globstar nullglob
+  fi
+
+  if [[ ${#target_files[@]} -eq 0 ]]; then
+    echo "${BYellow}[Warning]:${Color_Off} No mp4 files found."
+    return 0
+  fi
+
+  for f in "${target_files[@]}"; do
+    if [[ ! -f "$f" ]]; then
+      continue
+    fi
+
+    local scale_opt=()
+    if [[ -n "$scale" ]]; then
+      local scale_filter="${scale//x/:}"
+      scale_opt=(-vf "scale=${scale_filter}:force_original_aspect_ratio=decrease")
+    fi
+
+    if [[ "$codec" == "av1" || "$codec" == "both" ]]; then
+      local output_av1="${f%.mp4} - browser-av1.webm"
+      ffmpeg -i "$f" "${scale_opt[@]}" -c:v libsvtav1 -preset 8 -crf 36 -g 240 -pix_fmt yuv420p -row-mt 1 -c:a libopus -b:a 96k "$output_av1"
+      if [[ $? -ne 0 ]]; then
+        echo "${BIRed}[Error]:${Color_Off} AV1 compression failed for $f"
+      fi
+    fi
+
+    if [[ "$codec" == "vp9" || "$codec" == "both" ]]; then
+      local output_vp9="${f%.mp4} - browser-vp9.webm"
+      ffmpeg -i "$f" "${scale_opt[@]}" -c:v libvpx-vp9 -row-mt 1 -threads 8 -b:v 0 -crf 32 -g 240 -pix_fmt yuv420p -c:a libopus -b:a 96k "$output_vp9"
+      if [[ $? -ne 0 ]]; then
+        echo "${BIRed}[Error]:${Color_Off} VP9 compression failed for $f"
+      fi
+    fi
+  done
+}

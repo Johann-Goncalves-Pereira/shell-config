@@ -55,7 +55,6 @@ zinit wait lucid for \
 	OMZP::compleat \
 	OMZP::command-not-found \
 	OMZP::npm \
-	OMZP::yarn \
 	OMZP::node \
 	OMZP::golang \
 	OMZP::flutter \
@@ -67,6 +66,7 @@ zinit wait lucid for \
 	OMZP::copyfile \
 	OMZP::asdf \
 	OMZP::brew \
+	# OMZP::yarn \
 	  
 # : Completion enhancements
 zinit wait lucid depth"1" for \
@@ -115,9 +115,9 @@ fi
 
 # Modern Unix commands
 # See https://github.com/ibraheemdev/modern-unix
+	  # atload"alias cat='bat -p --wrap character'" cp"**/bat.1 -> $ZPFX/share/man/man1" mv"**/autocomplete/bat.zsh -> _bat" completions sbin"**/bat" @sharkdp/bat \
 zinit wait as"null" lucid from"gh-r" for \
 	  atload"alias ls='eza --color=auto --group-directories-first'; alias la='ls -laFh'" sbin"**/eza" if'[[ $OSTYPE != darwin* ]] && (( $+commands[unzip] ))' eza-community/eza \
-	  atload"alias cat='bat -p --wrap character'" cp"**/bat.1 -> $ZPFX/share/man/man1" mv"**/autocomplete/bat.zsh -> _bat" completions sbin"**/bat" @sharkdp/bat \
 	  cp"**/fd.1 -> $ZPFX/share/man/man1" completions sbin"**/fd" @sharkdp/fd \
 	  cp"**/hyperfine.1 -> $ZPFX/share/man/man1" completions sbin"**/hyperfine" @sharkdp/hyperfine \
 	  cp"**/doc/rg.1 -> $ZPFX/share/man/man1" completions sbin"**/rg" BurntSushi/ripgrep \

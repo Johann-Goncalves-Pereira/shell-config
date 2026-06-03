@@ -27,3 +27,9 @@ bindkey -M vicmd '^[[3;5~' kill-word
 ZSH_COLORIZE_TOOL=chroma
 ZSH_COLORIZE_STYLE="colorful"
 ZSH_COLORIZE_CHROMA_FORMATTER=terminal256
+
+# Enable nullglob to prevent errors when no files match a pattern
+setopt NULL_GLOB
+
+# Enable extended globbing for advanced pattern matching
+. ${ASDF_DATA_DIR:-$HOME/.asdf}/plugins/golang/set-env.zsh
