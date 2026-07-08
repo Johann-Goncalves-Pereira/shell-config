@@ -39,6 +39,7 @@ fi
 # alias q='exit'
 alias vi="vim"
 alias vim="nvim"
+alias code="cursor"
 
 # Git
 alias gtr='git tag -d $(git tag) && git fetch --tags' # Refresh local tags from remote

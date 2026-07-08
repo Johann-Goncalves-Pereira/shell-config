@@ -118,9 +118,9 @@ function update() {
 
   update_webui
 
-  update_spicetify
+  # update_spicetify
 
-  brew cleanup && rm -f $ZSH_COMPDUMP
+  brew cleanup --prune=all && rm -f $ZSH_COMPDUMP
 
   echo "\n\n${BGreen}Update completed.${Color_Off}\n\n"
 }
