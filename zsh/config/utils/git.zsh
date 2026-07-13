@@ -88,8 +88,22 @@ function gps() {
   if [ -d .git ] || [ -d ../.git ]; then
     _git_var
     if [ -n "$CURRENT_BRANCH" ]; then
+      local push_args=()
+      local arg
+      for arg in "$@"; do
+        case "$arg" in
+          -f|--force|--force-with-lease|-u|--set-upstream|--no-verify)
+            push_args+=("$arg")
+            ;;
+          *)
+            echo -e "\n${Red}[Error]:${Color_Off} Unknown option: $arg\n"
+            echo -e "Usage: gps [-f|--force|--force-with-lease] [-u|--set-upstream] [--no-verify]\n"
+            return 1
+            ;;
+        esac
+      done
       echo -e "\n${Cyan}[Progress]:${Color_Off} Pushing to remote...\n"
-      git push origin "$CURRENT_BRANCH"
+      git push "${push_args[@]}" origin "$CURRENT_BRANCH"
     else
       echo -e "\n${Red}[Error]:${Color_Off} Could not determine the current branch.\n"
     fi
