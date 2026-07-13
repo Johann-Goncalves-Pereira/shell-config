@@ -465,3 +465,183 @@ function compress_mp4_to_webm() {
     fi
   done
 }
+
+# Recursively copy a directory like cp -r, excluding common junk directories/files.
+# Usage: cp_ignore SRC DEST [-e pattern ...]
+#   -e pattern  extra exclude pattern (repeatable), e.g. -e .env -e '*.log'
+function cp_ignore() {
+  if ! command -v rsync >/dev/null; then
+    echo "${BIRed}[Error]:${Color_Off} ${BICyan}rsync${Color_Off} is not installed. Please install it and try again."
+    return 1
+  fi
+
+  local usage="Usage: cp_ignore SRC DEST [-e pattern ...]
+  Recursively copy SRC into DEST, excluding common junk (node_modules, .git, etc.).
+  Extra excludes: cp_ignore ./app ./backup -e .env -e '*.log'"
+
+  if [[ "$1" == "help" || "$1" == "--help" ]]; then
+    echo "$usage"
+    return 0
+  fi
+
+  local -a excludes=(
+    node_modules
+    .git
+    .svn
+    .hg
+    .venv
+    venv
+    __pycache__
+    .pytest_cache
+    .mypy_cache
+    .next
+    .nuxt
+    dist
+    build
+    out
+    coverage
+    .turbo
+    target
+    .DS_Store
+    Thumbs.db
+    .cache
+    .parcel-cache
+    .sass-cache
+  )
+  local -a positional=()
+  local -a rsync_args=()
+  local arg
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -e)
+        if [[ -z "$2" ]]; then
+          echo "${BIRed}[Error]:${Color_Off} -e requires a pattern."
+          return 1
+        fi
+        excludes+=("$2")
+        shift 2
+        ;;
+      -h|--help)
+        echo "$usage"
+        return 0
+        ;;
+      -*)
+        echo "${BIRed}[Error]:${Color_Off} Unknown option: $1"
+        echo "$usage"
+        return 1
+        ;;
+      *)
+        positional+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  if [[ ${#positional[@]} -ne 2 ]]; then
+    echo "${BIRed}[Error]:${Color_Off} Expected SRC and DEST."
+    echo "$usage"
+    return 1
+  fi
+
+  local src="${positional[1]}"
+  local dest="${positional[2]}"
+
+  if [[ ! -d "$src" ]]; then
+    echo "${BIRed}[Error]:${Color_Off} Source is not a directory: ${BICyan}$src${Color_Off}"
+    return 1
+  fi
+
+  if [[ ! -d "$dest" ]]; then
+    if [[ -e "$dest" ]]; then
+      echo "${BIRed}[Error]:${Color_Off} Destination exists and is not a directory: ${BICyan}$dest${Color_Off}"
+      return 1
+    fi
+    mkdir -p "$dest" || {
+      echo "${BIRed}[Error]:${Color_Off} Failed to create destination: ${BICyan}$dest${Color_Off}"
+      return 1
+    }
+  fi
+
+  for arg in "${excludes[@]}"; do
+    rsync_args+=(--exclude="$arg")
+  done
+
+  echo "Copying ${BICyan}$src${Color_Off} → ${BICyan}$dest${Color_Off} (excluding ${#excludes[@]} patterns)..."
+
+  if rsync -a "${rsync_args[@]}" "$src/" "$dest/"; then
+    echo "${BGreen}[Done]:${Color_Off} Copied ${BICyan}$src${Color_Off} → ${BICyan}$dest${Color_Off}"
+  else
+    echo "${BIRed}[Error]:${Color_Off} Failed to copy ${BICyan}$src${Color_Off} → ${BICyan}$dest${Color_Off}"
+    return 1
+  fi
+}
+
+# Wrap cp so recursive copies (-r/-R/--recursive) use cp_ignore by default.
+# Pass --no-ignore to get stock cp behavior (flag is stripped before calling cp).
+# Usage: cp -r SRC DEST
+#        cp -r --no-ignore SRC DEST
+function cp() {
+  local no_ignore=false
+  local recursive=false
+  local -a passthrough=()
+  local -a positionals=()
+  local arg
+
+  for arg in "$@"; do
+    case "$arg" in
+      --no-ignore)
+        no_ignore=true
+        ;;
+      --recursive)
+        recursive=true
+        passthrough+=("$arg")
+        ;;
+      -[!-]*)
+        if [[ "$arg" == *r* || "$arg" == *R* ]]; then
+          recursive=true
+        fi
+        passthrough+=("$arg")
+        ;;
+      -*)
+        passthrough+=("$arg")
+        ;;
+      *)
+        passthrough+=("$arg")
+        positionals+=("$arg")
+        ;;
+    esac
+  done
+
+  if [[ "$recursive" == true && "$no_ignore" == false && ${#positionals[@]} -ge 2 ]]; then
+    local dest="${positionals[-1]%/}"
+    local -a sources=("${positionals[@]:0:$(( ${#positionals[@]} - 1 ))}")
+    local src final_dest
+
+    if [[ ${#sources[@]} -gt 1 && ! -d "$dest" ]]; then
+      echo "${BIRed}[Error]:${Color_Off} Target '${BICyan}$dest${Color_Off}' is not a directory"
+      return 1
+    fi
+
+    for src in "${sources[@]}"; do
+      if [[ ! -d "$src" ]]; then
+        # Non-directory sources: fall back to real cp for the whole invocation
+        command cp "${passthrough[@]}"
+        return $?
+      fi
+    done
+
+    for src in "${sources[@]}"; do
+      src="${src%/}"
+      if [[ -d "$dest" ]]; then
+        final_dest="$dest/${src:t}"
+      else
+        final_dest="$dest"
+      fi
+      cp_ignore "$src" "$final_dest" || return $?
+    done
+    return 0
+  fi
+
+  command cp "${passthrough[@]}"
+}
