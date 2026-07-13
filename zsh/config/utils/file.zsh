@@ -43,6 +43,148 @@ function convert_m4b_audiobook_to_mp3_with_chapters() {
   done
 }
 
+# Convert m4a files to mp3 using libmp3lame VBR — good perceptual quality with smaller files.
+# Usage: convert_m4a_to_mp3 [path] [quality]
+#   path: file or directory (default: current directory, recursive)
+#   quality: high (~190 kbps), balanced (~165 kbps, default), small (~130 kbps)
+function convert_m4a_to_mp3() {
+  if ! command -v ffmpeg >/dev/null; then
+    echo "${BIRed}[Error]:${Color_Off} ${BICyan}ffmpeg${Color_Off} is not installed. Please install it and try again."
+    return 1
+  fi
+
+  local target="${1:-.}"
+  local quality="${2:-balanced}"
+  local q_value output_file input_bytes output_bytes saved_pct
+
+  case "$quality" in
+    high)     q_value=2 ;;
+    balanced) q_value=4 ;;
+    small)    q_value=6 ;;
+    *)
+      echo "${BIRed}[Error]:${Color_Off} Invalid quality '${quality}'. Use: high, balanced, or small."
+      return 1
+      ;;
+  esac
+
+  local -a files
+  if [[ -f "$target" && "${target##*.}" == m4a ]]; then
+    files=("$target")
+  else
+    setopt local_options null_glob
+    files=("$target"/**/*.m4a(N))
+  fi
+
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "${BYellow}[Warning]:${Color_Off} No m4a files found."
+    return 1
+  fi
+
+  for f in "${files[@]}"; do
+    output_file="${f:r}.mp3"
+
+    if [[ -f "$output_file" ]]; then
+      echo "${BYellow}[Skip]:${Color_Off} ${BICyan}$output_file${Color_Off} already exists."
+      continue
+    fi
+
+    echo "Converting ${BICyan}$f${Color_Off} → ${BICyan}$output_file${Color_Off} (VBR q=$q_value)..."
+
+    if ffmpeg -nostdin -hide_banner -loglevel warning -i "$f" \
+      -codec:a libmp3lame -q:a "$q_value" -map_metadata 0 \
+      -id3v2_version 3 "$output_file"; then
+
+      input_bytes=$(stat -f%z "$f" 2>/dev/null)
+      output_bytes=$(stat -f%z "$output_file" 2>/dev/null)
+      saved_pct=$(( (input_bytes - output_bytes) * 100 / input_bytes ))
+      echo "${BGreen}[Done]:${Color_Off} $(( input_bytes / 1024 )) KB → $(( output_bytes / 1024 )) KB (~${saved_pct}% smaller)"
+    else
+      echo "${BIRed}[Error]:${Color_Off} Failed to convert ${BICyan}$f${Color_Off}"
+      rm -f "$output_file"
+      return 1
+    fi
+  done
+}
+
+# Trim near-silent sections throughout audio, keeping a short breath where silence was.
+# Usage: cut_silence [path] [min_silence] [breath] [threshold]
+#   path:         file or directory (default: current directory, recursive)
+#   min_silence:  minimum silence duration to trim, in seconds (default: 0.8)
+#   breath:       silence to keep at each cut, in seconds (default: 0.3)
+#   threshold:    silence level in dB, lower = stricter (default: -45)
+function cut_silence() {
+  if ! command -v ffmpeg >/dev/null; then
+    echo "${BIRed}[Error]:${Color_Off} ${BICyan}ffmpeg${Color_Off} is not installed. Please install it and try again."
+    return 1
+  fi
+
+  local target="${1:-.}"
+  local min_silence="${2:-0.8}"
+  local breath="${3:-0.3}"
+  local threshold="${4:--45}"
+  local -a audio_exts=(mp3 m4a wav flac ogg aac opus)
+  local -a files f ext tmp codec_args format_args
+  local filter duration_before duration_after input_bytes output_bytes saved_pct
+
+  filter="silenceremove=start_periods=1:start_duration=${min_silence}:start_threshold=${threshold}dB:start_silence=${breath}:stop_periods=-1:stop_duration=${min_silence}:stop_threshold=${threshold}dB:stop_silence=${breath}"
+
+  if [[ -f "$target" ]]; then
+    files=("$target")
+  else
+    setopt local_options null_glob
+    for ext in "${audio_exts[@]}"; do
+      files+=("$target"/**/*."$ext"(N))
+    done
+  fi
+
+  if [[ ${#files[@]} -eq 0 ]]; then
+    echo "${BYellow}[Warning]:${Color_Off} No audio files found."
+    return 1
+  fi
+
+  for f in "${files[@]}"; do
+    ext="${f##*.}"
+    case "$ext" in
+      mp3)  codec_args=(-codec:a libmp3lame -q:a 4); format_args=(-f mp3) ;;
+      m4a)  codec_args=(-codec:a aac -b:a 128k); format_args=(-f ipod) ;;
+      aac)  codec_args=(-codec:a copy); format_args=(-f adts) ;;
+      wav)  codec_args=(-codec:a pcm_s16le); format_args=(-f wav) ;;
+      flac) codec_args=(-codec:a flac); format_args=(-f flac) ;;
+      ogg)  codec_args=(-codec:a libvorbis -q:a 4); format_args=(-f ogg) ;;
+      opus) codec_args=(-codec:a libopus -b:a 96k); format_args=(-f opus) ;;
+      *)
+        echo "${BYellow}[Skip]:${Color_Off} Unsupported format: ${BICyan}$f${Color_Off}"
+        continue
+        ;;
+    esac
+
+    tmp="${f:r}.cut.${RANDOM}.${ext}"
+    duration_before=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null)
+    input_bytes=$(stat -f%z "$f" 2>/dev/null)
+
+    echo "Cutting silence in ${BICyan}$f${Color_Off} (≥${min_silence}s @ ${threshold}dB, breath ${breath}s)..."
+
+    if ffmpeg -nostdin -hide_banner -loglevel warning -y -i "$f" \
+      -af "$filter" "${codec_args[@]}" "${format_args[@]}" -map_metadata 0 "$tmp"; then
+
+      duration_after=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$tmp" 2>/dev/null)
+      output_bytes=$(stat -f%z "$tmp" 2>/dev/null)
+      mv "$tmp" "$f"
+
+      if [[ -n "$duration_before" && -n "$duration_after" ]]; then
+        saved_pct=$(awk -v b="$duration_before" -v a="$duration_after" 'BEGIN { printf "%.0f", (b - a) * 100 / b }')
+        echo "${BGreen}[Done]:${Color_Off} ${duration_before%.*}s → ${duration_after%.*}s (~${saved_pct}% shorter), $(( input_bytes / 1024 )) KB → $(( output_bytes / 1024 )) KB"
+      else
+        echo "${BGreen}[Done]:${Color_Off} $(( input_bytes / 1024 )) KB → $(( output_bytes / 1024 )) KB"
+      fi
+    else
+      echo "${BIRed}[Error]:${Color_Off} Failed to process ${BICyan}$f${Color_Off}"
+      rm -f "$tmp"
+      return 1
+    fi
+  done
+}
+
 function compress_mp4() {
   if ! command -v ffmpeg >/dev/null; then
     echo "${BIRed}[Error]:${Color_Off} ffmpeg is not installed. Please install it and try again."
