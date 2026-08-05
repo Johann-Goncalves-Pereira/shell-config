@@ -41,27 +41,118 @@ function update_spicetify() {
 }
 
 function update_webui() {
-  echo "\n\n${BGreen}Updating WebUI...${Color_Off}\n\n"
-  # Check if Open WebUI container exists
-  if docker ps -q --filter "name=open-webui" | command grep -q .; then
-    # Container exists, proceed with update
-    current_image=$(docker inspect open-webui 2>/dev/null | jq -r '.[0].Image')
-    latest_image="ghcr.io/open-webui/open-webui:main"
+  echo "\n\n${BGreen}Updating WebUI + SearXNG...${Color_Off}\n\n"
 
-    if [[ "$current_image" == "$latest_image" ]]; then
-      echo "Open WebUI is already up to date."
-    else
-      echo "Updating Open WebUI..."
-      docker pull "$latest_image"
-      docker stop open-webui
-      docker rm open-webui
-      docker run -d -p 39237:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always "$latest_image"
-      echo "Open WebUI updated."
+  local network_name="open-webui-net"
+  local searxng_image="docker.io/searxng/searxng:latest"
+  local searxng_name="searxng"
+  local searxng_config="$HOME/Developer/programs/searxng"
+  local webui_image="ghcr.io/open-webui/open-webui:main"
+  local webui_name="open-webui"
+  local image_before latest_id needs_recreate
+
+  if ! command -v docker &>/dev/null; then
+    echo "Docker is not available. Skipping WebUI/SearXNG update."
+    return 1
+  fi
+
+  if ! docker network inspect "$network_name" &>/dev/null; then
+    echo "Creating Docker network $network_name..."
+    docker network create "$network_name"
+  fi
+
+  # --- SearXNG ---
+  echo "Updating SearXNG..."
+  image_before=""
+  if docker inspect "$searxng_name" &>/dev/null; then
+    image_before=$(docker inspect -f '{{.Image}}' "$searxng_name" 2>/dev/null)
+  fi
+
+  docker pull "$searxng_image"
+  latest_id=$(docker image inspect -f '{{.Id}}' "$searxng_image" 2>/dev/null)
+  needs_recreate=false
+
+  if ! docker inspect "$searxng_name" &>/dev/null; then
+    needs_recreate=true
+  elif [[ -n "$latest_id" && "$image_before" != "$latest_id" ]]; then
+    needs_recreate=true
+  fi
+
+  if [[ "$needs_recreate" == true ]]; then
+    echo "Starting SearXNG..."
+    docker stop "$searxng_name" 2>/dev/null || true
+    docker rm "$searxng_name" 2>/dev/null || true
+    docker run -d \
+      --name "$searxng_name" \
+      --restart always \
+      --network "$network_name" \
+      -p 8888:8080 \
+      -v "$searxng_config:/etc/searxng:rw" \
+      "$searxng_image"
+    echo "SearXNG started."
+  elif ! docker ps -q --filter "name=^${searxng_name}$" | command grep -q .; then
+    echo "SearXNG exists but is stopped. Starting..."
+    docker start "$searxng_name"
+    if ! docker inspect -f '{{json .NetworkSettings.Networks}}' "$searxng_name" 2>/dev/null | command grep -q "$network_name"; then
+      docker network connect "$network_name" "$searxng_name" 2>/dev/null || true
     fi
+    echo "SearXNG started."
   else
-    # Container doesn't exist, inform the user
-    echo "Open WebUI container not found. Please run it first."
-    echo "You can start it with: docker run -d -p 39237:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main"
+    if ! docker inspect -f '{{json .NetworkSettings.Networks}}' "$searxng_name" 2>/dev/null | command grep -q "$network_name"; then
+      docker network connect "$network_name" "$searxng_name" 2>/dev/null || true
+    fi
+    echo "SearXNG is already up to date and running."
+  fi
+
+  # --- Open WebUI ---
+  echo "Updating Open WebUI..."
+  image_before=""
+  if docker inspect "$webui_name" &>/dev/null; then
+    image_before=$(docker inspect -f '{{.Image}}' "$webui_name" 2>/dev/null)
+  fi
+
+  docker pull "$webui_image"
+  latest_id=$(docker image inspect -f '{{.Id}}' "$webui_image" 2>/dev/null)
+  needs_recreate=false
+
+  if ! docker inspect "$webui_name" &>/dev/null; then
+    needs_recreate=true
+  else
+    if [[ -n "$latest_id" && "$image_before" != "$latest_id" ]]; then
+      needs_recreate=true
+    fi
+    if ! docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$webui_name" 2>/dev/null | command grep -q '^WEB_SEARCH_ENGINE=searxng$'; then
+      needs_recreate=true
+    fi
+    if ! docker inspect -f '{{json .NetworkSettings.Networks}}' "$webui_name" 2>/dev/null | command grep -q "$network_name"; then
+      needs_recreate=true
+    fi
+  fi
+
+  if [[ "$needs_recreate" == true ]]; then
+    echo "Starting Open WebUI with SearXNG web search..."
+    docker stop "$webui_name" 2>/dev/null || true
+    docker rm "$webui_name" 2>/dev/null || true
+    docker run -d \
+      --name "$webui_name" \
+      --restart always \
+      --network "$network_name" \
+      --add-host=host.docker.internal:host-gateway \
+      -p 39237:8080 \
+      -v open-webui:/app/backend/data \
+      -e ENABLE_WEB_SEARCH=True \
+      -e WEB_SEARCH_ENGINE=searxng \
+      -e WEB_SEARCH_RESULT_COUNT=3 \
+      -e WEB_SEARCH_CONCURRENT_REQUESTS=10 \
+      -e 'SEARXNG_QUERY_URL=http://searxng:8080/search?q=<query>' \
+      "$webui_image"
+    echo "Open WebUI started."
+  elif ! docker ps -q --filter "name=^${webui_name}$" | command grep -q .; then
+    echo "Open WebUI exists but is stopped. Starting..."
+    docker start "$webui_name"
+    echo "Open WebUI started."
+  else
+    echo "Open WebUI is already up to date and running."
   fi
 }
 
