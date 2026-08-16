@@ -9,8 +9,8 @@ description: Charm v2 Bubble Tea CLI that recursively scans the current working 
 
 - Scan starts at process CWD (`os.Getwd()`), recursive, all depths.
 - Skip `.git` and paths matching `.gitignore` (repo-root and nested), including `node_modules` and `.pnpm-store`.
-- Images: raster/RAW extensions plus `image/*` MIME sniff. Skip SVG unless sniffed as `image/*`.
-- **ExifTool is required** for inspect (`-json -G -n`) and strip (`-all= -overwrite_original`).
+- Images: raster, vector, RAW, and project/document extensions (jpg, png, svg, pdf, psd, nef, …) plus `image/*` MIME sniff.
+- **ExifTool is required** for inspect (`-json -G -n`) and for strip of formats it can write (`-all= -overwrite_original`). **SVG** is stripped in-process (remove `metadata` / RDF / generator comments) because ExifTool cannot write SVG.
 - Filesystem fields (name, size, MIME, dates, mode) come from Go `os.Stat`.
 - All images start selected. Arrows/`j`/`k` move, **space** toggles, **enter** confirms then strips **all** metadata.
 - Category-selective strip is not implemented; keep `strip.All` as the only strip API until then.
