@@ -31,10 +31,13 @@ func TestImagesFindsNestedAndSkipsNonImages(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "photo.JPEG"), png, 0o644); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.WriteFile(filepath.Join(root, "mark.svg"), []byte("<svg/>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
 
 	got := Images(root)
-	if len(got.Paths) != 2 {
-		t.Fatalf("got %d paths %v, want 2", len(got.Paths), got.Paths)
+	if len(got.Paths) != 3 {
+		t.Fatalf("got %d paths %v, want 3", len(got.Paths), got.Paths)
 	}
 }
 

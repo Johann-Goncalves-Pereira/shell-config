@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-var imageExts = map[string]struct{}{
-	".jpg": {}, ".jpeg": {}, ".png": {}, ".gif": {}, ".webp": {},
-	".tif": {}, ".tiff": {}, ".bmp": {}, ".heic": {}, ".heif": {},
-	".avif": {}, ".jxl": {}, ".dng": {}, ".cr2": {}, ".cr3": {},
-	".nef": {}, ".arw": {}, ".orf": {}, ".rw2": {}, ".raf": {},
-	".srw": {}, ".raw": {}, ".ico": {},
-}
-
 type Result struct {
 	Paths  []string
 	Errors []error
@@ -55,8 +47,7 @@ func Images(root string) Result {
 }
 
 func isImage(path string) (bool, error) {
-	ext := strings.ToLower(filepath.Ext(path))
-	if _, ok := imageExts[ext]; ok {
+	if hasImageExt(path) {
 		return true, nil
 	}
 	f, err := os.Open(path)
