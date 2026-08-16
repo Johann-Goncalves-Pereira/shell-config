@@ -1,6 +1,9 @@
 package meta
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestCategoryFor(t *testing.T) {
 	tests := []struct {
@@ -15,7 +18,9 @@ func TestCategoryFor(t *testing.T) {
 		{"EXIF", "Software", CatSoftware},
 		{"XMP", "AIPrompt", CatAI},
 		{"C2PA", "Claim_generator", CatAI},
-		{"EXIF", "UnknownWidget", CatOther},
+		{"EXIF", "UnknownWidget", "EXIF"},
+		{"PNG", "BitDepth", CatTime},
+		{"Composite", "Megapixels", CatTime},
 	}
 	for _, tt := range tests {
 		t.Run(tt.group+":"+tt.tag, func(t *testing.T) {
@@ -24,6 +29,29 @@ func TestCategoryFor(t *testing.T) {
 				t.Errorf("categoryFor(%q,%q)=%q want %q", tt.group, tt.tag, got, tt.want)
 			}
 		})
+	}
+}
+
+func TestPresentTags(t *testing.T) {
+	img := Image{
+		Categories: map[string][]Field{
+			CatTime: {
+				{Name: "PNG: ImageWidth", Value: "1"},
+				{Name: "PNG: BitDepth", Value: "8"},
+			},
+			CatFileSystem: {
+				{Name: "File Name", Value: "a.png"},
+			},
+		},
+	}
+	got := strings.Join(img.PresentTags(), ",")
+	if !strings.Contains(got, "ImageWidth") || !strings.Contains(got, "BitDepth") || !strings.Contains(got, "File Name") {
+		t.Fatalf("PresentTags=%q", got)
+	}
+	for _, c := range img.PresentCategories() {
+		if c == "Other" {
+			t.Fatal("PresentCategories should not include Other")
+		}
 	}
 }
 
