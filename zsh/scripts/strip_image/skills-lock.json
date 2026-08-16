@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "charm-stack": {
+      "source": "yurifrl/cly",
+      "sourceType": "github",
+      "computedHash": "a6ab334b5d9e1d901283a02f0f063c261019d0d15c38b09e7c1c25754a16da47"
+    },
+    "golang-pro": {
+      "source": "jeffallan/claude-skills",
+      "sourceType": "github",
+      "computedHash": "c90a0798a12ea2d9191508439ec3191dd96713310615260ebe82ec5a09a4a434"
+    },
+    "golang-testing": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "computedHash": "db6e910031d9c289f91697cf2397b8a3f717c6fdeae7a115e811a32544d99e11"
+    },
+    "strip-image": {
+      "source": "local",
+      "sourceType": "local",
+      "computedHash": ""
+    }
+  }
+}

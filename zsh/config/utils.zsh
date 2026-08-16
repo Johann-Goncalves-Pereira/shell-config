@@ -225,6 +225,20 @@ direnv_nvm() {
   direnv allow
 }
 
+# Recursively inspect/strip image metadata in the current directory (Charm TUI).
+strip_image() {
+  if ! command -v go >/dev/null; then
+    echo "go is required to run strip_image." >&2
+    return 1
+  fi
+  local src="$USER_CONFIG_DIRECTORY/scripts/strip_image"
+  local bindir
+  go -C "$src" install ./cmd/strip_image || return
+  bindir="$(go env GOBIN)"
+  [[ -z "$bindir" ]] && bindir="$(go env GOPATH)/bin"
+  "$bindir/strip_image" "$@"
+}
+
 clean_node_modules() {
   local target_dir
   target_dir="${1:-.}"
