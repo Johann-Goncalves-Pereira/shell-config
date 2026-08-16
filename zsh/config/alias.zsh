@@ -40,6 +40,7 @@ fi
 alias vi="vim"
 alias vim="nvim"
 alias code="cursor"
+vscode() { "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" "$@"; }
 
 # Git
 alias gtr='git tag -d $(git tag) && git fetch --tags' # Refresh local tags from remote
