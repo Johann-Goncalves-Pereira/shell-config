@@ -30,14 +30,83 @@ type Image struct {
 }
 
 func (img Image) PresentCategories() []string {
-	order := []string{CatCamera, CatExposure, CatGeo, CatTime, CatDesc, CatCopyright, CatSoftware, CatAI, CatFileSystem, CatOther}
+	order := []string{CatCamera, CatExposure, CatGeo, CatTime, CatDesc, CatCopyright, CatSoftware, CatAI, CatFileSystem}
 	var out []string
+	seen := map[string]struct{}{}
 	for _, c := range order {
 		if len(img.Categories[c]) > 0 {
 			out = append(out, shortCat(c))
+			seen[c] = struct{}{}
 		}
 	}
+	var extra []string
+	for c, fields := range img.Categories {
+		if len(fields) == 0 {
+			continue
+		}
+		if _, ok := seen[c]; ok {
+			continue
+		}
+		if c == CatOther {
+			continue
+		}
+		extra = append(extra, c)
+	}
+	sort.Strings(extra)
+	return append(out, extra...)
+}
+
+// PresentTags lists every present field's short tag name (no Other bucket).
+func (img Image) PresentTags() []string {
+	var names []string
+	seen := map[string]struct{}{}
+	for _, f := range img.allFields() {
+		n := shortTag(f.Name)
+		if n == "" {
+			continue
+		}
+		if _, ok := seen[n]; ok {
+			continue
+		}
+		seen[n] = struct{}{}
+		names = append(names, n)
+	}
+	return names
+}
+
+func (img Image) allFields() []Field {
+	order := []string{CatCamera, CatExposure, CatGeo, CatTime, CatDesc, CatCopyright, CatSoftware, CatAI, CatFileSystem}
+	var out []Field
+	seen := map[string]struct{}{}
+	for _, c := range order {
+		seen[c] = struct{}{}
+		out = append(out, img.Categories[c]...)
+	}
+	var extra []string
+	for c := range img.Categories {
+		if _, ok := seen[c]; ok {
+			continue
+		}
+		if c == CatOther {
+			continue
+		}
+		extra = append(extra, c)
+	}
+	sort.Strings(extra)
+	for _, c := range extra {
+		out = append(out, img.Categories[c]...)
+	}
+	if fields := img.Categories[CatOther]; len(fields) > 0 {
+		out = append(out, fields...)
+	}
 	return out
+}
+
+func shortTag(name string) string {
+	if _, tag, ok := strings.Cut(name, ": "); ok {
+		return tag
+	}
+	return name
 }
 
 func shortCat(c string) string {
@@ -61,7 +130,7 @@ func shortCat(c string) string {
 	case CatFileSystem:
 		return "File"
 	default:
-		return "Other"
+		return c
 	}
 }
 

@@ -29,7 +29,7 @@ var tagCategory = map[string]string{
 	"iso": CatExposure, "isospeedratings": CatExposure, "isopeed": CatExposure,
 	"focallength": CatExposure, "focallengthin35mmformat": CatExposure,
 	"focallengthin35mmfilm": CatExposure,
-	"exposureprogram": CatExposure, "exposurecompensation": CatExposure,
+	"exposureprogram":       CatExposure, "exposurecompensation": CatExposure,
 	"exposurebiasvalue": CatExposure, "meteringmode": CatExposure,
 	"flash": CatExposure, "whitebalance": CatExposure, "colorspace": CatExposure,
 	"lightsource": CatExposure, "subjectdistance": CatExposure, "gaincontrol": CatExposure,
@@ -51,6 +51,14 @@ var tagCategory = map[string]string{
 	"orientation": CatTime, "imagewidth": CatTime, "imageheight": CatTime,
 	"exifimagewidth": CatTime, "exifimageheight": CatTime,
 	"xresolution": CatTime, "yresolution": CatTime, "resolutionunit": CatTime,
+	"imagesize": CatTime, "megapixels": CatTime,
+	"bitdepth": CatTime, "bitspersample": CatTime, "bitsperpixel": CatTime,
+	"colorcomponents": CatTime, "colortype": CatTime,
+	"encodingprocess": CatTime, "ycbcrsubsampling": CatTime,
+	"jfifversion": CatTime, "pixelunits": CatTime,
+	"pixelsperunitx": CatTime, "pixelsperunity": CatTime,
+	"interlace": CatTime, "filter": CatTime, "gamma": CatTime,
+	"compression": CatSoftware, "srgrendering": CatSoftware,
 
 	"headline": CatDesc, "title": CatDesc, "objectname": CatDesc,
 	"caption": CatDesc, "imagedescription": CatDesc, "description": CatDesc,
@@ -113,5 +121,17 @@ func categoryFor(group, tag string) string {
 	case "icc_profile":
 		return CatSoftware
 	}
-	return CatOther
+	if g != "" {
+		return prettyGroup(group)
+	}
+	return prettyGroup(tag)
+}
+
+func prettyGroup(group string) string {
+	g := strings.TrimSpace(group)
+	if g == "" {
+		return "File"
+	}
+	g = strings.ReplaceAll(g, "_", " ")
+	return g
 }
