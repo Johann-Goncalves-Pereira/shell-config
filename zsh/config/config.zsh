@@ -70,8 +70,8 @@ fi
 export LANG="en_US.UTF-8"
 export LC_ALL="en_US.UTF-8"
 
-# > Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
+# > LM Studio CLI (lms)
+export PATH="$PATH:$HOME/.lmstudio/bin"
 
 # > Python
 # export PATH="$(brew --prefix python)/libexec/bin:$PATH"
@@ -84,10 +84,6 @@ export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
 # Android SDK Configuration
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/tools/bin:$ANDROID_HOME/emulator:$PATH"
-
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/johannpereira/.lmstudio/bin"
-# End of LM Studio CLI section
 
 export PATH="/usr/local/bin:$PATH"
 

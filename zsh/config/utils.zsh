@@ -4,6 +4,7 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/shell.zsh ] && source $UTILS/shell.zsh
 [ -f $UTILS/file.zsh ] && source $UTILS/file.zsh
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
+[ -f $UTILS/audio.zsh ] && source $UTILS/audio.zsh
 
 function update_spicetify() {
   echo "\n\n${BGreen}Updating Spicetify...${Color_Off}\n\n"
@@ -53,6 +54,11 @@ function update_webui() {
 
   if ! command -v docker &>/dev/null; then
     echo "Docker is not available. Skipping WebUI/SearXNG update."
+    return 1
+  fi
+
+  if ! docker info &>/dev/null; then
+    echo "Docker daemon is not running. Skipping WebUI/SearXNG update."
     return 1
   fi
 

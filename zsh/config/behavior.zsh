@@ -4,9 +4,13 @@ ZSH_AUTOSUGGEST_STRATEGY=match_prev_cmd
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# Custom completion functions (e.g. ~/.zfunc/_*)
+fpath+=(~/.zfunc)
+
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
 # Completion styles
 zstyle ':completion:*' special-dirs true
+zstyle ':completion:*' menu select
 # Only run compinit if zinit isn't present (zinit manages completions)
 if ! type zinit >/dev/null 2>&1; then
 	autoload -Uz compinit && compinit -i 2>/dev/null || true
