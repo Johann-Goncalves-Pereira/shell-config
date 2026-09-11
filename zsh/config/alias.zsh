@@ -12,6 +12,7 @@ alias fd="fd -H"
 # ncdu alternative
 alias gdu="gdu-go"
 alias matrix='cmatrix -ba -u 2 -C red'
+alias hqaudio='fix_call_audio'
 
 # Ugrep
 if command -v ugrep >/dev/null; then
