@@ -18,12 +18,12 @@ fix_call_audio() {
         cat <<'EOF'
 Usage: fix_call_audio [input] [output] [--no-reset]
 
-  Forces system input to the Mac microphone and output to Bluetooth
-  headphones, then reconnects Bluetooth so A2DP stereo comes back.
+  Forces system input to the Mac microphone and output to the connected
+  Bluetooth headphones, then reconnects Bluetooth so A2DP stereo comes back.
 
-  Defaults:
-    input:  MacBook Pro Microphone  (or $AUDIO_INPUT_DEVICE)
-    output: Pretinho Laranjinha     (or $AUDIO_OUTPUT_DEVICE)
+  Defaults (auto-detected when omitted):
+    input:  built-in Mac microphone  (or $AUDIO_INPUT_DEVICE)
+    output: connected Bluetooth headset (or $AUDIO_OUTPUT_DEVICE)
 
   --no-reset  Skip Bluetooth disconnect/reconnect (device switch only)
 EOF
@@ -38,9 +38,6 @@ EOF
         ;;
     esac
   done
-
-  local input="${positional[1]:-${AUDIO_INPUT_DEVICE:-MacBook Pro Microphone}}"
-  local output="${positional[2]:-${AUDIO_OUTPUT_DEVICE:-Pretinho Laranjinha}}"
 
   if ! command -v SwitchAudioSource &>/dev/null; then
     if ! command -v brew &>/dev/null; then
@@ -60,20 +57,76 @@ EOF
     brew install blueutil || return 1
   fi
 
+  # cli format: name,type,id,uid
   _fix_call_audio_device_exists() {
     local name="$1"
     local type="$2"
     SwitchAudioSource -a -t "$type" 2>/dev/null | command grep -Fxq "$name"
   }
 
+  _fix_call_audio_is_bt_uid() {
+    local uid="$1"
+    [[ "$uid" =~ '^[0-9A-Fa-f]{2}(-[0-9A-Fa-f]{2}){5}:(input|output)$' ]]
+  }
+
+  _fix_call_audio_default_input() {
+    local line
+    line=$(SwitchAudioSource -a -f cli 2>/dev/null | command grep ',input,.*,BuiltInMicrophoneDevice$' | head -n1)
+    if [[ -n "$line" ]]; then
+      print -r -- "${line%%,*}"
+      return 0
+    fi
+    return 1
+  }
+
+  _fix_call_audio_default_output() {
+    local line name uid current
+    local -a candidates=()
+
+    while IFS= read -r line; do
+      [[ -z "$line" ]] && continue
+      name=${line%%,*}
+      uid=${line##*,}
+      if _fix_call_audio_is_bt_uid "$uid"; then
+        candidates+=("$name")
+      fi
+    done < <(SwitchAudioSource -a -f cli 2>/dev/null | command grep ',output,')
+
+    if (( ${#candidates} == 0 )); then
+      return 1
+    fi
+
+    if (( ${#candidates} == 1 )); then
+      print -r -- "${candidates[1]}"
+      return 0
+    fi
+
+    # Prefer the currently selected output if it is one of the BT devices.
+    current=$(SwitchAudioSource -t output -c 2>/dev/null)
+    if [[ -n "$current" ]] && (( ${candidates[(Ie)$current]} )); then
+      print -r -- "$current"
+      return 0
+    fi
+
+    # Prefer a BT device that also exposes an input (headset).
+    local candidate
+    for candidate in "${candidates[@]}"; do
+      if SwitchAudioSource -a -f cli 2>/dev/null | command grep -Fq "${candidate},input,"; then
+        print -r -- "$candidate"
+        return 0
+      fi
+    done
+
+    print -r -- "${candidates[1]}"
+  }
+
   _fix_call_audio_bt_address() {
     local name="$1"
     local line uid
-    # cli format: name,type,id,uid
     line=$(SwitchAudioSource -a -f cli 2>/dev/null | command grep -F "${name},output," | head -n1)
     [[ -z "$line" ]] && return 1
     uid=${line##*,}
-    [[ -z "$uid" || "$uid" != *:* ]] && return 1
+    _fix_call_audio_is_bt_uid "$uid" || return 1
     print -r -- "${uid%%:*}"
   }
 
@@ -90,6 +143,27 @@ EOF
     done
     return 1
   }
+
+  local input="${positional[1]:-${AUDIO_INPUT_DEVICE:-}}"
+  local output="${positional[2]:-${AUDIO_OUTPUT_DEVICE:-}}"
+
+  if [[ -z "$input" ]]; then
+    input=$(_fix_call_audio_default_input) || {
+      echo -e "${BRed}Error:${Color_Off} Could not find the built-in Mac microphone."
+      echo "Available inputs:"
+      SwitchAudioSource -a -t input
+      return 1
+    }
+  fi
+
+  if [[ -z "$output" ]]; then
+    output=$(_fix_call_audio_default_output) || {
+      echo -e "${BRed}Error:${Color_Off} No connected Bluetooth audio output found."
+      echo "Available outputs:"
+      SwitchAudioSource -a -t output
+      return 1
+    }
+  fi
 
   if ! _fix_call_audio_device_exists "$input" input; then
     echo -e "${BRed}Error:${Color_Off} Input device not found: $input"
@@ -111,7 +185,7 @@ EOF
   if [[ "$reset" == true ]]; then
     local bt_addr
     bt_addr=$(_fix_call_audio_bt_address "$output") || {
-      echo -e "${BRed}Error:${Color_Off} Could not read Bluetooth address for: $output"
+      echo -e "${BRed}Error:${Color_Off} $output is not a Bluetooth device (cannot reconnect)."
       return 1
     }
 
