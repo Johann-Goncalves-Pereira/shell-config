@@ -1,0 +1,13 @@
+---
+description: Phone CLI function design — inject runner, short fns, exhaustive match
+globs: scripts/phone/**/*.rs
+alwaysApply: false
+---
+
+# Phone CLI — Function Design
+
+- NEVER hide `std::process::Command` or sleeps inside domain tables — ALWAYS inject `CommandRunner` / `Wait`.
+- NEVER silent `_ =>` on CLI/`Commands` enums — ALWAYS exhaustive `match`.
+- NEVER nest past clippy `excessive_nesting` (3) — ALWAYS extract **module-level free fns**.
+- NEVER `anyhow` / `Box<dyn Error>` — ALWAYS `thiserror` (`AdbError`, `ConfigError`, …).
+- Keep functions under 80 lines (`too_many_lines`).

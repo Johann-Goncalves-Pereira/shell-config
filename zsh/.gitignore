@@ -1,0 +1,6 @@
+# Machine-local phone lab state (never publish)
+data/phone-adb/
+
+# Rust build / local cargo home (never publish)
+scripts/phone/target/
+scripts/phone/.cargo-home/

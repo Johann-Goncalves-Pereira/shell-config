@@ -1,0 +1,9 @@
+---
+description: Phone CLI rustfmt + Clippy
+globs: scripts/phone/**/*.rs
+alwaysApply: false
+---
+
+# Phone CLI — Code Style
+
+ALWAYS `rustfmt` (max_width 80, edition 2024). Fix Clippy via Cargo config — do not weaken lints.

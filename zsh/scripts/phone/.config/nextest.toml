@@ -1,0 +1,7 @@
+[profile.default]
+retries = 0
+test-threads = 4
+
+[profile.fast]
+retries = 0
+test-threads = 4

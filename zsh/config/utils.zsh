@@ -5,6 +5,7 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/file.zsh ] && source $UTILS/file.zsh
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
 [ -f $UTILS/audio.zsh ] && source $UTILS/audio.zsh
+[ -f $UTILS/phone.zsh ] && source $UTILS/phone.zsh
 
 function update_spicetify() {
   echo "\n\n${BGreen}Updating Spicetify...${Color_Off}\n\n"

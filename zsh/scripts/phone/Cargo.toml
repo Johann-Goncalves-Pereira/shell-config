@@ -1,0 +1,39 @@
+[package]
+name = "phone"
+version = "0.1.0"
+edition = "2024"
+description = "S23 Ultra lab phone control via ADB"
+license = "MIT"
+publish = false
+readme = "README.md"
+
+[[bin]]
+name = "phone"
+path = "src/main.rs"
+
+[lib]
+name = "phone"
+path = "src/lib.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+thiserror = "2"
+
+[dev-dependencies]
+# none — tests use temp PATH scripts only
+
+[lints.clippy]
+dbg_macro = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+disallowed_methods = "deny"
+disallowed_types = "deny"
+result_unit_err = "deny"
+too_many_lines = "deny"
+excessive_nesting = "deny"
+wildcard_enum_match_arm = "deny"
+mem_forget = "deny"
+allow_attributes_without_reason = "deny"
