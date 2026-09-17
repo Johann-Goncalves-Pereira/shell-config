@@ -44,6 +44,8 @@ enum Commands {
         #[arg(default_value_t = config::DEFAULT_ADB_PORT)]
         port: u16,
     },
+    /// Switch adbd back to USB (fast pm when cabled)
+    Usb,
     /// Prefer Tailscale WAN, else LAN (skips custom WebRTC without TURN)
     Wan {
         #[arg(default_value_t = config::DEFAULT_ADB_PORT)]
@@ -144,6 +146,10 @@ fn run(cli: Cli) -> Result<()> {
         Commands::Tcpip { port } => {
             reject_json(json, "tcpip")?;
             transport::tcpip(&runner, &wait, &cfg, port)
+        }
+        Commands::Usb => {
+            reject_json(json, "usb")?;
+            transport::usb(&runner, &cfg)
         }
         Commands::Wan { port } => {
             reject_json(json, "wan")?;

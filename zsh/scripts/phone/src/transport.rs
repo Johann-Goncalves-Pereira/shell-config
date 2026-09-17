@@ -256,16 +256,62 @@ pub fn mirror(
     adb::require_scrcpy(runner)?;
     let t = transport(runner, cfg)?;
     let via = via_label(cfg, &t);
+    // Scrcpy -S streams while the panel is off, but starting from Dozing /
+    // brightness 0 yields a black window. Wake first; do not screen::disable
+    // (that forces sleep and blacks the framebuffer).
+    wake_for_mirror(runner, &t);
     println!("Mirroring {t} via {via} (screen off on device)...");
     let serial_flag = format!("--serial={t}");
     let mut args: Vec<&str> = vec!["-S", "--no-power-on", &serial_flag];
+    // Tailscale/LAN: keep stream light. Prefer USB (`phone usb` if cabled).
+    if via != "USB" {
+        args.extend_from_slice(&[
+            "--max-size=800",
+            "--video-bit-rate=2M",
+            "--max-fps=20",
+            "--no-audio",
+            "--video-buffer=50",
+        ]);
+        println!(
+            "WAN tune: -m800 -b2M 20fps no-audio (cable? run: phone usb && pm)"
+        );
+    }
     for a in extra {
         args.push(a.as_str());
     }
-    if cfg.screen_disabled() {
-        let _ = crate::screen::disable(runner, cfg);
-    }
     adb::run_inherit(runner, "scrcpy", &args)
+}
+
+/// KEYCODE_WAKEUP — needed so scrcpy gets real frames before `-S`.
+fn wake_for_mirror(runner: &dyn CommandRunner, transport: &str) {
+    let _ = adb::adb(
+        runner,
+        &["-s", transport, "shell", "input", "keyevent", "224"],
+    );
+}
+
+/// Switch adbd back to USB (cable required). Prefer this for fast `pm`.
+pub fn usb(runner: &dyn CommandRunner, cfg: &Config) -> Result<()> {
+    adb::require_adb(runner)?;
+    let serial = cfg.read_serial();
+    // May be reached over TCP right now; `adb -s … usb` still works.
+    let t = if adb::is_device(runner, &serial) {
+        serial.clone()
+    } else {
+        transport(runner, cfg)?
+    };
+    println!("Restarting adbd in USB mode ({t})...");
+    adb::adb_status(runner, &["-s", &t, "usb"])?;
+    println!("Waiting for USB device {serial}...");
+    for _ in 0..20 {
+        if adb::is_device(runner, &serial) {
+            println!("USB ready: {serial}");
+            println!("{}", adb::devices_l(runner)?);
+            return Ok(());
+        }
+        std::thread::sleep(std::time::Duration::from_millis(250));
+    }
+    Err(AdbError::UsbUnauthorized { serial }.into())
 }
 
 pub fn shell_cmd(

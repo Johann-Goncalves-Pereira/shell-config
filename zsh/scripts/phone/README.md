@@ -24,6 +24,12 @@ pm                 # USB if cabled, else Tailscale/LAN automatically
 phone status
 ```
 
+Prefer a USB cable for `pm` — Tailscale adds ~100–300ms. If the cable is
+plugged but `pm` still says Tailscale, run `phone usb` then `pm`.
+
+Over Tailscale/LAN only, `pm` uses a light stream (`-m800 -b2M` 20fps, no
+audio). Override: `pm -- -m 1024 -b 4M`.
+
 ## Agents
 
 Machine-readable status and device control (works with the panel soft-disabled):
