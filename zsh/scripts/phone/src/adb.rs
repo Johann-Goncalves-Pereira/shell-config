@@ -72,6 +72,26 @@ pub fn shell(
     adb_stdout(runner, &["-s", transport, "shell", cmd])
 }
 
+/// `adb -s TRANSPORT exec-out ARGS...` — binary-safe stdout (e.g. screencap).
+pub fn exec_out(
+    runner: &dyn CommandRunner,
+    transport: &str,
+    args: &[&str],
+) -> Result<Vec<u8>> {
+    require_adb(runner)?;
+    let mut v: Vec<&str> = vec!["-s", transport, "exec-out"];
+    v.extend_from_slice(args);
+    let out = runner.output("adb", &v)?;
+    if out.status.success() {
+        return Ok(out.stdout);
+    }
+    Err(AdbError::CommandFailed {
+        args: v.join(" "),
+        stderr: merge_streams(&out),
+    }
+    .into())
+}
+
 pub fn settings_get(
     runner: &dyn CommandRunner,
     transport: &str,

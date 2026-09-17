@@ -12,6 +12,8 @@ pub struct ScriptedRunner {
     pub devices: String,
     pub shell_replies: RefCell<HashMap<String, String>>,
     pub puts: RefCell<Vec<(String, String, String)>>,
+    /// Bytes returned by `adb exec-out …` (e.g. screencap PNG).
+    pub exec_out: RefCell<Option<Vec<u8>>>,
 }
 
 impl CommandRunner for ScriptedRunner {
@@ -43,6 +45,14 @@ fn dispatch(
     }
     if bin == "adb" && args.len() == 4 && args[2] == "tcpip" {
         return Ok(bytes_ok(ok, b"restarting in TCP mode\n"));
+    }
+    if bin == "adb" && args.len() >= 4 && args[2] == "exec-out" {
+        let data = runner
+            .exec_out
+            .borrow()
+            .clone()
+            .unwrap_or_else(|| b"PNG".to_vec());
+        return Ok(bytes_ok(ok, &data));
     }
     if bin == "adb" && args.len() >= 4 && args[2] == "shell" {
         return scripted_shell(runner, args, ok);

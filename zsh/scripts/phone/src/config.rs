@@ -98,6 +98,42 @@ impl Config {
     pub fn write_wan_host(&self, host: &str) -> Result<()> {
         write_line(&self.wan_host_path(), host)
     }
+
+    pub fn screen_disabled_path(&self) -> PathBuf {
+        self.dir.join("screen_disabled")
+    }
+
+    pub fn screen_brightness_path(&self) -> PathBuf {
+        self.dir.join("screen_brightness")
+    }
+
+    pub fn screen_stay_on_path(&self) -> PathBuf {
+        self.dir.join("screen_stay_on")
+    }
+
+    pub fn screen_disabled(&self) -> bool {
+        read_trim(&self.screen_disabled_path()).as_deref() == Some("1")
+    }
+
+    pub fn write_screen_disabled(&self, on: bool) -> Result<()> {
+        write_line(&self.screen_disabled_path(), if on { "1" } else { "0" })
+    }
+
+    pub fn read_screen_brightness(&self) -> Option<String> {
+        read_trim(&self.screen_brightness_path())
+    }
+
+    pub fn write_screen_brightness(&self, value: &str) -> Result<()> {
+        write_line(&self.screen_brightness_path(), value)
+    }
+
+    pub fn read_screen_stay_on(&self) -> Option<String> {
+        read_trim(&self.screen_stay_on_path())
+    }
+
+    pub fn write_screen_stay_on(&self, value: &str) -> Result<()> {
+        write_line(&self.screen_stay_on_path(), value)
+    }
 }
 
 fn resolve_serial(dir: &Path) -> Result<String> {

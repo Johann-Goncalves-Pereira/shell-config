@@ -1,7 +1,8 @@
 # Phone lab CLI (S23 Ultra)
 
 Rust tool for the dead-screen Galaxy S23 Ultra: ADB harden, always-on prep,
-Tailscale WAN, scrcpy. Xin-ji rustfmt/clippy/nextest bar.
+Tailscale WAN, scrcpy, plus agent-friendly screenshot / UI / input. Xin-ji
+rustfmt/clippy/nextest bar.
 
 Shell only provides a thin wrapper (`phone` / `pm`) that builds and execs this
 binary — logic lives here, not in zsh.
@@ -23,23 +24,36 @@ pm                 # USB if cabled, else Tailscale/LAN automatically
 phone status
 ```
 
-`phone wan` is optional (explicit Tailscale connect / refresh).
+## Agents
 
-## Commands
+Machine-readable status and device control (works with the panel soft-disabled):
 
 ```bash
-phone status
-phone harden [--show]
-phone prep
-phone lock
-phone connect [host]
-phone tcpip [port]
-phone wan
-phone webrtc-probe
-phone tailscale
-phone mirror
-phone shell …
+phone --json status
+phone shot                    # PNG → ~/.config/phone-adb/last-shot.png
+phone --json ui               # compact uiautomator nodes + tap midpoints
+phone tap 540 1200
+phone type "hello world"
+phone key BACK
+phone launch com.android.settings
+phone --json current
 ```
+
+See [`.agents/skills/phone-operate/SKILL.md`](.agents/skills/phone-operate/SKILL.md).
+
+## Broken panel (soft-disable)
+
+```bash
+phone screen off      # brightness 0 + sleep; saves prior settings
+phone screen guard    # keep forcing sleep if power button wakes it (Ctrl+C stop)
+phone screen on       # restore brightness / stay-on
+phone screen status
+```
+
+Aliases: `pscreenoff`, `pscreenguard`, `pscreenon`.
+
+Without root, Android cannot permanently ignore the power button. `screen off`
+dims and sleeps the panel; `screen guard` re-sleeps it whenever it wakes.
 
 ## Validate
 

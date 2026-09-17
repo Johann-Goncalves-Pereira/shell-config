@@ -1,7 +1,10 @@
 //! Curated developer-option profile for a headless lab phone.
 
+use serde::Serialize;
+
 use crate::adb;
 use crate::error::{Error, HardenError, Result};
+use crate::json_out;
 use crate::runner::CommandRunner;
 
 /// `(namespace, key, value)` — value `"null"` deletes the key.
@@ -33,12 +36,57 @@ pub const DESIRED: &[(&str, &str, &str)] = &[
     ("secure", "usb_audio_automatic_routing_disabled", "0"),
 ];
 
-pub fn show(runner: &dyn CommandRunner, transport: &str) -> Result<()> {
+#[derive(Debug, Serialize)]
+pub struct HardenShow {
+    pub ok: bool,
+    pub transport: String,
+    pub settings: Vec<HardenSetting>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct HardenSetting {
+    pub ns: String,
+    pub key: String,
+    pub value: String,
+}
+
+pub fn show(
+    runner: &dyn CommandRunner,
+    transport: &str,
+    json: bool,
+) -> Result<()> {
+    let info = collect_show(runner, transport);
+    if json {
+        return json_out::print_ok(&info);
+    }
     println!("Developer options ({transport}):");
-    for &(ns, key, _) in DESIRED {
-        print_setting(runner, transport, ns, key);
+    for s in &info.settings {
+        let display = if s.value.is_empty() || s.value == "null" {
+            "<unset>"
+        } else {
+            s.value.as_str()
+        };
+        println!("  {:<8} {:<40} = {display}", s.ns, s.key);
     }
     Ok(())
+}
+
+fn collect_show(runner: &dyn CommandRunner, transport: &str) -> HardenShow {
+    let mut settings = Vec::new();
+    for &(ns, key, _) in DESIRED {
+        let val = adb::settings_get(runner, transport, ns, key)
+            .unwrap_or_else(|_| "<error>".into());
+        settings.push(HardenSetting {
+            ns: ns.to_string(),
+            key: key.to_string(),
+            value: val,
+        });
+    }
+    HardenShow {
+        ok: true,
+        transport: transport.to_string(),
+        settings,
+    }
 }
 
 pub fn apply(runner: &dyn CommandRunner, transport: &str) -> Result<()> {
@@ -62,23 +110,7 @@ pub fn apply(runner: &dyn CommandRunner, transport: &str) -> Result<()> {
     best_effort_props(runner, transport);
     best_effort_phantom(runner, transport);
     println!("Hardened. Re-check with: phone harden --show");
-    show(runner, transport)
-}
-
-fn print_setting(
-    runner: &dyn CommandRunner,
-    transport: &str,
-    ns: &str,
-    key: &str,
-) {
-    let val = adb::settings_get(runner, transport, ns, key)
-        .unwrap_or_else(|_| "<error>".into());
-    let display = if val.is_empty() || val == "null" {
-        "<unset>"
-    } else {
-        val.as_str()
-    };
-    println!("  {ns:<8} {key:<40} = {display}");
+    show(runner, transport, false)
 }
 
 fn put_one(
@@ -99,6 +131,7 @@ fn put_one(
         Err(Error::Config(e)) => Err(Error::Config(e)),
         Err(Error::Harden(e)) => Err(Error::Harden(e)),
         Err(Error::Wan(e)) => Err(Error::Wan(e)),
+        Err(Error::Control(e)) => Err(Error::Control(e)),
         Err(Error::Io(e)) => Err(Error::Io(e)),
     }
 }

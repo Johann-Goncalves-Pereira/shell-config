@@ -1,9 +1,12 @@
 //! Resolve USB vs wireless transport; connect / tcpip / mirror / prep.
 
+use serde::Serialize;
+
 use crate::adb;
 use crate::config::{Config, DEFAULT_ADB_PORT};
 use crate::error::{AdbError, Result};
 use crate::harden;
+use crate::json_out;
 use crate::runner::{CommandRunner, Wait};
 
 /// Prefer USB cable; else Tailscale WAN; else LAN. Used by `pm` / shell.
@@ -63,20 +66,87 @@ fn ensure_tcp_device(
     None
 }
 
-pub fn status(runner: &dyn CommandRunner, cfg: &Config) -> Result<()> {
+#[derive(Debug, Serialize)]
+pub struct StatusInfo {
+    pub ok: bool,
+    pub reachable: bool,
+    pub transport: Option<String>,
+    pub via: Option<String>,
+    pub serial: String,
+    pub host: Option<String>,
+    pub wan_host: Option<String>,
+    pub devices: Vec<String>,
+    pub config_dir: String,
+    pub screen_disabled: bool,
+}
+
+pub fn status(
+    runner: &dyn CommandRunner,
+    cfg: &Config,
+    json: bool,
+) -> Result<()> {
+    let info = collect_status(runner, cfg)?;
+    if json {
+        return json_out::print_ok(&info);
+    }
     println!("ADB devices:\n{}", adb::devices_l(runner)?);
-    println!("Saved serial: {}", cfg.read_serial());
-    match cfg.read_host() {
+    println!("Saved serial: {}", info.serial);
+    match &info.host {
         Some(h) => println!("Saved host:   {h}"),
         None => println!(
             "Saved host:   (none — run phone tcpip while USB-connected)"
         ),
     }
-    if let Some(w) = cfg.read_wan_host() {
+    if let Some(w) = &info.wan_host {
         println!("WAN host:     {w}");
     }
-    println!("Config dir:  {}", cfg.dir().display());
+    if let Some(t) = &info.transport {
+        println!("Transport:    {t} ({})", info.via.as_deref().unwrap_or("?"));
+    } else {
+        println!("Transport:    (unreachable)");
+    }
+    println!("Config dir:  {}", info.config_dir);
     Ok(())
+}
+
+pub fn collect_status(
+    runner: &dyn CommandRunner,
+    cfg: &Config,
+) -> Result<StatusInfo> {
+    let _ = adb::require_adb(runner);
+    let devices = adb::authorized_transports(runner).unwrap_or_default();
+    let serial = cfg.read_serial();
+    let host = cfg.read_host();
+    let wan_host = cfg.read_wan_host();
+    let (reachable, transport, via) = match transport(runner, cfg) {
+        Ok(t) => {
+            let via = via_label(cfg, &t);
+            (true, Some(t), Some(via))
+        }
+        Err(_) => (false, None, None),
+    };
+    Ok(StatusInfo {
+        ok: true,
+        reachable,
+        transport,
+        via,
+        serial,
+        host,
+        wan_host,
+        devices,
+        config_dir: cfg.dir().display().to_string(),
+        screen_disabled: cfg.screen_disabled(),
+    })
+}
+
+fn via_label(cfg: &Config, t: &str) -> String {
+    if t == cfg.read_serial() {
+        "USB".into()
+    } else if t.starts_with("100.") {
+        "Tailscale".into()
+    } else {
+        "LAN".into()
+    }
 }
 
 pub fn connect(
@@ -153,7 +223,7 @@ pub fn prep(
     adb::settings_put(runner, &t, "global", "mobile_data_always_on", "1")?;
     ensure_tcpip_if_usb(runner, wait, cfg)?;
     println!("Server prep done. Mirror with screen off: phone mirror");
-    status(runner, cfg)
+    status(runner, cfg, false)
 }
 
 fn ensure_tcpip_if_usb(
@@ -185,18 +255,15 @@ pub fn mirror(
 ) -> Result<()> {
     adb::require_scrcpy(runner)?;
     let t = transport(runner, cfg)?;
-    let via = if t == cfg.read_serial() {
-        "USB"
-    } else if t.starts_with("100.") {
-        "Tailscale"
-    } else {
-        "LAN"
-    };
+    let via = via_label(cfg, &t);
     println!("Mirroring {t} via {via} (screen off on device)...");
     let serial_flag = format!("--serial={t}");
-    let mut args: Vec<&str> = vec!["-S", &serial_flag];
+    let mut args: Vec<&str> = vec!["-S", "--no-power-on", &serial_flag];
     for a in extra {
         args.push(a.as_str());
+    }
+    if cfg.screen_disabled() {
+        let _ = crate::screen::disable(runner, cfg);
     }
     adb::run_inherit(runner, "scrcpy", &args)
 }
@@ -225,20 +292,29 @@ mod tests {
     use std::collections::HashMap;
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    #[test]
-    fn transport_prefers_usb_serial() -> Result<()> {
-        let runner = ScriptedRunner {
+    fn runner_usb() -> ScriptedRunner {
+        ScriptedRunner {
             which_adb: true,
             devices: "List of devices attached\nTESTSERIAL\tdevice\n".into(),
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
-        };
+            exec_out: RefCell::new(None),
+        }
+    }
+
+    fn temp_cfg(tag: &str) -> Result<Config> {
         let stamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_err(|e| std::io::Error::other(e.to_string()))?
             .as_nanos();
-        let dir = std::env::temp_dir().join(format!("phone-tr-{stamp}"));
-        let cfg = Config::with_dir("TESTSERIAL".into(), dir)?;
+        let dir = std::env::temp_dir().join(format!("phone-{tag}-{stamp}"));
+        Config::with_dir("TESTSERIAL".into(), dir)
+    }
+
+    #[test]
+    fn transport_prefers_usb_serial() -> Result<()> {
+        let runner = runner_usb();
+        let cfg = temp_cfg("tr")?;
         let t = transport(&runner, &cfg)?;
         assert_eq!(t, "TESTSERIAL");
         Ok(())
@@ -257,17 +333,12 @@ mod tests {
                 .into(),
             shell_replies: RefCell::new(replies),
             puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
         };
         let wait = RecordingWait {
             calls: RefCell::new(Vec::new()),
         };
-        let stamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|e| std::io::Error::other(e.to_string()))?
-            .as_nanos();
-        let dir = std::env::temp_dir().join(format!("phone-tcp-{stamp}"));
-        let cfg = Config::with_dir("TESTSERIAL".into(), dir)?;
-        // Need ScriptedRunner to handle tcpip subcommand
+        let cfg = temp_cfg("tcp")?;
         tcpip_with_extended(&runner, &wait, &cfg)?;
         assert_eq!(cfg.read_host().as_deref(), Some("192.168.0.50:5555"));
         assert_eq!(wait.calls.borrow().as_slice(), &[1500]);
@@ -282,13 +353,9 @@ mod tests {
                 .into(),
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
         };
-        let stamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|e| std::io::Error::other(e.to_string()))?
-            .as_nanos();
-        let dir = std::env::temp_dir().join(format!("phone-wan-{stamp}"));
-        let cfg = Config::with_dir("TESTSERIAL".into(), dir)?;
+        let cfg = temp_cfg("wan")?;
         cfg.write_wan_host("100.64.0.2:5555")?;
         let t = transport(&runner, &cfg)?;
         assert_eq!(t, "100.64.0.2:5555");
@@ -303,16 +370,41 @@ mod tests {
                 .into(),
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
         };
-        let stamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_err(|e| std::io::Error::other(e.to_string()))?
-            .as_nanos();
-        let dir = std::env::temp_dir().join(format!("phone-usbwan-{stamp}"));
-        let cfg = Config::with_dir("TESTSERIAL".into(), dir)?;
+        let cfg = temp_cfg("usbwan")?;
         cfg.write_wan_host("100.64.0.2:5555")?;
         let t = transport(&runner, &cfg)?;
         assert_eq!(t, "TESTSERIAL");
+        Ok(())
+    }
+
+    #[test]
+    fn collect_status_reachable_json_shape() -> Result<()> {
+        let runner = runner_usb();
+        let cfg = temp_cfg("st")?;
+        let info = collect_status(&runner, &cfg)?;
+        assert!(info.ok);
+        assert!(info.reachable);
+        assert_eq!(info.transport.as_deref(), Some("TESTSERIAL"));
+        assert_eq!(info.via.as_deref(), Some("USB"));
+        Ok(())
+    }
+
+    #[test]
+    fn collect_status_unreachable() -> Result<()> {
+        let runner = ScriptedRunner {
+            which_adb: true,
+            devices: "List of devices attached\n".into(),
+            shell_replies: RefCell::new(HashMap::new()),
+            puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
+        };
+        let cfg = temp_cfg("unr")?;
+        let info = collect_status(&runner, &cfg)?;
+        assert!(info.ok);
+        assert!(!info.reachable);
+        assert!(info.transport.is_none());
         Ok(())
     }
 

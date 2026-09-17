@@ -16,6 +16,8 @@ pub enum Error {
     #[error(transparent)]
     Wan(#[from] WanError),
     #[error(transparent)]
+    Control(#[from] ControlError),
+    #[error(transparent)]
     Io(#[from] io::Error),
 }
 
@@ -55,6 +57,10 @@ pub enum AdbError {
     Spawn { bin: String, source: io::Error },
     #[error("{bin} exited with status {status}")]
     ExitStatus { bin: String, status: String },
+    #[error(
+        "--json is not supported for `{cmd}` (interactive or long-running)"
+    )]
+    JsonUnsupported { cmd: String },
 }
 
 #[derive(Debug, Error)]
@@ -76,6 +82,25 @@ pub enum WanError {
         #[from]
         source: AdbError,
     },
+}
+
+#[derive(Debug, Error)]
+pub enum ControlError {
+    #[error(
+        "unknown key name `{name}` — use BACK/HOME/ENTER/SLEEP/WAKEUP or a numeric keycode"
+    )]
+    UnknownKey { name: String },
+    #[error("screenshot write {path}: {source}")]
+    ShotWrite { path: PathBuf, source: io::Error },
+}
+
+impl ControlError {
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::UnknownKey { .. } => "unknown_key",
+            Self::ShotWrite { .. } => "shot_write",
+        }
+    }
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

@@ -4,7 +4,8 @@ Rulebook for AI working on the **phone** lab CLI. Humans: see [README.md](README
 
 ## Skills (read before coding)
 
-1. [`.agents/skills/rust-pro/SKILL.md`](.agents/skills/rust-pro/SKILL.md)
+1. [`.agents/skills/rust-pro/SKILL.md`](.agents/skills/rust-pro/SKILL.md) — when editing this crate
+2. [`.agents/skills/phone-operate/SKILL.md`](.agents/skills/phone-operate/SKILL.md) — when **operating** the lab phone
 
 ## Layout
 
@@ -12,10 +13,13 @@ Rulebook for AI working on the **phone** lab CLI. Humans: see [README.md](README
 | --- | --- |
 | `src/main.rs` | CLI parse + exit mapping (shell) |
 | `src/error.rs` | `thiserror` domain errors |
+| `src/json_out.rs` | `--json` success/error envelopes |
 | `src/config.rs` | serial/host paths |
 | `src/runner.rs` | injectable `CommandRunner` + `Wait` |
 | `src/adb.rs` | ADB device/settings helpers over runner |
 | `src/harden.rs` | curated developer-option table |
+| `src/screen.rs` | Soft-disable / re-enable physical panel + power-wake guard |
+| `src/control.rs` | Agent control: shot / ui / tap / type / key / launch |
 | `src/transport.rs` | connect / tcpip / mirror / prep / status |
 | `src/wan.rs` | WebRTC probe + Tailscale WAN |
 | `tests/` | integration with fake `adb` on `PATH` |
@@ -30,12 +34,19 @@ Rulebook for AI working on the **phone** lab CLI. Humans: see [README.md](README
 5. **No `unsafe`** unless the human explicitly asks.
 6. **Never fake network success** — honest errors when Tailscale/APK download fails.
 7. **Do not** commit secrets, APKs, or weaken clippy/rustfmt.
+8. **`--json`** — one object on stdout; errors JSON on stderr. Interactive cmds reject it.
 
 ## Commands
 
 ```bash
 ./validate.sh
-phone status
+phone --json status
+phone shot
+phone --json ui
+phone tap 100 200
 phone prep
-pm                 # USB if present, else Tailscale/LAN (no phone wan needed)
+pm                 # USB if present, else Tailscale/LAN (human mirror)
+phone screen off   # dim + sleep broken panel
+phone screen guard # re-sleep if power button wakes it
+phone screen on    # restore later
 ```
