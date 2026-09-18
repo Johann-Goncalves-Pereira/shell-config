@@ -18,6 +18,8 @@ pub enum Error {
     #[error(transparent)]
     Control(#[from] ControlError),
     #[error(transparent)]
+    Agent(#[from] AgentError),
+    #[error(transparent)]
     Io(#[from] io::Error),
 }
 
@@ -99,6 +101,26 @@ impl ControlError {
         match self {
             Self::UnknownKey { .. } => "unknown_key",
             Self::ShotWrite { .. } => "shot_write",
+        }
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum AgentError {
+    #[error("write LaunchAgent plist {path}: {source}")]
+    WritePlist { path: PathBuf, source: io::Error },
+    #[error("phone release binary missing at {path} — cargo build --release")]
+    MissingBinary { path: PathBuf },
+    #[error("launchctl bootstrap failed: {detail}")]
+    Bootstrap { detail: String },
+}
+
+impl AgentError {
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::WritePlist { .. } => "agent_write_plist",
+            Self::MissingBinary { .. } => "agent_missing_bin",
+            Self::Bootstrap { .. } => "agent_bootstrap",
         }
     }
 }

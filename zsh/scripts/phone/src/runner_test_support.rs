@@ -14,6 +14,10 @@ pub struct ScriptedRunner {
     pub puts: RefCell<Vec<(String, String, String)>>,
     /// Bytes returned by `adb exec-out …` (e.g. screencap PNG).
     pub exec_out: RefCell<Option<Vec<u8>>>,
+    /// stdout for `adb mdns services`
+    pub mdns: RefCell<Option<String>>,
+    /// Recorded `adb shell …` command strings (after transport).
+    pub shells: RefCell<Vec<String>>,
 }
 
 impl CommandRunner for ScriptedRunner {
@@ -42,6 +46,14 @@ fn dispatch(
     }
     if bin == "adb" && (args == ["devices"] || args == ["devices", "-l"]) {
         return Ok(bytes_ok(ok, runner.devices.as_bytes()));
+    }
+    if bin == "adb" && args == ["mdns", "services"] {
+        let text = runner
+            .mdns
+            .borrow()
+            .clone()
+            .unwrap_or_else(|| "List of discovered mdns services\n".into());
+        return Ok(bytes_ok(ok, text.as_bytes()));
     }
     if bin == "adb" && args.len() == 4 && args[2] == "tcpip" {
         return Ok(bytes_ok(ok, b"restarting in TCP mode\n"));
@@ -88,6 +100,7 @@ fn scripted_shell(
     ok: ExitStatus,
 ) -> crate::error::Result<Output> {
     let cmd = args[3..].join(" ");
+    runner.shells.borrow_mut().push(cmd.clone());
     if let Some(out) = handle_settings_put(runner, &cmd, ok) {
         return Ok(out);
     }

@@ -99,6 +99,7 @@ fn ensure_installed(
             crate::error::Error::Harden(e) => crate::error::Error::Harden(e),
             crate::error::Error::Wan(e) => crate::error::Error::Wan(e),
             crate::error::Error::Control(e) => crate::error::Error::Control(e),
+            crate::error::Error::Agent(e) => crate::error::Error::Agent(e),
             crate::error::Error::Io(e) => crate::error::Error::Io(e),
         })?;
     Ok(())

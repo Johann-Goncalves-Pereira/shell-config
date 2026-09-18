@@ -132,6 +132,7 @@ fn put_one(
         Err(Error::Harden(e)) => Err(Error::Harden(e)),
         Err(Error::Wan(e)) => Err(Error::Wan(e)),
         Err(Error::Control(e)) => Err(Error::Control(e)),
+        Err(Error::Agent(e)) => Err(Error::Agent(e)),
         Err(Error::Io(e)) => Err(Error::Io(e)),
     }
 }

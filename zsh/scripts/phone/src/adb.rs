@@ -165,6 +165,56 @@ pub fn devices_l(runner: &dyn CommandRunner) -> Result<String> {
     adb_stdout(runner, &["devices", "-l"])
 }
 
+/// Hosts from `adb mdns services` (wireless debugging TLS ports).
+pub fn mdns_hosts(runner: &dyn CommandRunner) -> Vec<String> {
+    let Ok(text) = adb_stdout(runner, &["mdns", "services"]) else {
+        return Vec::new();
+    };
+    parse_mdns_services(&text)
+}
+
+/// Parse `adb mdns services` lines into `ip:port` connect targets.
+pub fn parse_mdns_services(text: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for line in text.lines() {
+        if let Some(host) = mdns_line_host(line.trim()) {
+            push_unique_host(&mut out, host);
+        }
+    }
+    out
+}
+
+fn push_unique_host(out: &mut Vec<String>, host: String) {
+    if !out.iter().any(|h| h == &host) {
+        out.push(host);
+    }
+}
+
+fn mdns_line_host(line: &str) -> Option<String> {
+    if line.is_empty() || line.starts_with("List of") {
+        return None;
+    }
+    if !(line.contains("_adb") || line.contains("adb-")) {
+        return None;
+    }
+    // Typical: name \t _adb-tls-connect._tcp \t 192.168.0.1:37123
+    line.split_whitespace().rev().find_map(host_port_if_valid)
+}
+
+fn host_port_if_valid(part: &str) -> Option<String> {
+    let (ip, port) = part.rsplit_once(':')?;
+    if port.parse::<u16>().is_ok() && looks_like_ip(ip) {
+        Some(part.to_string())
+    } else {
+        None
+    }
+}
+
+fn looks_like_ip(s: &str) -> bool {
+    let dots = s.bytes().filter(|&b| b == b'.').count();
+    dots == 3 && s.chars().all(|c| c.is_ascii_digit() || c == '.')
+}
+
 pub fn run_inherit(
     runner: &dyn CommandRunner,
     bin: &str,
@@ -248,6 +298,16 @@ mod tests {
         assert_eq!(parse_wlan_ip(wlan).as_deref(), Some("192.0.2.10"));
         let all = "inet 192.0.2.10/24\ninet 100.64.1.2/32\n";
         assert_eq!(parse_tailscale_ip(all).as_deref(), Some("100.64.1.2"));
+        Ok(())
+    }
+
+    #[test]
+    fn parse_mdns_tls_connect_line() -> Result<()> {
+        let text = "List of discovered mdns services\n\
+adb-RXCW-abc\t_adb-tls-connect._tcp\t192.0.2.10:37123\n\
+something else\n";
+        let hosts = parse_mdns_services(text);
+        assert_eq!(hosts, vec!["192.0.2.10:37123".to_string()]);
         Ok(())
     }
 }

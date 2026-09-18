@@ -6,7 +6,7 @@ use phone::error::{AdbError, Result};
 use phone::harden;
 use phone::json_out;
 use phone::runner::{RealRunner, RealWait};
-use phone::{control, screen, transport, wan};
+use phone::{agent, control, persist, screen, transport, wan};
 
 #[derive(Parser)]
 #[command(
@@ -35,6 +35,14 @@ enum Commands {
     },
     /// Always-on profile (harden + Wi‑Fi never sleep + tcpip)
     Prep,
+    /// Full persist: tcpip + try persist.adb.tcp.port + Tailscale whitelist (USB)
+    Persist,
+    /// Install LaunchAgent that re-arms tcpip / reconnects wireless
+    Watch,
+    /// Stop and remove the phone-watch LaunchAgent
+    Unwatch,
+    /// Long-running watch loop (LaunchAgent entrypoint)
+    Guard,
     /// Re-assert ADB trust never-expire
     Lock,
     /// adb connect to saved or given host
@@ -132,8 +140,19 @@ fn run(cli: Cli) -> Result<()> {
         Commands::Status => transport::status(&runner, &cfg, json),
         Commands::Harden { show } => run_harden(&runner, &cfg, show, json),
         Commands::Prep => {
-            reject_json(json, "prep")?;
-            transport::prep(&runner, &wait, &cfg)
+            run_always_on(&runner, &wait, &cfg, AlwaysOn::Prep, json)
+        }
+        Commands::Persist => {
+            run_always_on(&runner, &wait, &cfg, AlwaysOn::Persist, json)
+        }
+        Commands::Watch => {
+            run_always_on(&runner, &wait, &cfg, AlwaysOn::Watch, json)
+        }
+        Commands::Unwatch => {
+            run_always_on(&runner, &wait, &cfg, AlwaysOn::Unwatch, json)
+        }
+        Commands::Guard => {
+            run_always_on(&runner, &wait, &cfg, AlwaysOn::Guard, json)
         }
         Commands::Lock => {
             reject_json(json, "lock")?;
@@ -189,6 +208,45 @@ fn run(cli: Cli) -> Result<()> {
             control::launch(&runner, &cfg, &package, json)
         }
         Commands::Current => control::current(&runner, &cfg, json),
+    }
+}
+
+enum AlwaysOn {
+    Prep,
+    Persist,
+    Watch,
+    Unwatch,
+    Guard,
+}
+
+fn run_always_on(
+    runner: &RealRunner,
+    wait: &RealWait,
+    cfg: &Config,
+    kind: AlwaysOn,
+    json: bool,
+) -> Result<()> {
+    match kind {
+        AlwaysOn::Prep => {
+            reject_json(json, "prep")?;
+            transport::prep(runner, wait, cfg)
+        }
+        AlwaysOn::Persist => {
+            reject_json(json, "persist")?;
+            persist::persist(runner, wait, cfg)
+        }
+        AlwaysOn::Watch => {
+            reject_json(json, "watch")?;
+            agent::watch(runner)
+        }
+        AlwaysOn::Unwatch => {
+            reject_json(json, "unwatch")?;
+            agent::unwatch(runner)
+        }
+        AlwaysOn::Guard => {
+            reject_json(json, "guard")?;
+            agent::guard_loop(runner, wait, cfg)
+        }
     }
 }
 

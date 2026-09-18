@@ -462,6 +462,8 @@ mod tests {
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
             exec_out: RefCell::new(Some(png.clone())),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
         };
         let stamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)

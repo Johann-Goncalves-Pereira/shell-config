@@ -50,6 +50,7 @@ pub fn error_code(err: &Error) -> &'static str {
         Error::Wan(WanError::ApkDownload) => "apk_download",
         Error::Wan(WanError::ApkInstall { .. }) => "apk_install",
         Error::Control(e) => e.code(),
+        Error::Agent(e) => e.code(),
         Error::Io(_) => "io",
     }
 }

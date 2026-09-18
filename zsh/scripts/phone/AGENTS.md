@@ -20,7 +20,9 @@ Rulebook for AI working on the **phone** lab CLI. Humans: see [README.md](README
 | `src/harden.rs` | curated developer-option table |
 | `src/screen.rs` | Soft-disable / re-enable physical panel + power-wake guard |
 | `src/control.rs` | Agent control: shot / ui / tap / type / key / launch |
-| `src/transport.rs` | connect / tcpip / mirror / prep / status |
+| `src/transport.rs` | connect / tcpip / mirror / prep / status (+ mDNS) |
+| `src/persist.rs` | always-on: tcpip + persist props + Tailscale whitelist |
+| `src/agent.rs` | LaunchAgent watch / unwatch / guard |
 | `src/wan.rs` | WebRTC probe + Tailscale WAN |
 | `tests/` | integration with fake `adb` on `PATH` |
 | `validate.sh` | fmt + clippy `-D warnings` + nextest |
@@ -44,8 +46,10 @@ phone --json status
 phone shot
 phone --json ui
 phone tap 100 200
-phone prep
-pm                 # USB if present, else Tailscale/LAN (human mirror)
+phone persist      # USB always-on arm
+phone watch        # LaunchAgent re-arm / reconnect
+phone prep         # persist on USB, else soft prep
+pm                 # USB → Tailscale → LAN → mDNS
 phone screen off   # dim + sleep broken panel
 phone screen guard # re-sleep if power button wakes it
 phone screen on    # restore later

@@ -26,26 +26,38 @@ fn try_connect_candidates(
     runner: &dyn CommandRunner,
     cfg: &Config,
 ) -> Option<String> {
-    let port = DEFAULT_ADB_PORT;
-    let mut candidates: Vec<String> = Vec::new();
-    if let Some(w) = cfg.read_wan_host() {
-        candidates.push(w);
-    }
-    if !cfg.tailscale_peer().is_empty()
-        && let Some(ip) =
-            adb::mac_tailscale_peer_ip(runner, cfg.tailscale_peer())
-    {
-        candidates.push(format!("{ip}:{port}"));
-    }
-    if let Some(h) = cfg.read_host() {
-        candidates.push(h);
-    }
-    for host in candidates {
+    for host in collect_candidates(runner, cfg) {
         if let Some(t) = ensure_tcp_device(runner, cfg, &host) {
             return Some(t);
         }
     }
     None
+}
+
+fn collect_candidates(runner: &dyn CommandRunner, cfg: &Config) -> Vec<String> {
+    let port = DEFAULT_ADB_PORT;
+    let mut candidates: Vec<String> = Vec::new();
+    push_unique(&mut candidates, cfg.read_wan_host());
+    if !cfg.tailscale_peer().is_empty()
+        && let Some(ip) =
+            adb::mac_tailscale_peer_ip(runner, cfg.tailscale_peer())
+    {
+        push_unique(&mut candidates, Some(format!("{ip}:{port}")));
+    }
+    push_unique(&mut candidates, cfg.read_host());
+    for host in adb::mdns_hosts(runner) {
+        push_unique(&mut candidates, Some(host));
+    }
+    candidates
+}
+
+fn push_unique(out: &mut Vec<String>, host: Option<String>) {
+    let Some(host) = host else {
+        return;
+    };
+    if !out.iter().any(|h| h == &host) {
+        out.push(host);
+    }
 }
 
 fn ensure_tcp_device(
@@ -144,9 +156,17 @@ fn via_label(cfg: &Config, t: &str) -> String {
         "USB".into()
     } else if t.starts_with("100.") {
         "Tailscale".into()
+    } else if is_nondefault_adb_port(t) {
+        "mDNS".into()
     } else {
         "LAN".into()
     }
+}
+
+fn is_nondefault_adb_port(host: &str) -> bool {
+    host.rsplit_once(':')
+        .and_then(|(_, p)| p.parse::<u16>().ok())
+        .is_some_and(|p| p != DEFAULT_ADB_PORT)
 }
 
 pub fn connect(
@@ -214,38 +234,16 @@ pub fn prep(
     wait: &dyn Wait,
     cfg: &Config,
 ) -> Result<()> {
-    let t = transport(runner, cfg)?;
-    println!("Applying always-on server profile...");
-    harden::apply(runner, &t)?;
-    adb::settings_put(runner, &t, "global", "wifi_sleep_policy", "2")?;
-    adb::settings_put(runner, &t, "global", "wifi_wakeup_enabled", "1")?;
-    adb::settings_put(runner, &t, "global", "stay_on_while_plugged_in", "7")?;
-    adb::settings_put(runner, &t, "global", "mobile_data_always_on", "1")?;
-    ensure_tcpip_if_usb(runner, wait, cfg)?;
-    println!("Server prep done. Mirror with screen off: phone mirror");
-    status(runner, cfg, false)
-}
-
-fn ensure_tcpip_if_usb(
-    runner: &dyn CommandRunner,
-    wait: &dyn Wait,
-    cfg: &Config,
-) -> Result<()> {
     let serial = cfg.read_serial();
-    if !adb::is_device(runner, &serial) {
-        return Ok(());
+    if adb::is_device(runner, &serial) {
+        return crate::persist::persist(runner, wait, cfg);
     }
-    let Ok(ip) = adb::wifi_ip(runner, &serial) else {
-        return Ok(());
-    };
-    println!("Ensuring wireless ADB on {ip}:{DEFAULT_ADB_PORT}...");
-    let port = DEFAULT_ADB_PORT.to_string();
-    let _ = adb::adb_status(runner, &["-s", &serial, "tcpip", &port]);
-    wait.wait_ms(1500);
-    let host = format!("{ip}:{DEFAULT_ADB_PORT}");
-    let _ = adb::adb(runner, &["connect", &host]);
-    cfg.write_host(&host)?;
-    Ok(())
+    println!("USB not present — applying soft prep over current transport...");
+    let t = transport(runner, cfg)?;
+    harden::apply(runner, &t)?;
+    crate::persist::force_wifi_always_on(runner, &t, true)?;
+    println!("Soft prep done (full persist needs USB). Mirror: phone mirror");
+    status(runner, cfg, false)
 }
 
 pub fn mirror(
@@ -345,6 +343,8 @@ mod tests {
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
             exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
         }
     }
 
@@ -380,12 +380,14 @@ mod tests {
             shell_replies: RefCell::new(replies),
             puts: RefCell::new(Vec::new()),
             exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
         };
         let wait = RecordingWait {
             calls: RefCell::new(Vec::new()),
         };
         let cfg = temp_cfg("tcp")?;
-        tcpip_with_extended(&runner, &wait, &cfg)?;
+        tcpip(&runner, &wait, &cfg, DEFAULT_ADB_PORT)?;
         assert_eq!(cfg.read_host().as_deref(), Some("192.168.0.50:5555"));
         assert_eq!(wait.calls.borrow().as_slice(), &[1500]);
         Ok(())
@@ -400,6 +402,8 @@ mod tests {
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
             exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
         };
         let cfg = temp_cfg("wan")?;
         cfg.write_wan_host("100.64.0.2:5555")?;
@@ -417,6 +421,8 @@ mod tests {
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
             exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
         };
         let cfg = temp_cfg("usbwan")?;
         cfg.write_wan_host("100.64.0.2:5555")?;
@@ -445,6 +451,8 @@ mod tests {
             shell_replies: RefCell::new(HashMap::new()),
             puts: RefCell::new(Vec::new()),
             exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
         };
         let cfg = temp_cfg("unr")?;
         let info = collect_status(&runner, &cfg)?;
@@ -454,16 +462,33 @@ mod tests {
         Ok(())
     }
 
-    fn tcpip_with_extended(
-        runner: &ScriptedRunner,
-        wait: &RecordingWait,
-        cfg: &Config,
-    ) -> Result<()> {
-        let serial = cfg.read_serial();
-        let ip = adb::wifi_ip(runner, &serial)?;
-        wait.wait_ms(1500);
-        let host = format!("{ip}:5555");
-        cfg.write_host(&host)?;
+    #[test]
+    fn transport_falls_back_to_mdns() -> Result<()> {
+        let runner = ScriptedRunner {
+            which_adb: true,
+            devices: "List of devices attached\n192.0.2.10:37123\tdevice\n"
+                .into(),
+            shell_replies: RefCell::new(HashMap::new()),
+            puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
+            mdns: RefCell::new(Some(
+                "List of discovered mdns services\n\
+adb-x\t_adb-tls-connect._tcp\t192.0.2.10:37123\n"
+                    .into(),
+            )),
+            shells: RefCell::new(Vec::new()),
+        };
+        let cfg = temp_cfg("mdns")?;
+        let t = transport(&runner, &cfg)?;
+        assert_eq!(t, "192.0.2.10:37123");
+        Ok(())
+    }
+
+    #[test]
+    fn via_label_marks_mdns_port() -> Result<()> {
+        let cfg = temp_cfg("via")?;
+        assert_eq!(via_label(&cfg, "192.0.2.1:37123"), "mDNS");
+        assert_eq!(via_label(&cfg, "192.0.2.1:5555"), "LAN");
         Ok(())
     }
 }
