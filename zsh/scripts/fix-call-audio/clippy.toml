@@ -1,0 +1,14 @@
+# Clippy for phone lab CLI (Xin-ji backend bar, adapted).
+# Severity (deny) lives in Cargo.toml [lints.clippy].
+
+cognitive-complexity-threshold = 25
+too-many-lines-threshold = 80
+excessive-nesting-threshold = 3
+
+disallowed-methods = [
+	{ path = "std::mem::forget", reason = "RAII: do not leak with mem::forget" },
+]
+
+disallowed-types = [
+	{ path = "anyhow::Error", reason = "Use thiserror domain enums instead of anyhow", allow-invalid = true },
+]

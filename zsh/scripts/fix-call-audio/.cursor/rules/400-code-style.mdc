@@ -1,0 +1,10 @@
+---
+description: fix-call-audio rustfmt + Clippy
+globs: scripts/fix-call-audio/**/*.rs
+alwaysApply: false
+---
+
+# fix-call-audio — Code Style
+
+ALWAYS `rustfmt` (max_width 80, edition 2024). Fix Clippy via Cargo config —
+do not weaken lints.

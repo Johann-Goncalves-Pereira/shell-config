@@ -4,3 +4,6 @@ data/phone-adb/
 # Rust build / local cargo home (never publish)
 scripts/phone/target/
 scripts/phone/.cargo-home/
+scripts/fix-call-audio/target/
+scripts/fix-call-audio/.cargo-home/
+scripts/fix-call-audio/bin/
