@@ -7,41 +7,6 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/audio.zsh ] && source $UTILS/audio.zsh
 [ -f $UTILS/phone.zsh ] && source $UTILS/phone.zsh
 
-function update_spicetify() {
-  echo "\n\n${BGreen}Updating Spicetify...${Color_Off}\n\n"
-
-  # Check if Spotify is running
-  if ! command pgrep -x "Spotify" > /dev/null; then
-    echo "Spotify is not open. Skipping update."
-    return
-  fi
-
-  # Wait for Spotify to be open for at least 60 seconds
-  local start_time=$(date +%s)
-  while true; do
-    if command pgrep -x "Spotify" > /dev/null; then
-      local current_time=$(date +%s)
-      if (( current_time - start_time >= 60 )); then
-        break
-      fi
-    else
-      start_time=$(date +%s)
-    fi
-    sleep 5
-  done
-
-  if command -v spicetify &>/dev/null; then
-    local upgrade_output
-    upgrade_output=$(spicetify upgrade 2>&1)
-    echo "$upgrade_output"
-
-    if echo "$upgrade_output" | command grep -Eiq "(backup apply|spicetify apply|spotify.*updated)"; then
-      echo "Running spicetify backup apply..."
-      spicetify backup apply
-    fi
-  fi
-}
-
 function update_webui() {
   echo "\n\n${BGreen}Updating WebUI + SearXNG...${Color_Off}\n\n"
 
@@ -215,8 +180,6 @@ function update() {
   asdf plugin update --all
 
   update_webui
-
-  # update_spicetify
 
   brew cleanup --prune=all && rm -f $ZSH_COMPDUMP
 

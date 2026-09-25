@@ -87,10 +87,6 @@ export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/tools:$ANDROID_HOME/tool
 
 export PATH="/usr/local/bin:$PATH"
 
-# > Spicetify
-export PATH=$PATH:/Users/johannpereira/.spicetify
-
-
 export PATH="/opt/homebrew/opt/imagemagick-full/bin:$PATH"
 export PATH="/opt/homebrew/opt/imagemagick-full/bin:$PATH"
 export PATH="/opt/homebrew/opt/ffmpeg-full/bin:$PATH"
