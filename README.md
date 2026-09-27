@@ -1,45 +1,44 @@
-# What I use today
-- [ ] Bash
-- [x] Zsh
+# shell-config
 
-## Bash Settings
+Personal zsh setup. The prompt, `...` completion, and the git/media/phone helpers are the same shell as before. The foundation underneath is antidote, mise, and Atuin.
 
-My personal settings
+## What loads
 
-## Zsh Settings
+`~/.zshenv` and `~/.zprofile` are symlinks into this repo. `~/.zshrc` points at `zsh/base.zsh`.
 
-1. Useful plugins.
-2. Cool and useful theme.
-  - ![image](https://user-images.githubusercontent.com/62612685/173672501-b030f955-8995-447d-b58a-4a0c45b997e4.png)
-3. Personal functions to automate tasks.
-  - Clean docker.
-  - Clean branch.
-  - Reload shell.
-  - cd just with dots.
-  - Clock.
-  - direnv.
-  - Git shortcuts.
-  - Jump to file.
-4. ls cool display.
- - ![image](https://user-images.githubusercontent.com/62612685/173672089-2ee7e91f-094f-4401-ba9d-2dbebf2ae4fa.png)
+1. Homebrew and extra paths
+2. [mise](https://mise.jdx.dev/) for language versions (reads `~/.tool-versions` and `zsh/config/mise.toml`)
+3. direnv, for existing `.envrc` files
+4. zoxide (`cd`), fzf (Ctrl-T, Alt-C), Atuin (Ctrl-R)
+5. A small [antidote](https://antidote.sh/) plugin list: completions, fzf-tab, autosuggestions, syntax highlighting, autopair, wakatime
+6. oh-my-posh, theme file `zsh/config/prompt/johanns.json` (skipped in Apple Terminal)
 
-## SetUp
+asdf and fnm are not sourced anymore. Their binaries can stay installed until you trust `mise doctor`.
 
-Clone in your home directory.
+## Set up
 
 ```sh
-git@github.com:Johann-Goncalves-Pereira/shell-config.git ~/.shell-config
+git clone git@github.com:Johann-Goncalves-Pereira/shell-config.git ~/.shell-config
+zsh ~/.shell-config/zsh/install/install.zsh
 ```
 
-or
+The installer links these three files (backing up anything that is not already a symlink):
 
 ```sh
-https://github.com/Johann-Goncalves-Pereira/shell-config.git ~/.shell-config
+ln -sfn ~/.shell-config/zsh/zshenv.zsh ~/.zshenv
+ln -sfn ~/.shell-config/zsh/zprofile.zsh ~/.zprofile
+ln -sfn ~/.shell-config/zsh/base.zsh ~/.zshrc
 ```
 
-First make the symbolic link.
+## Day to day
+
+- `...` then Tab still walks up directories, through fzf-tab
+- `gps`, `gpo`, `gcdp`, `git_purge` are unchanged in spirit
+- `update` refreshes Homebrew, Mac App Store, antidote, mise, and the local web UI
+- `direnv_nvm` asks for a Node version and runs `mise use --path . node@<version>`
+
+## Check the config
 
 ```sh
-ln -s .shell-config/zsh/base.zsh .zshrc
-ln -s .shell-config/zsh/config/prompt/.p10k.zsh .p10k.zsh
+zsh ~/.shell-config/zsh/scripts/validate.zsh
 ```
