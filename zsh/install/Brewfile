@@ -1,0 +1,6 @@
+# Shell foundation. Other CLIs (fzf, zoxide, eza, bat, fd, ripgrep,
+# oh-my-posh) are already installed; oh-my-posh lives on its own tap.
+brew "antidote"
+brew "mise"
+brew "atuin"
+brew "git-delta"
