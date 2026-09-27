@@ -22,6 +22,41 @@ _expand_dots
   exit 1
 }
 
+LBUFFER='..'
+_expand_dots
+[[ $LBUFFER == '../' ]] || {
+  print -u2 "FAIL: '..' → expected '../', got '$LBUFFER'"
+  exit 1
+}
+
+LBUFFER='cd ..'
+_expand_dots
+[[ $LBUFFER == 'cd ../' ]] || {
+  print -u2 "FAIL: 'cd ..' → expected 'cd ../', got '$LBUFFER'"
+  exit 1
+}
+
+LBUFFER='foo/..'
+_expand_dots
+[[ $LBUFFER == 'foo/../' ]] || {
+  print -u2 "FAIL: 'foo/..' → expected 'foo/../', got '$LBUFFER'"
+  exit 1
+}
+
+LBUFFER='foo..'
+_expand_dots
+[[ $LBUFFER == 'foo..' ]] || {
+  print -u2 "FAIL: 'foo..' should stay unchanged, got '$LBUFFER'"
+  exit 1
+}
+
+LBUFFER='../'
+_expand_dots
+[[ $LBUFFER == '../' ]] || {
+  print -u2 "FAIL: '../' should stay unchanged, got '$LBUFFER'"
+  exit 1
+}
+
 # --- contract: never call fzf-tab/fzf-completion from the Tab widget ---
 typeset -f _expand_dots_then_expand_or_complete | grep -q 'fzf-tab-complete' && {
   print -u2 "FAIL: widget must not call fzf-tab-complete"

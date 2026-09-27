@@ -47,11 +47,20 @@ top_history() {
     sort -nr | nl | head -n"$amount"
 }
 
-# Expand ... to ../../ in the current buffer (mutates LBUFFER).
+# Expand dot runs in the current buffer (mutates LBUFFER).
 # Keep this a plain function — do not `zle -N` it.
+#
+#   ..     → ../
+#   ...    → ../../
+#   .....  → ../../..
+# A run of three or more dots is rewritten first. Exactly two dots only become
+# `../` when they are their own path segment (`..`, `cd ..`, `foo/..`), so
+# names like `foo..` are left alone.
 function _expand_dots() {
   if [[ $LBUFFER =~ '\.\.\.+' ]]; then
     LBUFFER=$LBUFFER:fs%\.\.\.%../../%
+  elif [[ $LBUFFER =~ '(^|[^[:alnum:]_])\.\.$' ]]; then
+    LBUFFER+='/'
   fi
 }
 
