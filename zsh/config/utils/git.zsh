@@ -148,18 +148,35 @@ function gcdp() {
   fi
 }
 
-# This will purge all the git branches that are not useful anymore.
+# Delete every local branch except the default. Default is yes.
 function git_purge() {
-  get-default-branch
+  if ! _git_var; then
+    return 1
+  fi
 
-  echo -e "\n${BRed}Purging all branches, except $DEFAULT_BRANCH - from your local storage.${Color_Off}\n"
+  echo -e "\n${BRed}Purging all branches, except $DEFAULT_BRANCH_NAME - from your local storage.${Color_Off}\n"
 
   echo -n "Are you sure you want to remove all branches? $DEFAULT_YES "
   read -r answer
-  if [[ $answer =~ ^([nN]|[nN])$ ]]; then
+  if [[ $answer =~ ^[nN]$ ]]; then
     echo -e "\n${Cyan}Aborted.${Color_Off}\n"
-  else
-    git branch | grep -v "$DEFAULT_BRANCH" | xargs git branch -D
-    git remote prune origin
+    return 0
   fi
+
+  if [[ -n $CURRENT_BRANCH && $CURRENT_BRANCH != "$DEFAULT_BRANCH_NAME" ]]; then
+    echo -e "${BYellow}[Warning]:${Color_Off} Staying on ${CURRENT_BRANCH}. It will not be deleted.\n"
+  fi
+
+  local branch
+  local -a doomed
+  doomed=()
+  while IFS= read -r branch; do
+    [[ -z $branch || $branch == "$DEFAULT_BRANCH_NAME" || $branch == "$CURRENT_BRANCH" ]] && continue
+    doomed+=("$branch")
+  done < <(git branch --format='%(refname:short)')
+
+  if (( ${#doomed} )); then
+    git branch -D "${doomed[@]}"
+  fi
+  git remote prune origin
 }

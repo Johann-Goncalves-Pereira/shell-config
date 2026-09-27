@@ -25,7 +25,7 @@ if command -v ugrep >/dev/null; then
     alias grep='ugrep -G'  # search with basic regular expressions (BRE)
     alias egrep='ugrep -E' # search with extended regular expressions (ERE)
     alias fgrep='ugrep -F' # find string(s)
-    alias pgrep='ugrep -P' # search with Perl regular expressions
+    alias upgrep='ugrep -P' # Perl regex. Do not alias pgrep; that shadows process grep.
     alias xgrep='ugrep -W' # search (ERE) and output text or hex for binary
 
     alias zgrep='ugrep -zG'  # search compressed files and archives with BRE
@@ -46,4 +46,18 @@ vscode() { "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code
 # Git
 alias gtr='git tag -d $(git tag) && git fetch --tags' # Refresh local tags from remote
 
-export PATH=$PATH:$(go env GOPATH)/bin
+# Modern unix aliases previously applied by zinit atload. Only when the tool exists.
+if (( $+commands[eza] )); then
+  alias ls='eza --icons --time-style=long-iso --group-directories-first'
+  alias la='eza --icons --time-style=long-iso --group-directories-first -laFh'
+  alias ll='eza --icons --time-style=long-iso --group-directories-first -l --header'
+  alias lt='eza -T -L=3 --icons'
+elif (( $+commands[gls] )); then
+  alias ls='gls --color=tty --group-directories-first'
+fi
+(( $+commands[btm] )) && alias top='btm'
+(( $+commands[tldr] )) && alias help='tldr'
+(( $+commands[delta] )) && alias diff='delta'
+(( $+commands[duf] )) && alias df='duf'
+(( $+commands[dust] )) && alias du='dust'
+(( $+commands[gping] )) && alias ping='gping'

@@ -11,16 +11,17 @@ function compress_mp3() {
     return 1
   fi
 
-  shopt -s globstar nullglob
-  for f in **/*.mp3; do
-    if [ -f "$f" ]; then
-      output_file="$(echo "$f" | sed 's/\(.*\)\.mp3/\1 - compressed.mp3/')"
-      lame --mp3input -b 64 --resample 22.05 "$f" "$output_file" && trash "$f"
-    else
-      echo "${BYellow}[Warning]:${Color_Off} No mp3 files found."
-    fi
+  local -a files
+  local f output_file
+  files=(**/*.mp3(N.))
+  if (( ${#files} == 0 )); then
+    echo "${BYellow}[Warning]:${Color_Off} No mp3 files found."
+    return 1
+  fi
+  for f in "${files[@]}"; do
+    output_file="${f:r} - compressed.mp3"
+    lame --mp3input -b 64 --resample 22.05 "$f" "$output_file" && trash "$f"
   done
-  shopt -u globstar nullglob
 }
 
 # Function to convert m4b audiobook files to mp3 format with chapters.
@@ -216,9 +217,7 @@ function compress_mp4() {
   if [[ -n "$1" && -f "$1" ]]; then
     target_files=("$1")
   else
-    shopt -s globstar nullglob
-    target_files=(**/*.mp4)
-    shopt -u globstar nullglob
+    target_files=(**/*.mp4(N.))
   fi
 
   if [[ ${#target_files[@]} -eq 0 ]]; then
@@ -287,9 +286,7 @@ function compress_mov() {
   if [[ -n "$1" && -f "$1" ]]; then
     target_files=("$1")
   else
-    shopt -s globstar nullglob
-    target_files=(**/*.mov)
-    shopt -u globstar nullglob
+    target_files=(**/*.mov(N.))
   fi
 
   if [[ ${#target_files[@]} -eq 0 ]]; then
@@ -358,9 +355,7 @@ function compress_mkv() {
   if [[ -n "$1" && -f "$1" ]]; then
     target_files=("$1")
   else
-    shopt -s globstar nullglob
-    target_files=(**/*.mkv)
-    shopt -u globstar nullglob
+    target_files=(**/*.mkv(N.))
   fi
 
   if [[ ${#target_files[@]} -eq 0 ]]; then
@@ -427,9 +422,7 @@ function compress_mp4_to_webm() {
   if [[ -n "$1" && -f "$1" ]]; then
     target_files=("$1")
   else
-    shopt -s globstar nullglob
-    target_files=(**/*.mp4)
-    shopt -u globstar nullglob
+    target_files=(**/*.mp4(N.))
   fi
 
   if [[ ${#target_files[@]} -eq 0 ]]; then

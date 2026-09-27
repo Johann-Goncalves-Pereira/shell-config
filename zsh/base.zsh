@@ -2,34 +2,26 @@
 # >  Zsh configuration  < #
 # > ------------------- < #
 
-# > ----- < #
-# >  Var  < #
-# > ----- < #
-
 USER_CONFIG_DIRECTORY="$HOME/.shell-config/zsh"
 
-# > ------------------ < #
-# >  Load config file  < #
-# > ------------------ < #
+_source_if() {
+  [[ -f $1 ]] && source "$1"
+}
 
-[ -f $USER_CONFIG_DIRECTORY/config/color.zsh ] && source $USER_CONFIG_DIRECTORY/config/color.zsh
+_source_if "$USER_CONFIG_DIRECTORY/config/color.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/00-xdg.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/10-homebrew.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/70-path.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/20-mise.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/40-options.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/50-completions.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/30-plugins.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/alias.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/alias/git.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/utils.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/60-keys.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/python.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/work.zsh"
+_source_if "$USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh"
 
-[ -f $USER_CONFIG_DIRECTORY/config/cache.zsh ] && source $USER_CONFIG_DIRECTORY/config/cache.zsh
-
-[ -f $USER_CONFIG_DIRECTORY/config/zinit.zsh ] && source $USER_CONFIG_DIRECTORY/config/zinit.zsh
-
-[ -f $USER_CONFIG_DIRECTORY/config/config.zsh ] && source $USER_CONFIG_DIRECTORY/config/config.zsh
-
-[ -f $USER_CONFIG_DIRECTORY/config/alias.zsh ] && source $USER_CONFIG_DIRECTORY/config/alias.zsh
-
-[ -f $USER_CONFIG_DIRECTORY/config/utils.zsh ] && source $USER_CONFIG_DIRECTORY/config/utils.zsh
-
-[ -f $USER_CONFIG_DIRECTORY/config/behavior.zsh ] && source $USER_CONFIG_DIRECTORY/config/behavior.zsh
-
-[ -f $USER_CONFIG_DIRECTORY/config/work.zsh ] && source $USER_CONFIG_DIRECTORY/config/work.zsh
-
-# Python related fallbacks / helpers
-[ -f $USER_CONFIG_DIRECTORY/config/python.zsh ] && source $USER_CONFIG_DIRECTORY/config/python.zsh
-
-# [ -f $USER_CONFIG_DIRECTORY/config/prompt/.p10k-config.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/.p10k-config.zsh
-[ -f $USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh ] && source $USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh
+unfunction _source_if

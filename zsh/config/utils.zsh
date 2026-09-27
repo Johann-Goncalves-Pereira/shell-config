@@ -1,5 +1,6 @@
 UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 
+[ -f $UTILS/widgets.zsh ] && source $UTILS/widgets.zsh
 [ -f $UTILS/docker.zsh ] && source $UTILS/docker.zsh
 [ -f $UTILS/shell.zsh ] && source $UTILS/shell.zsh
 [ -f $UTILS/file.zsh ] && source $UTILS/file.zsh
@@ -160,28 +161,39 @@ function update() {
   brew update
   brew upgrade
   brew cleanup
-  echo "\n\n${BGreen}Updating Zinit...${Color_Off}\n\n"
+  if command -v mas >/dev/null; then
+    echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
+    mas upgrade
+  fi
 
-  echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
-  mas upgrade
-
-
-  zinit update --parallel
+  if (( $+functions[antidote] )); then
+    echo "\n\n${BGreen}Updating plugins...${Color_Off}\n\n"
+    antidote update
+    rm -f "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zsh_plugins.zsh"
+  fi
 
   echo "\n\n${BGreen}Updating Javascript...${Color_Off}\n\n"
 
-  corepack install -g npm@latest
-  corepack install -g pnpm@latest
-  corepack up
+  if command -v corepack >/dev/null; then
+    corepack install -g npm@latest
+    corepack install -g pnpm@latest
+    corepack up
+  fi
 
-  echo "\n\n${BGreen}Updating Asdf...${Color_Off}\n\n"
+  if command -v mise >/dev/null; then
+    echo "\n\n${BGreen}Updating mise tools...${Color_Off}\n\n"
+    mise upgrade
+  fi
 
-  # asdf update
-  asdf plugin update --all
+  if command -v atuin >/dev/null; then
+    local atuin_comp="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/completions"
+    mkdir -p "$atuin_comp"
+    atuin gen-completions --shell zsh >"${atuin_comp}/_atuin" 2>/dev/null || true
+  fi
 
   update_webui
 
-  brew cleanup --prune=all && rm -f $ZSH_COMPDUMP
+  brew cleanup --prune=all && rm -f "$ZSH_COMPDUMP"
 
   echo "\n\n${BGreen}Update completed.${Color_Off}\n\n"
 }
@@ -189,10 +201,23 @@ function update() {
 
 
 direnv_nvm() {
-  vared -p "What version do you want to use? " -c version
-
-  echo "use nodejs $version" >.envrc
-  direnv allow
+  local version=""
+  vared -p "What node version do you want to use? " -c version
+  if [[ -z $version ]]; then
+    echo "No version given."
+    return 1
+  fi
+  if ! command -v mise >/dev/null; then
+    echo "mise is not installed."
+    return 1
+  fi
+  mise use --path . "node@${version}" || return
+  if [[ ! -f .envrc ]] || ! grep -q 'use mise' .envrc; then
+    print 'use mise' >> .envrc
+  fi
+  if command -v direnv >/dev/null; then
+    direnv allow
+  fi
 }
 
 # Recursively inspect/strip image metadata in the current directory (Charm TUI).

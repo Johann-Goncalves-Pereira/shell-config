@@ -1,0 +1,9 @@
+# Version files already used by a language (.node-version, .tool-versions, …).
+[settings]
+idiomatic_version_file_enable_tools = ["node", "python", "ruby", "go", "bun"]
+legacy_version_file = true
+
+# Matches the fnm default on this machine so `node` does not disappear
+# when asdf/fnm stop being sourced. Project version files still win.
+[tools]
+node = "24.11.1"

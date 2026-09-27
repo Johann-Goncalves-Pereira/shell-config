@@ -1,0 +1,10 @@
+# Completions on fpath, then compinit, then fzf-tab.
+zsh-users/zsh-completions path:src kind:fpath
+~/.shell-config/zsh/config/45-compinit.zsh
+
+# fzf-tab must load after compinit and before widgets that wrap the line editor.
+Aloxaf/fzf-tab
+zsh-users/zsh-autosuggestions
+zdharma-continuum/fast-syntax-highlighting
+hlissner/zsh-autopair
+sobolevn/wakatime-zsh-plugin

@@ -72,8 +72,17 @@ typeset -f _expand_dots_then_expand_or_complete | grep -q '\.expand-or-complete'
 }
 
 # --- simulate fzf-tab wrapping our widget (the fixed chain) ---
-FZFTAB="$HOME/.local/share/zinit/plugins/Aloxaf---fzf-tab/fzf-tab.zsh"
-if [[ -f $FZFTAB ]]; then
+FZFTAB=""
+for candidate in \
+  "$HOME/.local/share/zinit/plugins/Aloxaf---fzf-tab/fzf-tab.zsh" \
+  "$HOME/.cache/antidote"/https-COLON--SLASH--SLASH-github.com-SLASH-Aloxaf-SLASH-fzf-tab/fzf-tab.zsh
+do
+  if [[ -f $candidate ]]; then
+    FZFTAB="$candidate"
+    break
+  fi
+done
+if [[ -n $FZFTAB ]]; then
   # Minimal stubs so sourcing fzf-tab doesn't need a full interactive env
   source "$FZFTAB"
 
@@ -110,13 +119,15 @@ if [[ -f $FZFTAB ]]; then
   }
 fi
 
-# --- zinit must re-enable fzf-tab with our setup helper (not steal Tab back) ---
-if grep -A5 'Aloxaf/fzf-tab' ~/.shell-config/zsh/config/zinit.zsh | grep -q '_bind_expand_dots_keys'; then
-  print -u2 "FAIL: zinit fzf-tab atload must not only rebind Tab via _bind_expand_dots_keys"
+# --- keys file must re-enable fzf-tab with our setup helper (not steal Tab back) ---
+keys_file="${0:A:h}/../config/60-keys.zsh"
+plugins_file="${0:A:h}/../plugins/zsh_plugins.txt"
+grep -q '_setup_expand_dots_with_fzf_tab' "$keys_file" || {
+  print -u2 "FAIL: 60-keys.zsh must call _setup_expand_dots_with_fzf_tab"
   exit 1
-fi
-grep -q '_setup_expand_dots_with_fzf_tab' ~/.shell-config/zsh/config/zinit.zsh || {
-  print -u2 "FAIL: zinit fzf-tab atload must call _setup_expand_dots_with_fzf_tab"
+}
+grep -q 'Aloxaf/fzf-tab' "$plugins_file" || {
+  print -u2 "FAIL: plugin list must include fzf-tab"
   exit 1
 }
 

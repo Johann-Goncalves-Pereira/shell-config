@@ -2,15 +2,8 @@
 # >  Docker CLI Configuration  < #
 # > -------------------------- < #
 
-# Added Docker CLI to PATH
-export PATH="/Applications/Docker.app/Contents/Resources/bin:$PATH"
-
-# Docker CLI completions
-fpath=(/Users/johannpereira/.docker/completions $fpath)
-if ! type zinit >/dev/null 2>&1; then
-  autoload -Uz compinit
-  compinit -i 2>/dev/null || true
-fi
+# Docker CLI path is added from config/70-path.zsh.
+# Completions are added from config/50-completions.zsh.
 
 # > --------------- < #
 # >  Docker Utils  < #
@@ -19,11 +12,14 @@ fi
 # Stop all docker containers and remove them.
 function docker_clean() {
   echo -e "${BYellow}Stopping all containers from your local storage.${Color_Off}\n"
-  docker ps -a -q | xargs docker stop
+  local -a ids
+  ids=("${(@f)$(docker ps -aq)}")
+  ids=("${ids[@]:#}")
+  (( ${#ids} )) && docker stop "${ids[@]}"
 
   echo -n "\nAre you sure you want to remove all containers? $DEFAULT_YES "
   read -r answer
-  if [[ $answer =~ ^([nN]|[nN])$ ]]; then
+  if [[ $answer =~ ^[nN]$ ]]; then
     echo -e "${Cyan}Process canceled.${Color_Off}\n"
   else
     echo -e "${BRed}Removing all containers from your local storage.${Color_Off}\n"
@@ -38,9 +34,13 @@ function docker_full_clean() {
   echo -n "Are you sure you want to remove all containers? $DEFAULT_NO "
   read -r answer
   if [[ $answer =~ ^([yY][eE][sS]|[yY])$ ]]; then
-    # docker rmi $(docker images -q)
-    docker ps -a -q | xargs docker rm -f
-    docker images -q | xargs docker rmi -f
+    local -a ids images
+    ids=("${(@f)$(docker ps -aq)}")
+    ids=("${ids[@]:#}")
+    images=("${(@f)$(docker images -q)}")
+    images=("${images[@]:#}")
+    (( ${#ids} )) && docker rm -f "${ids[@]}"
+    (( ${#images} )) && docker rmi -f "${images[@]}"
   else
     echo -e "${Cyan}Process canceled.${Color_Off}\n"
   fi
