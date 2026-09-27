@@ -4,6 +4,12 @@ ZSH_AUTOSUGGEST_STRATEGY=match_prev_cmd
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+# fzf --zsh rebinds Tab to fzf-completion; put dots-expander back so fzf-tab
+# (loaded later via zinit wait) captures it as _ftb_orig_widget.
+if (( ${+functions[_bind_expand_dots_keys]} )); then
+	_bind_expand_dots_keys
+fi
+
 # Custom completion functions (e.g. ~/.zfunc/_*)
 fpath+=(~/.zfunc)
 

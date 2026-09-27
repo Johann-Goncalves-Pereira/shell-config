@@ -131,15 +131,20 @@ zinit wait as"null" lucid from"gh-r" for \
 	  atload"alias lt='eza -T -L=3 --icons'" \
 	  bpick"*.zip" sbin"**/procs" if'(( $+commands[unzip] )) && [[ $CPUTYPE != aarch* ]]' dalance/procs	
 
-# FZF: fuzzy finderls
+# FZF: fuzzy finder
+# Rebind Tab to dots-expander after fzf key-bindings (before fzf-tab below).
 zinit ice wait lucid as"null" from"gh-r" src'key-bindings.zsh' completions sbin'**/fzf' \
+	  atload'(( ${+functions[_bind_expand_dots_keys]} )) && _bind_expand_dots_keys' \
 	  dl'https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.zsh;
 		 https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.zsh -> _fzf;
 		 https://raw.githubusercontent.com/junegunn/fzf/master/man/man1/fzf.1 -> $ZPFX/share/man/man1/fzf.1;
 		 https://raw.githubusercontent.com/junegunn/fzf/master/man/man1/fzf-tmux.1 -> $ZPFX/share/man/man1/fzf-tmux.1;'
 zinit light junegunn/fzf
 
-zinit ice wait lucid depth"1" atload"zicompinit; zicdreplay" blockf
+# Make fzf-tab wrap our dots widget as _ftb_orig_widget (re-enable after load).
+zinit ice wait lucid depth"1" \
+	  atload'zicompinit; zicdreplay; (( ${+functions[_setup_expand_dots_with_fzf_tab]} )) && _setup_expand_dots_with_fzf_tab' \
+	  blockf
 zinit light Aloxaf/fzf-tab
 
 zstyle ':fzf-tab:*' switch-group ',' '.'

@@ -47,51 +47,60 @@ top_history() {
     sort -nr | nl | head -n"$amount"
 }
 
-# Expand ... to ../../ in the current buffer.
-#
-# The function is meant to be bound to a key and called
-# interactively. It will expand ... to ../../ if it finds
-# a sequence of dots in the current buffer.
-#
-# The function does not modify the buffer if it doesn't find
-# a sequence of dots.
+# Expand ... to ../../ in the current buffer (mutates LBUFFER).
+# Keep this a plain function — do not `zle -N` it.
 function _expand_dots() {
-  local MATCH
   if [[ $LBUFFER =~ '\.\.\.+' ]]; then
     LBUFFER=$LBUFFER:fs%\.\.\.%../../%
   fi
 }
 
-# Expand ... to ../../ in the current buffer and then expand or complete the
-# current buffer.
+# Tab: expand ... → ../.. then run real completion.
+#
+# Only call `.expand-or-complete` — never `fzf-tab-complete` or `fzf-completion`.
+# fzf-tab saves whatever is on Tab as `_ftb_orig_widget` and invokes it from
+# `fzf-tab-complete`. If we rebind Tab to ourselves after fzf-tab loads and then
+# call `fzf-tab-complete`, we recurse until FUNCNEST blows up.
+#
+# Final chain: Tab → fzf-tab-complete → (orig) this widget → .expand-or-complete
 function _expand_dots_then_expand_or_complete() {
-  zle _expand_dots
-  zle expand-or-complete
+  _expand_dots
+  zle .expand-or-complete
 }
-# This function first expands a sequence of dots ('...') to '../../' in the current
-# buffer using the _expand_dots function, and then accepts the current line as if
-# the Enter key was pressed.
+
+# Enter: expand dots then accept the line.
 function _expand_dots_then_accept_line() {
-  zle _expand_dots
-  zle accept-line
+  _expand_dots
+  zle .accept-line
 }
 
-# Create a custom widget to expand ... to ../../ in the current buffer.
-zle -N _expand_dots
-
-# Create a custom widget to expand ... to ../../ in the current buffer, and then
-# either expand or complete the current buffer.
 zle -N _expand_dots_then_expand_or_complete
-
-# Create a custom widget to expand ... to ../../ in the current buffer, and then
-# accept the current line as if the Enter key was pressed.
 zle -N _expand_dots_then_accept_line
 
-# Bind the widgets to keys.
-# - '^I' is the Tab key.
-# - '^M' is the Enter key.
-bindkey '^I' _expand_dots_then_expand_or_complete
-bindkey '^M' _expand_dots_then_accept_line
+# Bind before fzf-tab so enable-fzf-tab can capture THIS as _ftb_orig_widget.
+# After fzf-tab is active, keep Tab on fzf-tab-complete (do not steal it back).
+_bind_expand_dots_keys() {
+  bindkey '^M' _expand_dots_then_accept_line
+  if [[ ${_ftb_orig_widget:-} == _expand_dots_then_expand_or_complete ]] &&
+    (( ${+widgets[fzf-tab-complete]} )); then
+    bindkey '^I' fzf-tab-complete
+  else
+    bindkey '^I' _expand_dots_then_expand_or_complete
+  fi
+  if [[ ${fzf_default_completion:-} == _expand_dots_then_expand_or_complete ]]; then
+    fzf_default_completion='.expand-or-complete'
+  fi
+}
+_bind_expand_dots_keys
+
+# Called from fzf-tab's atload: force our widget to be the wrapped orig, then
+# give Tab back to fzf-tab. Survives zinit turbo load-order races.
+_setup_expand_dots_with_fzf_tab() {
+  (( ${+functions[enable-fzf-tab]} )) || return 0
+  bindkey '^I' _expand_dots_then_expand_or_complete
+  bindkey '^M' _expand_dots_then_accept_line
+  enable-fzf-tab
+}
 
 # ${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration
 
