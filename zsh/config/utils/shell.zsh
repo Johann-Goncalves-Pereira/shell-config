@@ -86,8 +86,8 @@ function _expand_dots_then_accept_line() {
 zle -N _expand_dots_then_expand_or_complete
 zle -N _expand_dots_then_accept_line
 
-# Bind before fzf-tab so enable-fzf-tab can capture THIS as _ftb_orig_widget.
-# After fzf-tab is active, keep Tab on fzf-tab-complete (do not steal it back).
+# Tab binding lives in config/60-keys.zsh, after plugins load.
+# Calling this early steals Tab back from fzf-tab.
 _bind_expand_dots_keys() {
   bindkey '^M' _expand_dots_then_accept_line
   if [[ ${_ftb_orig_widget:-} == _expand_dots_then_expand_or_complete ]] &&
@@ -100,19 +100,20 @@ _bind_expand_dots_keys() {
     fzf_default_completion='.expand-or-complete'
   fi
 }
-_bind_expand_dots_keys
 
-# Called from fzf-tab's atload: force our widget to be the wrapped orig, then
-# give Tab back to fzf-tab. Survives zinit turbo load-order races.
+# Force our widget to be the wrapped orig, then give Tab back to fzf-tab.
+# Called once from config/60-keys.zsh after the plugin bundle is sourced.
+#
+# enable-fzf-tab restores whatever Tab widget it captured at load time before
+# it reads the key again. Overwrite that memory first, or it puts
+# expand-or-complete / fzf-completion back and our bind is ignored.
 _setup_expand_dots_with_fzf_tab() {
   (( ${+functions[enable-fzf-tab]} )) || return 0
+  typeset -g _ftb_orig_widget=_expand_dots_then_expand_or_complete
   bindkey '^I' _expand_dots_then_expand_or_complete
   bindkey '^M' _expand_dots_then_accept_line
   enable-fzf-tab
 }
-
-# ${GHOSTTY_RESOURCES_DIR}/shell-integration/zsh/ghostty-integration
-
 
 # Function to search torrents using magnetfinder with safer provider handling
 # The search query will be passed wrapped in " or ' so the program receives the quotes.
