@@ -10,9 +10,10 @@ fi
 
 if (( $+commands[brew] )); then
   () {
-    local d
-    for d in "${HOMEBREW_PREFIX}"/opt/*/libexec/gnubin(N); do
-      path=("$d" $path)
+    local name dir
+    for name in coreutils findutils gnu-sed grep; do
+      dir="${HOMEBREW_PREFIX}/opt/${name}/libexec/gnubin"
+      [[ -d $dir ]] && path=("$dir" $path)
     done
   }
   export PATH

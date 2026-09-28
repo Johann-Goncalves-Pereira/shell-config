@@ -28,8 +28,25 @@ if (( $+commands[fzf] )); then
   export FZF_ALT_C_OPTS="--preview 'tree -NC {} | head -200'"
 fi
 
-# Atuin owns Ctrl-R. Imported history lives in its own database.
+# Atuin owns Ctrl-R. Use the repo config only when the user has none yet.
 if (( $+commands[atuin] )); then
+  () {
+    local user_cfg="${XDG_CONFIG_HOME:-$HOME/.config}/atuin/config.toml"
+    local repo_cfg="$USER_CONFIG_DIRECTORY/config/atuin.toml"
+    if [[ ! -e $user_cfg && ! -L $user_cfg && -f $repo_cfg ]]; then
+      mkdir -p "${user_cfg:h}"
+      ln -s "$repo_cfg" "$user_cfg"
+    fi
+  }
+  # These override the generated Atuin file. enter_accept is also false there,
+  # because this Atuin build does not honor ATUIN_ENTER_ACCEPT.
+  export ATUIN_ENTER_ACCEPT=false
+  export ATUIN_SEARCH_MODE=fuzzy
+  export ATUIN_FILTER_MODE=global
+  export ATUIN_STYLE=compact
+  export ATUIN_INLINE_HEIGHT=20
+  export ATUIN_SHOW_PREVIEW=true
+  export ATUIN_UPDATE_CHECK=false
   eval "$(atuin init zsh)"
 fi
 

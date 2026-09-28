@@ -49,8 +49,12 @@
         {
           "foreground": "#417E37",
           "properties": {
-            "fetch_version": true
+            "fetch_version": true,
+            "display_mode": "files",
+            "extensions": ["package.json"]
           },
+          "display_mode": "files",
+          "extensions": ["package.json"],
           "style": "powerline",
           "template": "<#cc7eda> » </><#68BD4A></> {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
           "type": "node"
@@ -94,10 +98,17 @@
           "template": "<#cc7eda> » </><#79D4FD>󰟓 </> {{ .Full }}"
         },
         {
-          "type": "text",
+          "type": "rust",
           "style": "powerline",
-          "foreground": "#AA2901",
-          "template": "{{ if or (glob \"Cargo.toml\") (glob \"Cargo.lock\") (glob \"*.rs\") (glob \"rust-toolchain\") (glob \"rust-toolchain.toml\") (glob \"*/Cargo.toml\") (glob \"*/Cargo.lock\") (glob \"*/*.rs\") (glob \"*/*/Cargo.toml\") (glob \"*/*/Cargo.lock\") (glob \"*/*/*.rs\") }}<#cc7eda> » </><#F64D01></> {{ index (splitList \" \" (cmd \"rustc\" \"--version\")) 1 }}{{ end }}"
+          "foreground": "#F64D01",
+          "display_mode": "files",
+          "extensions": ["Cargo.toml", "Cargo.lock", "rust-toolchain.toml"],
+          "properties": {
+            "fetch_version": true,
+            "display_mode": "files",
+            "extensions": ["Cargo.toml", "Cargo.lock", "rust-toolchain.toml"]
+          },
+          "template": "<#cc7eda> » </><#F64D01></> {{ .Full }}"
         },
         {
           "type": "haskell",
@@ -180,6 +191,10 @@
       "type": "prompt"
     }
   ],
+  "transient_prompt": {
+    "foreground": "#E06C75",
+    "template": "\u276f "
+  },
   "final_space": true,
   "version": 3
 }

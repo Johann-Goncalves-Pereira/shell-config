@@ -1,0 +1,8 @@
+# Ctrl-R searches history. Enter stays in the search instead of running a line.
+search_mode = "fuzzy"
+filter_mode = "global"
+enter_accept = false
+style = "compact"
+inline_height = 20
+show_preview = true
+update_check = false

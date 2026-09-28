@@ -37,9 +37,26 @@ fix_call_audio() {
   "$bin" "$@"
 }
 
-# On interactive shells, ensure the LaunchAgent guard is loaded (quiet).
-# Ensure the LaunchAgent guard is loaded. Do not re-run the audio reset
-# on every interactive shell; that belongs to an explicit `fix_call_audio` call.
+# True when the release binary is missing or older than its sources.
+_fix_call_audio_outdated() {
+  local src="$USER_CONFIG_DIRECTORY/scripts/fix-call-audio"
+  local bin="${src}/target/release/fix-call-audio"
+  local f
+  [[ ! -x $bin || "$src/Cargo.toml" -nt $bin ]] && return 0
+  for f in "$src"/src/*.rs "$src"/swift/*.swift; do
+    [[ -e $f && $f -nt $bin ]] && return 0
+  done
+  return 1
+}
+
+# Ensure the LaunchAgent guard is loaded. A fresh binary runs in the
+# background so the prompt is not blocked. A rebuild stays in the foreground
+# so two shells do not compile at once.
 if [[ "$(uname -s)" == "Darwin" && -o interactive && "${FIX_CALL_AUDIO_DISABLE:-0}" != "1" ]]; then
-  fix_call_audio watch >/dev/null 2>&1 || true
+  if _fix_call_audio_outdated; then
+    fix_call_audio watch >/dev/null 2>&1 || true
+  else
+    fix_call_audio watch >/dev/null 2>&1 &
+    disown
+  fi
 fi

@@ -96,5 +96,40 @@ repo=$(mktemp -d)
 ) || fail "git_purge did not keep main/current and delete the other branch"
 rm -rf "$repo"
 
+# --- prompt does not shell out to rustc or glob source files ---
+theme="$root/config/prompt/johanns.json"
+grep -q '"type": "rust"' "$theme" || fail "prompt needs a native rust segment"
+if grep -q 'rustc' "$theme"; then
+  fail "prompt must not call rustc"
+fi
+if grep -F -q '*.rs' "$theme"; then
+  fail "prompt must not glob rs files"
+fi
+grep -q '"transient_prompt"' "$theme" || fail "finished prompts need a one-line transient prompt"
+
+# --- a fresh audio binary is watched in the background ---
+audio_file="$root/config/utils/audio.zsh"
+grep -q 'fix_call_audio watch >/dev/null 2>&1 &' "$audio_file" || fail "fresh audio watch must be backgrounded"
+grep -q 'disown' "$audio_file" || fail "background audio watch must be disowned"
+grep -q '_fix_call_audio_outdated' "$audio_file" || fail "rebuilds must stay in the foreground"
+
+# --- atuin does not run a history line on enter ---
+grep -q 'enter_accept = false' "$root/config/atuin.toml" || fail "atuin enter_accept must be false"
+mise_file="$root/config/20-mise.zsh"
+enter_line="$(grep -n 'ATUIN_ENTER_ACCEPT=false' "$mise_file" | head -1 | cut -d: -f1)"
+init_line="$(grep -n 'atuin init zsh' "$mise_file" | head -1 | cut -d: -f1)"
+if [[ -z $enter_line || -z $init_line || $enter_line -ge $init_line ]]; then
+  fail "ATUIN_ENTER_ACCEPT=false must be set before atuin init"
+fi
+
+# --- Ctrl-Right accepts the autosuggestion ---
+grep -q 'autosuggest-accept' "$root/config/60-keys.zsh" || fail "Ctrl-Right must bind autosuggest-accept"
+
+# --- homebrew does not scan every gnubin ---
+if grep -F -q 'opt/*/libexec/gnubin' "$homebrew_file"; then
+  fail "homebrew must not glob every gnubin"
+fi
+grep -q 'coreutils' "$homebrew_file" || fail "homebrew should prepend coreutils gnubin when present"
+
 print "OK foundation"
 exit 0

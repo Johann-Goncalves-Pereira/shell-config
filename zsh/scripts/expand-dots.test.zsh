@@ -57,7 +57,10 @@ _expand_dots
   exit 1
 }
 
-# --- contract: never call fzf-tab/fzf-completion from the Tab widget ---
+# --- contract: completion must actually start, without re-entering fzf-tab ---
+# `zle .expand-or-complete` (the builtin) returns without compsys when called
+# from this user widget, so Tab on `cd` produces no menu. The undotted widget
+# enters `_main_complete`. Calling fzf-tab-complete / fzf-completion recurses.
 typeset -f _expand_dots_then_expand_or_complete | grep -q 'fzf-tab-complete' && {
   print -u2 "FAIL: widget must not call fzf-tab-complete"
   exit 1
@@ -66,8 +69,12 @@ typeset -f _expand_dots_then_expand_or_complete | grep -q 'fzf-completion' && {
   print -u2 "FAIL: widget must not call fzf-completion"
   exit 1
 }
-typeset -f _expand_dots_then_expand_or_complete | grep -q '\.expand-or-complete' || {
-  print -u2 "FAIL: widget must call .expand-or-complete"
+typeset -f _expand_dots_then_expand_or_complete | grep -q 'zle \.expand-or-complete' && {
+  print -u2 "FAIL: widget must not call builtin .expand-or-complete"
+  exit 1
+}
+typeset -f _expand_dots_then_expand_or_complete | grep -q 'zle expand-or-complete' || {
+  print -u2 "FAIL: widget must call zle expand-or-complete"
   exit 1
 }
 

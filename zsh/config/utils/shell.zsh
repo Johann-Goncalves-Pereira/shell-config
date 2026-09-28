@@ -66,15 +66,19 @@ function _expand_dots() {
 
 # Tab: expand ... → ../.. then run real completion.
 #
-# Only call `.expand-or-complete` — never `fzf-tab-complete` or `fzf-completion`.
-# fzf-tab saves whatever is on Tab as `_ftb_orig_widget` and invokes it from
-# `fzf-tab-complete`. If we rebind Tab to ourselves after fzf-tab loads and then
-# call `fzf-tab-complete`, we recurse until FUNCNEST blows up.
+# Call the `expand-or-complete` widget, never the builtin `.expand-or-complete`.
+# From this user widget the builtin returns without entering compsys, so fzf-tab
+# gets no matches and Tab draws nothing. The undotted widget does enter
+# `_main_complete`, which fzf-tab wraps.
 #
-# Final chain: Tab → fzf-tab-complete → (orig) this widget → .expand-or-complete
+# Never call `fzf-tab-complete` or `fzf-completion` from here. fzf-tab saves
+# whatever is on Tab as `_ftb_orig_widget` and invokes it from
+# `fzf-tab-complete`. Calling that again recurses until FUNCNEST blows up.
+#
+# Final chain: Tab → fzf-tab-complete → (orig) this widget → expand-or-complete
 function _expand_dots_then_expand_or_complete() {
   _expand_dots
-  zle .expand-or-complete
+  zle expand-or-complete
 }
 
 # Enter: expand dots then accept the line.
