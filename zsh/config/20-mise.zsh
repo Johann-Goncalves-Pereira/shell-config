@@ -38,6 +38,15 @@ if (( $+commands[atuin] )); then
       ln -s "$repo_cfg" "$user_cfg"
     fi
   }
+  # These override the generated Atuin file. enter_accept is also false there,
+  # because this Atuin build does not honor ATUIN_ENTER_ACCEPT.
+  export ATUIN_ENTER_ACCEPT=false
+  export ATUIN_SEARCH_MODE=fuzzy
+  export ATUIN_FILTER_MODE=global
+  export ATUIN_STYLE=compact
+  export ATUIN_INLINE_HEIGHT=20
+  export ATUIN_SHOW_PREVIEW=true
+  export ATUIN_UPDATE_CHECK=false
   eval "$(atuin init zsh)"
 fi
 

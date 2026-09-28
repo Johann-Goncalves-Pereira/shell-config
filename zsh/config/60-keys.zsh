@@ -21,6 +21,12 @@ if (( ${+widgets[fancy-ctrl-z]} )); then
   bindkey '^Z' fancy-ctrl-z
 fi
 
+# Ctrl-Right accepts the grey suggestion. Right arrow still moves one character.
+if (( ${+widgets[autosuggest-accept]} )); then
+  bindkey -M emacs '^[[1;5C' autosuggest-accept
+  bindkey -M viins '^[[1;5C' autosuggest-accept
+fi
+
 # Plugins are already loaded. Hand Tab to fzf-tab with the dots widget underneath.
 # If fzf-tab is missing, still bind the dots expander.
 if (( ${+functions[enable-fzf-tab]} && ${+functions[_setup_expand_dots_with_fzf_tab]} )); then
