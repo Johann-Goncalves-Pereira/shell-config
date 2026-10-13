@@ -7,6 +7,7 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
 [ -f $UTILS/audio.zsh ] && source $UTILS/audio.zsh
 [ -f $UTILS/phone.zsh ] && source $UTILS/phone.zsh
+[ -f $UTILS/ukvdavi.zsh ] && source $UTILS/ukvdavi.zsh
 
 function update_webui() {
   echo "\n\n${BGreen}Updating WebUI + SearXNG...${Color_Off}\n\n"
