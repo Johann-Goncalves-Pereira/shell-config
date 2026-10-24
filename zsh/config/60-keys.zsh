@@ -21,7 +21,7 @@ if (( ${+widgets[fancy-ctrl-z]} )); then
   bindkey '^Z' fancy-ctrl-z
 fi
 
-# Plugins are already loaded. Hand Tab to fzf-tab with the dots widget underneath.
+# Plugins are already loaded. Expand dots inside fzf-tab, then complete for real.
 # If fzf-tab is missing, still bind the dots expander.
 if (( ${+functions[enable-fzf-tab]} && ${+functions[_setup_expand_dots_with_fzf_tab]} )); then
   _setup_expand_dots_with_fzf_tab

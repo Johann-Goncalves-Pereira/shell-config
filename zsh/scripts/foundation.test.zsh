@@ -38,6 +38,9 @@ fi
   if command -v ugrep >/dev/null; then
     [[ $(alias upgrep 2>/dev/null) == *ugrep* ]] || fail "upgrep should wrap ugrep -P"
   fi
+  if alias open-cli >/dev/null 2>&1; then
+    fail "open-cli must be a PATH binary, not a zsh alias"
+  fi
 )
 
 # --- media globs are zsh, not bash shopt ---

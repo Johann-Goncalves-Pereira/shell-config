@@ -64,14 +64,11 @@ function _expand_dots() {
   fi
 }
 
-# Tab: expand ... → ../.. then run real completion.
-#
-# Only call `.expand-or-complete` — never `fzf-tab-complete` or `fzf-completion`.
-# fzf-tab saves whatever is on Tab as `_ftb_orig_widget` and invokes it from
-# `fzf-tab-complete`. If we rebind Tab to ourselves after fzf-tab loads and then
-# call `fzf-tab-complete`, we recurse until FUNCNEST blows up.
-#
-# Final chain: Tab → fzf-tab-complete → (orig) this widget → .expand-or-complete
+# Tab without fzf-tab: expand ... → ../.. then run real completion.
+# With fzf-tab, Tab goes through the wrapper installed by
+# `_setup_expand_dots_with_fzf_tab` instead. This widget must not call
+# `fzf-tab-complete` or `fzf-completion`: fzf-tab invokes whatever it saved as
+# `_ftb_orig_widget`, and calling it again recurses until FUNCNEST blows up.
 function _expand_dots_then_expand_or_complete() {
   _expand_dots
   zle .expand-or-complete
@@ -101,18 +98,45 @@ _bind_expand_dots_keys() {
   fi
 }
 
-# Force our widget to be the wrapped orig, then give Tab back to fzf-tab.
+# Expand dots, then let fzf-tab complete through the real completion widget.
 # Called once from config/60-keys.zsh after the plugin bundle is sourced.
 #
+# Two separate bugs both make `cd <Tab>` draw nothing:
+#
+# 1. If `_ftb_orig_widget` is a user widget that runs `zle .expand-or-complete`,
+#    completion happens in a nested editor command. fzf-tab records no matches
+#    and `_fzf-tab-apply` then clears the list the nested command just built.
+#    The orig widget has to be `expand-or-complete` itself.
+#
+# 2. fzf-tab sets `local IN_FZF_TAB=1` and then starts that widget with `zle`.
+#    The completion widget does not see that local, so its compadd hook ignores
+#    the matches. A global is visible across that boundary. Unset it afterwards
+#    so ordinary compadd is left alone.
+#
+# fast-syntax-highlighting rebinds the `fzf-tab-complete` widget to a saved
+# copy of the original function. `zle -N` points Tab back at the wrapper.
+#
 # enable-fzf-tab restores whatever Tab widget it captured at load time before
-# it reads the key again. Overwrite that memory first, or it puts
-# expand-or-complete / fzf-completion back and our bind is ignored.
+# it reads the key again. Overwrite that memory first.
 _setup_expand_dots_with_fzf_tab() {
   (( ${+functions[enable-fzf-tab]} )) || return 0
-  typeset -g _ftb_orig_widget=_expand_dots_then_expand_or_complete
-  bindkey '^I' _expand_dots_then_expand_or_complete
+  if (( ! $+functions[_expand_dots_ftb_complete] )); then
+    functions[_expand_dots_ftb_complete]=${functions[fzf-tab-complete]}
+    function fzf-tab-complete() {
+      _expand_dots
+      typeset -g IN_FZF_TAB=1
+      {
+        _expand_dots_ftb_complete "$@"
+      } always {
+        unset IN_FZF_TAB
+      }
+    }
+  fi
+  typeset -g _ftb_orig_widget=expand-or-complete
+  bindkey '^I' expand-or-complete
   bindkey '^M' _expand_dots_then_accept_line
   enable-fzf-tab
+  zle -N fzf-tab-complete
 }
 
 # Function to search torrents using magnetfinder with safer provider handling

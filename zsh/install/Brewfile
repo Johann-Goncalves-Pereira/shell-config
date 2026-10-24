@@ -1,6 +1,43 @@
-# Shell foundation. Other CLIs (fzf, zoxide, eza, bat, fd, ripgrep,
-# oh-my-posh) are already installed; oh-my-posh lives on its own tap.
+# Shell + media + phone/audio stack for a fresh Mac.
+# Fonts are optional (installer prompt / INSTALL_NERD_FONT).
+
+tap "jandedobbeleer/oh-my-posh"
+
+# Foundation
 brew "antidote"
 brew "mise"
 brew "atuin"
 brew "git-delta"
+brew "fzf"
+brew "zoxide"
+brew "direnv"
+brew "fd"
+brew "bat"
+brew "eza"
+brew "ripgrep"
+brew "jandedobbeleer/oh-my-posh/oh-my-posh"
+brew "ugrep"
+
+# Day-to-day aliases / helpers
+brew "bottom"
+brew "tealdeer"
+brew "duf"
+brew "dust"
+brew "gping"
+brew "jq"
+brew "gh"
+brew "coreutils"
+brew "curl"
+brew "wget"
+brew "mas"
+brew "trash"
+
+# Media helpers (keg-only; PATH wired in config/70-path.zsh)
+brew "ffmpeg-full"
+brew "imagemagick-full"
+brew "lame"
+
+# Phone / call audio
+brew "switchaudio-osx"
+brew "blueutil"
+cask "android-platform-tools"

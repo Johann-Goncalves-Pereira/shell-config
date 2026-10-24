@@ -17,17 +17,27 @@ asdf and fnm are not sourced anymore. Their binaries can stay installed until yo
 
 ## Set up
 
+macOS only. Clone **exactly** to `~/.shell-config` (paths are hardcoded). Needs [GitHub SSH](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) and Xcode Command Line Tools (`xcode-select --install`).
+
 ```sh
 git clone git@github.com:Johann-Goncalves-Pereira/shell-config.git ~/.shell-config
-zsh ~/.shell-config/zsh/install/install.zsh
+cd ~/.shell-config && ./setup
 ```
 
-The installer links these three files (backing up anything that is not already a symlink):
+`./setup` installs Homebrew (if missing), the Brewfile stack (shell + media + phone/audio), uv, Rust via rustup, Node from `zsh/config/mise.toml`, optionally JetBrainsMono Nerd Font, then links:
 
 ```sh
 ln -sfn ~/.shell-config/zsh/zshenv.zsh ~/.zshenv
 ln -sfn ~/.shell-config/zsh/zprofile.zsh ~/.zprofile
 ln -sfn ~/.shell-config/zsh/base.zsh ~/.zshrc
+```
+
+Non-interactive font: `INSTALL_NERD_FONT=1 ./setup` or `INSTALL_NERD_FONT=0 ./setup`.
+
+After the first new terminal: Atuin history is separate (`atuin login` / `atuin import`). Extra languages are optional, for example:
+
+```sh
+mise use -g go@latest python@3.13 ruby@3.2
 ```
 
 ## Day to day
