@@ -28,7 +28,7 @@ if grep -q 'zinit' "$root/base.zsh"; then
   fail "base.zsh must not source zinit"
 fi
 
-# --- pgrep is not shadowed ---
+# --- pgrep is not shadowed; eza la flags stay eza-0.23-safe ---
 (
   emulate -L zsh
   source "$root/config/alias.zsh"
@@ -40,6 +40,13 @@ fi
   fi
   if alias open-cli >/dev/null 2>&1; then
     fail "open-cli must be a PATH binary, not a zsh alias"
+  fi
+  if (( $+commands[eza] )); then
+    (( $+aliases[la] )) || fail "la alias missing when eza is installed"
+    [[ $aliases[la] == *'-laFh'* ]] && fail "la must not glue flags after -F (eza parses -laFh as --classify=h)"
+    [[ $aliases[la] == *'--classify='* ]] || fail "la should set --classify=… explicitly"
+    # Smoke the resolved argv so a glued -F regresses here, not only on the new Mac.
+    eval "$aliases[la]" >/dev/null || fail "la alias must run successfully"
   fi
 )
 
