@@ -25,8 +25,8 @@ function update_webui() {
     return 1
   fi
 
-  if ! docker info &>/dev/null; then
-    echo "Docker daemon is not running. Skipping WebUI/SearXNG update."
+  if ! docker_ensure_running; then
+    echo "Skipping WebUI/SearXNG update."
     return 1
   fi
 
