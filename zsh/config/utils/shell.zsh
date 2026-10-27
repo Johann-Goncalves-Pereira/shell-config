@@ -2,6 +2,16 @@ function reload() {
   exec zsh
 }
 
+ollama() {
+  if [[ $1 == serve ]]; then
+    shift
+    command ollama serve "$@" &>/dev/null &
+    disown
+  else
+    command ollama "$@"
+  fi
+}
+
 function killport() {
   local port="$1"
 
