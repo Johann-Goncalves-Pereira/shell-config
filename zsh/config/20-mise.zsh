@@ -1,12 +1,16 @@
 # mise replaces asdf + fnm. direnv stays for existing .envrc files.
 # asdf and fnm binaries are left installed until `mise doctor` is trusted.
+#
+# --shims: version switching happens when a tool runs, not on every cd.
+# Full `mise activate` installs a chpwd hook-env that costs ~30ms per cd and
+# can stall for seconds when auto_install would fetch a missing version.
 if [[ -f "$USER_CONFIG_DIRECTORY/config/mise.toml" ]]; then
   export MISE_GLOBAL_CONFIG_FILE="$USER_CONFIG_DIRECTORY/config/mise.toml"
   export MISE_LEGACY_VERSION_FILE="${MISE_LEGACY_VERSION_FILE:-1}"
 fi
 
 if (( $+commands[mise] )); then
-  eval "$(mise activate zsh)"
+  eval "$(mise activate zsh --shims)"
 fi
 
 if (( $+commands[direnv] )); then
@@ -14,8 +18,13 @@ if (( $+commands[direnv] )); then
 fi
 
 # One zoxide init. `cd` is the jump command, same as before.
+# Add to the DB in the background so direct-path cds are not blocked on I/O.
 if (( $+commands[zoxide] )); then
+  export _ZO_DOCTOR=0
   eval "$(zoxide init --cmd cd zsh)"
+  __zoxide_hook() {
+    \command zoxide add -- "$(__zoxide_pwd)" &>/dev/null &!
+  }
 fi
 
 # One fzf init. Ctrl-T and Alt-C stay here; Ctrl-R is handed to Atuin below.

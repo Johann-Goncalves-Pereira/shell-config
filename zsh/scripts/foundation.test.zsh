@@ -16,6 +16,16 @@ if grep -q 'if ! brew=' "$homebrew_file"; then
   fail "inverted brew guard is back"
 fi
 
+# --- cd must stay snappy: mise shims (no chpwd hook-env) + async zoxide add ---
+mise_file="$root/config/20-mise.zsh"
+grep -F -q 'mise activate zsh --shims' "$mise_file" || fail "mise must activate with --shims so cd does not run hook-env"
+if grep -E -q 'mise activate zsh"[^-]|mise activate zsh$' "$mise_file"; then
+  fail "full mise activate (with hook-env) would make every cd pay ~30ms"
+fi
+grep -F -q '_ZO_DOCTOR=0' "$mise_file" || fail "disable zoxide doctor noise (_ZO_DOCTOR=0)"
+grep -E -q 'zoxide add .*\&!' "$mise_file" || fail "zoxide chpwd hook must add in the background (&!)"
+grep -F -q 'auto_install = false' "$root/config/mise.toml" || fail "mise auto_install must be off so missing tools do not stall cd/prompt"
+
 # --- plugins are antidote, not zinit ---
 plugins_file="$root/plugins/zsh_plugins.txt"
 grep -q 'Aloxaf/fzf-tab' "$plugins_file" || fail "fzf-tab missing from plugin list"

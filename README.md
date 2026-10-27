@@ -7,7 +7,7 @@ Personal zsh setup. The prompt, `...` completion, and the git/media/phone helper
 `~/.zshenv` and `~/.zprofile` are symlinks into this repo. `~/.zshrc` points at `zsh/base.zsh`.
 
 1. Homebrew and extra paths
-2. [mise](https://mise.jdx.dev/) for language versions (reads `~/.tool-versions` and `zsh/config/mise.toml`)
+2. [mise](https://mise.jdx.dev/) shims for language versions (reads `~/.tool-versions` and `zsh/config/mise.toml`; no per-`cd` hook)
 3. direnv, for existing `.envrc` files
 4. zoxide (`cd`), fzf (Ctrl-T, Alt-C), Atuin (Ctrl-R)
 5. A small [antidote](https://antidote.sh/) plugin list: completions, fzf-tab, autosuggestions, syntax highlighting, autopair, wakatime
