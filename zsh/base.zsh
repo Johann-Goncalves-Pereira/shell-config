@@ -26,4 +26,5 @@ _source_if "$USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh"
 
 unfunction _source_if
 
-. "$HOME/.local/share/../bin/env"
+# uv's env file (adds ~/.local/bin). Absent until uv is installed.
+[[ -f "$HOME/.local/bin/env" ]] && . "$HOME/.local/bin/env"

@@ -20,26 +20,25 @@ function killport() {
     return 1
   fi
 
-  lsof -t -i:$port >/dev/null 2>&1
-  if [ $? -ne 0 ]; then
-    echo -e "${BRed}Error:${Color_Off} No process is using port: $port"
+  # Only the listener. A bare -i:$port also matches clients connected to that
+  # port (a browser tab on :3000), and those used to get killed too.
+  local -a pids
+  pids=(${(f)"$(lsof -t -iTCP:"$port" -sTCP:LISTEN 2>/dev/null)"})
+  if (( ${#pids} == 0 )); then
+    echo -e "${BRed}Error:${Color_Off} Nothing is listening on port: $port"
     return 1
   fi
 
-  kill $(lsof -t -i:$port)
-  if [ $? -eq 0 ]; then
-    echo -e "${UGreen}Success:${Color_Off} Killed process on port: $port\n"
+  if kill "${pids[@]}"; then
+    echo -e "${UGreen}Success:${Color_Off} Killed listener on port $port (pid ${(j:, :)pids})\n"
   else
     echo -e "${BRed}Error:${Color_Off} Failed to kill process on port: $port"
     return 1
   fi
 }
 
-# This function displays the top N most frequently used shell commands
-# from the history. It takes one argument, 'amount', which specifies
-# the number of top commands to display. The commands are sorted by
-# frequency, and each command's occurrence percentage is shown.
-# Commands starting with "./" are excluded from the results.
+# Top N most-used commands. Atuin keeps the full history; the `history`
+# builtin only shows the last 16 events.
 top_history() {
   local amount="$1"
 
@@ -47,14 +46,12 @@ top_history() {
     echo -e "${BRed}Error:${Color_Off} No amount provided"
     return 1
   fi
-
-  if ! history >/dev/null 2>&1; then
-    echo -e "${BRed}Error:${Color_Off} Could not access the command history"
+  if ! command -v atuin >/dev/null; then
+    echo -e "${BRed}Error:${Color_Off} atuin is not installed"
     return 1
   fi
 
-  history | grep -v "./" | awk '{CMD[$2]++;count++;}END {for (a in CMD)print CMD[a] " " CMD[a]/count*100 "% " a;}' |
-    sort -nr | nl | head -n"$amount"
+  atuin stats --count "$amount"
 }
 
 # Expand dot runs in the current buffer (mutates LBUFFER).
