@@ -44,7 +44,8 @@ mise use -g go@latest python@3.13 ruby@3.2
 
 - `...` then Tab still walks up directories, through fzf-tab
 - `gps`, `gpo`, `gcdp`, `git_purge` are unchanged in spirit
-- `update` refreshes Homebrew, Mac App Store, antidote, mise, and the local web UI
+- `update` refreshes Homebrew, Mac App Store, antidote, and mise; `update --webui` also refreshes the local web UI (starts Docker)
+- Up/Down cycle history entries that start with what is typed; Ctrl-R is Atuin
 - `direnv_nvm` asks for a Node version and runs `mise use --path . node@<version>`
 
 ## Check the config
