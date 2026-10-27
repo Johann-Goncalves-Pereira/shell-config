@@ -25,3 +25,5 @@ _source_if "$USER_CONFIG_DIRECTORY/config/work.zsh"
 _source_if "$USER_CONFIG_DIRECTORY/config/prompt/oh-my-posh.zsh"
 
 unfunction _source_if
+
+. "$HOME/.local/share/../bin/env"
