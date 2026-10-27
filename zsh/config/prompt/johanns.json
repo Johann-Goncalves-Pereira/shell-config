@@ -9,119 +9,212 @@
           "type": "shell",
           "style": "plain",
           "foreground": "#E06C75",
-          "properties": {
+          "template": " {{ .Name }}",
+          "options": {
             "mapped_shell_names": {
               "pwsh": "Shell",
               "powershell": "Shell",
               "cmd": "Cmd",
               "bash": "Bash"
             }
-          },
-          "template": "\ue795 {{ .Name }}"
+          }
         },
         {
           "foreground": "#E5C07B",
-          "properties": {
-            "time_format": "06ʸ 1ᵐ 2ᵈ · 15:04:05"
-          },
           "style": "plain",
           "template": "<#cc7eda> » </>[{{ .CurrentDate | date .Format }}]",
-          "type": "time"
+          "type": "time",
+          "options": {
+            "time_format": "06ʸ 1ᵐ 2ᵈ · 15:04:05"
+          }
         },
         {
           "foreground": "#b8ff75",
-          "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
-          "properties": {
-            "style": "roundrock",
-            "always_enabled": true
-          },
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#E06C75{{ end }}"
+          ],
           "style": "diamond",
           "template": "<#cc7eda> » </>{{ .FormattedMs }}",
-          "type": "executiontime"
+          "type": "executiontime",
+          "options": {
+            "style": "roundrock",
+            "always_enabled": true
+          }
         },
         {
           "type": "status",
           "style": "plain",
           "foreground": "#b8ff75",
-          "foreground_templates": ["{{ if gt .Code 0 }}#E06C75{{ end }}"],
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}#E06C75{{ end }}"
+          ],
           "template": " x{{ reason .Code }}"
         },
         {
           "foreground": "#417E37",
-          "properties": {
-            "fetch_version": true
-          },
           "style": "powerline",
           "template": "<#cc7eda> » </><#68BD4A></> {{ if .PackageManagerIcon }}{{ .PackageManagerIcon }} {{ end }}{{ .Full }}",
-          "type": "node"
+          "type": "node",
+          "options": {
+            "fetch_version": true,
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "pnpm",
           "style": "powerline",
           "foreground": "#BB6400",
           "template": "<#cc7eda> » </><#F69220></> {{ .Full }}",
-          "display_mode": "files",
-          "extensions": ["pnpm-lock.yaml"]
+          "options": {
+            "display_mode": "files",
+            "extensions": [
+              "pnpm-lock.yaml"
+            ]
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "bun",
           "style": "powerline",
           "foreground": "#F471B5",
-          "template": "<#cc7eda> » </><#FAF1E1></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#FAF1E1></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "php",
           "style": "powerline",
           "foreground": "#7eb8da",
-          "template": "<#cc7eda> » </><#4F5B93></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#4F5B93></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "python",
           "style": "powerline",
           "foreground": "#75A8D3",
-          "template": "<#cc7eda> » </><#FFDF76></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#FFDF76></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "ruby",
           "style": "powerline",
           "foreground": "#9B1C16",
-          "template": "<#cc7eda> » </><#CC342D></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#CC342D></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "go",
           "style": "powerline",
           "foreground": "#027D9C",
-          "template": "<#cc7eda> » </><#79D4FD>󰟓 </> {{ .Full }}"
+          "template": "<#cc7eda> » </><#79D4FD>󰟓 </> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
-          "type": "text",
+          "type": "rust",
           "style": "powerline",
           "foreground": "#AA2901",
-          "template": "{{ if or (glob \"Cargo.toml\") (glob \"Cargo.lock\") (glob \"*.rs\") (glob \"rust-toolchain\") (glob \"rust-toolchain.toml\") (glob \"*/Cargo.toml\") (glob \"*/Cargo.lock\") (glob \"*/*.rs\") (glob \"*/*/Cargo.toml\") (glob \"*/*/Cargo.lock\") (glob \"*/*/*.rs\") }}<#cc7eda> » </><#F64D01></> {{ index (splitList \" \" (cmd \"rustc\" \"--version\")) 1 }}{{ end }}"
+          "options": {
+            "display_mode": "files",
+            "extensions": [
+              "Cargo.toml",
+              "Cargo.lock",
+              "rust-toolchain.toml",
+              "rust-toolchain"
+            ]
+          },
+          "template": "<#cc7eda> » </><#F64D01></> {{ .Full }}",
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "haskell",
           "style": "powerline",
           "foreground": "#8F4E8B",
-          "template": "<#cc7eda> » </><#453A62></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#453A62></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "java",
           "style": "powerline",
           "foreground": "#5484A2",
-          "template": "<#cc7eda> » </><#E76F00></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#E76F00></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "lua",
           "style": "powerline",
           "foreground": "#010181",
-          "template": "<#cc7eda> » </><#00185D></> {{ .Full }}"
+          "template": "<#cc7eda> » </><#00185D></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         },
         {
           "type": "elixir",
           "style": "powerline",
           "foreground": "#66539E",
-          "template": "<#cc7eda> » </><#8B5CF6>\ue62d</> {{ .Full }}"
+          "template": "<#cc7eda> » </><#8B5CF6></> {{ .Full }}",
+          "options": {
+            "display_mode": "files"
+          },
+          "cache": {
+            "duration": "1h",
+            "strategy": "folder"
+          }
         }
       ],
       "type": "prompt"
@@ -132,12 +225,12 @@
       "segments": [
         {
           "foreground": "#61AFEF",
-          "properties": {
-            "style": "full"
-          },
           "style": "plain",
-          "template": "\ue5ff {{ .Path }}",
-          "type": "path"
+          "template": " {{ .Path }}",
+          "type": "path",
+          "options": {
+            "style": "full"
+          }
         },
         {
           "foreground": "#F3C267",
@@ -147,15 +240,15 @@
             "{{ if gt .Ahead 0 }}#B388FF{{ end }}",
             "{{ if gt .Behind 0 }}#B388FF{{ end }}"
           ],
-          "properties": {
+          "style": "plain",
+          "template": "<#cc7eda> » </>{{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }}  {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }}  {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }}  {{ .StashCount }}{{ end }} ",
+          "type": "git",
+          "options": {
             "branch_max_length": 25,
             "fetch_stash_count": true,
             "fetch_status": true,
             "fetch_upstream_icon": true
-          },
-          "style": "plain",
-          "template": "<#cc7eda> » </>{{ .UpstreamIcon }}{{ .HEAD }}{{if .BranchStatus }} {{ .BranchStatus }}{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} ",
-          "type": "git"
+          }
         }
       ],
       "type": "prompt"
@@ -167,13 +260,13 @@
         {
           "foreground": "#E06C75",
           "style": "plain",
-          "template": "\u0021",
+          "template": "!",
           "type": "root"
         },
         {
           "foreground": "#E06C75",
           "style": "plain",
-          "template": "\u276f",
+          "template": "❯",
           "type": "text"
         }
       ],
