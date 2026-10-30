@@ -64,6 +64,10 @@ pub fn persist(
     transport::tcpip(runner, wait, cfg, DEFAULT_ADB_PORT)?;
     save_tailscale_wan(runner, cfg, &serial)?;
     open_tailscale(runner, &serial);
+    match crate::termux_guard::install(runner, wait, cfg) {
+        Ok(()) => {}
+        Err(e) => println!("Termux USB guard: skipped ({e})"),
+    }
     println!(
         "Persist done. Classic :{DEFAULT_ADB_PORT} may still reset on reboot \
          unless persist.adb.tcp.port stuck — use `phone watch` on this Mac."
@@ -83,12 +87,29 @@ pub fn force_usb_lab_mode(
     if verbose {
         println!("Forcing USB lab mode on {transport} (This device + MTP)...");
     }
+    // RNDIS/tether replaces ADB on the cable — setFunctions mtp clears it.
     let _ = adb::shell(runner, transport, "svc usb setFunctions mtp");
     let _ =
         adb::shell(runner, transport, "svc usb setScreenUnlockedFunctions mtp");
+    let _ = adb::shell(runner, transport, "svc usb setFunctions mtp,adb");
     try_persist_usb_config(runner, transport, verbose);
     verify_usb_lab_mode(runner, transport, verbose);
     Ok(())
+}
+
+/// When the cable is RNDIS/wrong mode, USB ADB is gone — flip MTP over LAN/WAN.
+///
+/// Returns the transport used. Requires a reachable wireless (or USB) `device`.
+pub fn force_mtp_via_reachable(
+    runner: &dyn CommandRunner,
+    cfg: &Config,
+) -> Result<String> {
+    for host in [cfg.read_host(), cfg.read_wan_host()].into_iter().flatten() {
+        let _ = adb::adb_connect(runner, &host);
+    }
+    let t = crate::transport::transport(runner, cfg)?;
+    force_usb_lab_mode(runner, &t, false)?;
+    Ok(t)
 }
 
 fn try_persist_usb_config(
@@ -280,7 +301,7 @@ fn save_tailscale_wan(
         let host = format!("{ip}:{DEFAULT_ADB_PORT}");
         cfg.write_wan_host(&host)?;
         println!("Saved WAN host: {host}");
-        let _ = adb::adb(runner, &["connect", &host]);
+        let _ = adb::adb_connect(runner, &host);
     } else {
         println!(
             "No Tailscale IP on phone yet — open Tailscale (connect on boot), then: phone wan"
@@ -330,6 +351,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         force_usb_lab_mode(&runner, "TEST", false)?;
         let shells = runner.shells.borrow();
@@ -338,6 +360,42 @@ mod tests {
             shells
                 .iter()
                 .any(|c| { c == "svc usb setScreenUnlockedFunctions mtp" })
+        );
+        assert!(shells.iter().any(|c| c == "svc usb setFunctions mtp,adb"));
+        Ok(())
+    }
+
+    #[test]
+    fn force_mtp_via_reachable_uses_usb_serial() -> Result<()> {
+        use std::time::{SystemTime, UNIX_EPOCH};
+        let mut replies = HashMap::new();
+        replies.insert("svc usb getFunctions".into(), "mtp,adb".into());
+        replies
+            .insert("getprop persist.sys.usb.config".into(), "mtp,adb".into());
+        let runner = ScriptedRunner {
+            which_adb: true,
+            devices: "List of devices attached\nTESTSERIAL\tdevice\n".into(),
+            shell_replies: RefCell::new(replies),
+            puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
+        };
+        let stamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| std::io::Error::other(e.to_string()))?
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!("phone-mtp-{stamp}"));
+        let cfg = Config::with_dir("TESTSERIAL".into(), dir)?;
+        let t = force_mtp_via_reachable(&runner, &cfg)?;
+        assert_eq!(t, "TESTSERIAL");
+        assert!(
+            runner
+                .shells
+                .borrow()
+                .iter()
+                .any(|c| c == "svc usb setFunctions mtp")
         );
         Ok(())
     }
@@ -352,6 +410,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         try_persist_tcp_port(&runner, "TEST");
         Ok(())
@@ -367,6 +426,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         force_wifi_always_on(&runner, "TEST", false)?;
         let puts = runner.puts.borrow();
