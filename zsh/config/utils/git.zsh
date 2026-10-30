@@ -1,7 +1,14 @@
 NOT_IN_GIT="\n ${Red}[Error]:${Color_Off} There is not a git repository in this folder!\n"
 
+# True inside any working tree, including nested directories and worktrees
+# (where .git is a file). The old `[ -d .git ] || [ -d ../.git ]` check
+# refused to run more than one level below the root.
+_in_git_work_tree() {
+  [[ $(command git rev-parse --is-inside-work-tree 2>/dev/null) == true ]]
+}
+
 _git_var() {
-  if [ -d .git ] || [ -d ../.git ]; then
+  if _in_git_work_tree; then
     CURRENT_BRANCH=$(git branch --show-current)
 
     if [ -z "$CURRENT_BRANCH" ]; then
@@ -71,7 +78,7 @@ git_squash_all_commits() {
 }
 
 function print_default_branch() {
-  if [ -d .git ] || [ -d ../.git ]; then
+  if _in_git_work_tree; then
     if ! _git_var; then
       echo -e "\n${Red}[Error]:${Color_Off} Could not determine the default branch. Please check the remote settings.\n"
       return 1
@@ -79,13 +86,13 @@ function print_default_branch() {
 
     echo -e "\nYour default branch is: ${UGreen}$DEFAULT_BRANCH_NAME${Color_Off}\n"
   else
-    echo -e $NOT_IN_GIT
+    echo -e "$NOT_IN_GIT"
   fi
 }
 
 # Push to remote
 function gps() {
-  if [ -d .git ] || [ -d ../.git ]; then
+  if _in_git_work_tree; then
     _git_var
     if [ -n "$CURRENT_BRANCH" ]; then
       local push_args=()
@@ -108,27 +115,26 @@ function gps() {
       echo -e "\n${Red}[Error]:${Color_Off} Could not determine the current branch.\n"
     fi
   else
-    echo -e $NOT_IN_GIT
+    echo -e "$NOT_IN_GIT"
   fi
 }
 
 function gpo() {
-  if [ -d .git ] || [ -d ../.git ]; then
+  if _in_git_work_tree; then
     _git_var
     if [ -n "$CURRENT_BRANCH" ]; then
       echo -e "\n${Cyan}[Progress]:${Color_Off} Pulling from remote origin ${UGreen}$CURRENT_BRANCH${Color_Off}\n"
       git pull origin "$CURRENT_BRANCH"
-      git fetch origin
     else
       echo -e "\n${Red}[Error]:${Color_Off} Could not determine the current branch.\n"
     fi
   else
-    echo -e $NOT_IN_GIT
+    echo -e "$NOT_IN_GIT"
   fi
 }
 
 function gcdp() {
-  if [ -d .git ] || [ -d ../.git ]; then
+  if _in_git_work_tree; then
     if ! _git_var; then
       echo -e "\n${Red}[Error]:${Color_Off} Failed to retrieve git variables.\n"
       return 1
@@ -144,7 +150,7 @@ function gcdp() {
     fi
     gpo
   else
-    echo -e $NOT_IN_GIT
+    echo -e "$NOT_IN_GIT"
   fi
 }
 

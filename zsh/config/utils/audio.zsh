@@ -37,9 +37,12 @@ fix_call_audio() {
   "$bin" "$@"
 }
 
-# On interactive shells, ensure the LaunchAgent guard is loaded (quiet).
-# Ensure the LaunchAgent guard is loaded. Do not re-run the audio reset
-# on every interactive shell; that belongs to an explicit `fix_call_audio` call.
-if [[ "$(uname -s)" == "Darwin" && -o interactive && "${FIX_CALL_AUDIO_DISABLE:-0}" != "1" ]]; then
-  fix_call_audio watch >/dev/null 2>&1 || true
+# On interactive shells, make sure the LaunchAgent guard is loaded.
+# `watch` is idempotent (it only bootstraps when the agent is stopped or the
+# plist is stale), and it runs in the background so the prompt never waits on
+# launchctl. The audio reset itself belongs to an explicit `fix_call_audio` call.
+# Skip until cargo exists so a mid-setup shell does not fail-loop.
+if [[ $OSTYPE == darwin* && -o interactive && "${FIX_CALL_AUDIO_DISABLE:-0}" != "1" ]] \
+  && (( $+commands[cargo] )); then
+  fix_call_audio watch &>/dev/null &!
 fi

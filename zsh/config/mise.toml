@@ -2,8 +2,13 @@
 [settings]
 idiomatic_version_file_enable_tools = ["node", "python", "ruby", "go", "bun"]
 legacy_version_file = true
+# Missing tools must not block cd / prompt; install explicitly with `mise install`.
+auto_install = false
 
-# Matches the fnm default on this machine so `node` does not disappear
-# when asdf/fnm stop being sourced. Project version files still win.
+# Node tracks the 24 line so `mise upgrade` (run by `update`) picks up patch
+# releases; an exact pin never moved. Project version files still win.
 [tools]
-node = "24.11.1"
+go = "latest"
+node = "24"
+python = "3.13"
+ruby = "3.2"

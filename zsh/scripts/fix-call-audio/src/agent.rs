@@ -56,11 +56,24 @@ pub fn write_plist(bin: &Path) -> Result<()> {
     Ok(())
 }
 
+/// Seconds-since-epoch mtime of the release binary, or empty when missing.
+/// Baked into the plist so a rebuilt binary changes the body and `watch`
+/// restarts the agent instead of treating it as already watching.
+pub fn build_stamp(bin: &Path) -> String {
+    std::fs::metadata(bin)
+        .and_then(|m| m.modified())
+        .ok()
+        .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+        .map(|d| d.as_secs().to_string())
+        .unwrap_or_default()
+}
+
 fn plist_body(bin: &Path, log: &Path) -> String {
     let bin_s = bin.display().to_string();
     let log_s = log.display().to_string();
     let home_s = home().display().to_string();
     let root = env!("CARGO_MANIFEST_DIR");
+    let stamp = build_stamp(bin);
     format!(
         r#"<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -89,6 +102,8 @@ fn plist_body(bin: &Path, log: &Path) -> String {
 		<string>{home_s}</string>
 		<key>CARGO_MANIFEST_DIR</key>
 		<string>{root}</string>
+		<key>FIX_CALL_AUDIO_BUILD</key>
+		<string>{stamp}</string>
 	</dict>
 </dict>
 </plist>
@@ -96,17 +111,54 @@ fn plist_body(bin: &Path, log: &Path) -> String {
     )
 }
 
+/// True when launchd reports the agent running and the plist on disk already
+/// matches `body`. `watch` then returns without a bootout/bootstrap cycle, so
+/// opening a terminal does not restart the guard and reset its cooldown.
+pub fn already_watching(
+    runner: &dyn CommandRunner,
+    uid: &str,
+    plist: &Path,
+    body: &str,
+) -> bool {
+    let Ok(on_disk) = std::fs::read_to_string(plist) else {
+        return false;
+    };
+    if on_disk != body {
+        return false;
+    }
+    let label_path = format!("gui/{uid}/{LABEL}");
+    match runner.output("launchctl", &["print", &label_path]) {
+        Ok(out) => {
+            out.status.success() && agent_running(&devices::stdout_utf8(&out))
+        }
+        Err(_) => false,
+    }
+}
+
+/// `launchctl print` lists the job's own `state = running` at one tab of
+/// indentation; nested `state = active` lines belong to its sub-entries.
+pub fn agent_running(print_output: &str) -> bool {
+    print_output
+        .lines()
+        .any(|line| line.trim() == "state = running")
+}
+
 pub fn watch(runner: &dyn CommandRunner) -> Result<()> {
     devices::ensure_switch_audio(runner)?;
     devices::ensure_blueutil(runner)?;
     let _ = hide::ensure_built(runner)?;
     let bin = release_bin();
-    write_plist(&bin)?;
     let uid = user_id(runner)?;
+    let plist = plist_path();
+    let body = plist_body(&bin, &log_path());
+    if already_watching(runner, &uid, &plist, &body) {
+        println!("Already watching: {LABEL}");
+        return Ok(());
+    }
+    write_plist(&bin)?;
     let domain = format!("gui/{uid}");
     let label_path = format!("{domain}/{LABEL}");
     let _ = runner.output("launchctl", &["bootout", &label_path]);
-    let plist = plist_path();
     let plist_s = plist.to_string_lossy().into_owned();
     let out = runner.output("launchctl", &["bootstrap", &domain, &plist_s])?;
     if out.status.success() {
@@ -283,4 +335,109 @@ fn maintain_session(
         let _ = devices::set_device(runner, "output", output);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::error::Result;
+    use crate::runner::ScriptedRunner;
+
+    fn temp_plist(tag: &str, body: &str) -> Result<PathBuf> {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        let dir = std::env::temp_dir().join(format!("fca-agent-{tag}-{nanos}"));
+        std::fs::create_dir_all(&dir)?;
+        let path = dir.join("agent.plist");
+        std::fs::write(&path, body)?;
+        Ok(path)
+    }
+
+    fn print_key() -> String {
+        format!("launchctl print gui/501/{LABEL}")
+    }
+
+    #[test]
+    fn running_agent_with_fresh_plist_is_already_watching() -> Result<()> {
+        let plist = temp_plist("fresh", "<plist>fresh</plist>")?;
+        let runner = ScriptedRunner::new();
+        runner.on(print_key(), 0, "\tstate = running\n\tpid = 41109\n", "");
+        assert!(already_watching(
+            &runner,
+            "501",
+            &plist,
+            "<plist>fresh</plist>"
+        ));
+        let calls = runner.calls.borrow();
+        assert!(calls.iter().all(|c| !c.contains("bootout")));
+        assert!(calls.iter().all(|c| !c.contains("bootstrap")));
+        Ok(())
+    }
+
+    #[test]
+    fn stale_plist_forces_restart_without_asking_launchd() -> Result<()> {
+        let plist = temp_plist("stale", "<plist>old binary</plist>")?;
+        let runner = ScriptedRunner::new();
+        runner.on(print_key(), 0, "\tstate = running\n", "");
+        assert!(!already_watching(
+            &runner,
+            "501",
+            &plist,
+            "<plist>rebuilt binary</plist>"
+        ));
+        assert!(runner.calls.borrow().is_empty());
+        Ok(())
+    }
+
+    #[test]
+    fn stopped_agent_forces_restart() -> Result<()> {
+        let plist = temp_plist("stopped", "<plist>same</plist>")?;
+        let runner = ScriptedRunner::new();
+        runner.on(print_key(), 113, "", "Could not find service");
+        assert!(!already_watching(
+            &runner,
+            "501",
+            &plist,
+            "<plist>same</plist>"
+        ));
+        Ok(())
+    }
+
+    #[test]
+    fn missing_plist_forces_restart() {
+        let runner = ScriptedRunner::new();
+        let missing = std::env::temp_dir().join("fca-agent-missing.plist");
+        assert!(!already_watching(&runner, "501", &missing, "<plist/>"));
+        assert!(runner.calls.borrow().is_empty());
+    }
+
+    #[test]
+    fn rebuilt_binary_changes_the_plist_body() -> Result<()> {
+        let bin = temp_plist("rebuilt", "binary")?;
+        let log = Path::new("/tmp/fca.log");
+        let file = std::fs::File::options().write(true).open(&bin)?;
+        file.set_modified(UNIX_EPOCH + std::time::Duration::from_secs(1000))?;
+        assert_eq!(build_stamp(&bin), "1000");
+        let before = plist_body(&bin, log);
+        file.set_modified(UNIX_EPOCH + std::time::Duration::from_secs(2000))?;
+        assert_eq!(build_stamp(&bin), "2000");
+        assert_ne!(before, plist_body(&bin, log));
+        assert_eq!(build_stamp(Path::new("/nonexistent/fca")), "");
+        Ok(())
+    }
+
+    #[test]
+    fn agent_running_reads_only_the_job_state() {
+        let cases: &[(&str, bool)] = &[
+            ("\tstate = running\n\tpid = 1\n", true),
+            ("\tstate = waiting\n", false),
+            ("\t\tstate = active\n", false),
+            ("", false),
+        ];
+        for (output, want) in cases {
+            assert_eq!(agent_running(output), *want, "output={output:?}");
+        }
+    }
 }

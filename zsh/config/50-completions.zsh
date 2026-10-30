@@ -24,11 +24,39 @@ fi
   fi
 }
 
+# LS_COLORS was empty, so list-colors below colored nothing. Generate it once
+# with GNU dircolors (vivid is not installed) and cache the export line.
+() {
+  [[ -n ${LS_COLORS:-} ]] && return 0
+  local cache="${XDG_CACHE_HOME:-$HOME/.cache}/zsh/ls_colors.zsh"
+  local dircolors
+  if [[ ! -s $cache ]]; then
+    for dircolors in gdircolors dircolors; do
+      (( $+commands[$dircolors] )) || continue
+      mkdir -p "${cache:h}"
+      # dircolors emits an empty LS_COLORS for a TERM it does not know (dumb);
+      # do not cache that.
+      TERM="${TERM:-xterm-256color}" "$dircolors" -b >| "$cache" 2>/dev/null \
+        && grep -q 'di=' "$cache" \
+        || rm -f "$cache"
+      break
+    done
+  fi
+  [[ -s $cache ]] && source "$cache"
+  return 0
+}
+
 zstyle ':completion:*' matcher-list '' 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
 zstyle ':completion:*' special-dirs true
-zstyle ':completion:*' menu select
+# fzf-tab draws the list; zsh's own menu must stay off so the unambiguous
+# prefix is inserted before fzf opens (fzf-tab README).
+zstyle ':completion:*' menu no
 
 zstyle ':fzf-tab:*' switch-group ',' '.'
+# fzf-tab ignores FZF_DEFAULT_OPTS unless asked; this applies --height/--border.
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+# Short lists still get a usable picker instead of a one-line window.
+zstyle ':fzf-tab:*' fzf-min-height 15
 zstyle ':completion:*:descriptions' format '[%d]'
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:complete:*:options' sort true

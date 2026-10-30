@@ -7,6 +7,7 @@ UTILS="$USER_CONFIG_DIRECTORY/config/utils"
 [ -f $UTILS/git.zsh ] && source $UTILS/git.zsh
 [ -f $UTILS/audio.zsh ] && source $UTILS/audio.zsh
 [ -f $UTILS/phone.zsh ] && source $UTILS/phone.zsh
+[ -f $UTILS/ukvdavi.zsh ] && source $UTILS/ukvdavi.zsh
 
 function update_webui() {
   echo "\n\n${BGreen}Updating WebUI + SearXNG...${Color_Off}\n\n"
@@ -24,8 +25,8 @@ function update_webui() {
     return 1
   fi
 
-  if ! docker info &>/dev/null; then
-    echo "Docker daemon is not running. Skipping WebUI/SearXNG update."
+  if ! docker_ensure_running; then
+    echo "Skipping WebUI/SearXNG update."
     return 1
   fi
 
@@ -153,14 +154,27 @@ function optimize_homebrew_taps() {
   fi
 }
 
+# update [--webui]
+# The WebUI/SearXNG step starts Docker and pulls two images, so it is opt-in.
 function update() {
+  local with_webui=0 arg
+  for arg in "$@"; do
+    case "$arg" in
+      --webui) with_webui=1 ;;
+      *)
+        echo -e "${BRed}Error:${Color_Off} Unknown option: $arg"
+        echo "Usage: update [--webui]"
+        return 1
+        ;;
+    esac
+  done
+
   echo -e "${BGreen}Optimizing Homebrew taps...${Color_Off}\n"
   optimize_homebrew_taps
 
   echo -e "\n\n${BGreen}Updating with Homebrew...${Color_Off}\n"
   brew update
   brew upgrade
-  brew cleanup
   if command -v mas >/dev/null; then
     echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
     mas upgrade
@@ -191,9 +205,16 @@ function update() {
     atuin gen-completions --shell zsh >"${atuin_comp}/_atuin" 2>/dev/null || true
   fi
 
-  update_webui
+  if (( with_webui )); then
+    update_webui
+  else
+    echo "\n${BGreen}Skipping WebUI/SearXNG (run \`update --webui\` to include it).${Color_Off}\n"
+  fi
 
-  brew cleanup --prune=all && rm -f "$ZSH_COMPDUMP"
+  # One cleanup at the end. Dropping the compdump and the cached init scripts
+  # makes the next shell pick up new completions and upgraded tools.
+  brew cleanup --prune=all
+  rm -f "$ZSH_COMPDUMP" "$ZSH_COMPDUMP.zwc" "${XDG_CACHE_HOME:-$HOME/.cache}"/zsh/init-*.zsh(N)
 
   echo "\n\n${BGreen}Update completed.${Color_Off}\n\n"
 }
@@ -227,11 +248,20 @@ strip_image() {
     return 1
   fi
   local src="$USER_CONFIG_DIRECTORY/scripts/strip_image"
-  local bindir
-  go -C "$src" install ./cmd/strip_image || return
+  local bindir bin newest
   bindir="$(go env GOBIN)"
   [[ -z "$bindir" ]] && bindir="$(go env GOPATH)/bin"
-  "$bindir/strip_image" "$@"
+  bin="$bindir/strip_image"
+  # Rebuild only when a source file is newer than the installed binary,
+  # the same check phone and ukvdavi use.
+  newest=""
+  if [[ -x $bin ]]; then
+    newest=$(find "$src" -type f \( -name '*.go' -o -name 'go.mod' -o -name 'go.sum' \) -newer "$bin" -print -quit 2>/dev/null)
+  fi
+  if [[ ! -x $bin || -n $newest ]]; then
+    go -C "$src" install ./cmd/strip_image || return
+  fi
+  "$bin" "$@"
 }
 
 clean_node_modules() {

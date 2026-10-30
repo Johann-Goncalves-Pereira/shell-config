@@ -1,0 +1,3 @@
+#!/usr/bin/env zsh
+# Fresh-machine entrypoint. Clone to ~/.shell-config, then run ./setup.
+exec zsh "${0:A:h}/zsh/install/install.zsh" "$@"

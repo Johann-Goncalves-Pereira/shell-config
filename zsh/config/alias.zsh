@@ -49,7 +49,9 @@ alias gtr='git tag -d $(git tag) && git fetch --tags' # Refresh local tags from 
 # Modern unix aliases previously applied by zinit atload. Only when the tool exists.
 if (( $+commands[eza] )); then
   alias ls='eza --icons --time-style=long-iso --group-directories-first'
-  alias la='eza --icons --time-style=long-iso --group-directories-first -laFh'
+  # -F/--classify takes always|auto|never; do not glue short flags after -F
+  # (eza 0.23+ parses -laFh as --classify=h).
+  alias la='eza --icons --time-style=long-iso --group-directories-first -lah --classify=always'
   alias ll='eza --icons --time-style=long-iso --group-directories-first -l --header'
   alias lt='eza -T -L=3 --icons'
 elif (( $+commands[gls] )); then

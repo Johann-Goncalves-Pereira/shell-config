@@ -38,7 +38,7 @@ function convert_m4b_audiobook_to_mp3_with_chapters() {
   fi
 
   # Loop through all .m4b files in the current directory
-  for audiobook_path in *.m4b; do
+  for audiobook_path in *.m4b(N); do
     echo -n "Converting ${BICyan}$audiobook_path${Color_Off} to mp3 format with chapters...\n"
     m4b-tool split --audio-format mp3 --audio-bitrate 96k --audio-channels 2 --audio-samplerate 22050 "$audiobook_path"
   done
@@ -564,6 +564,17 @@ function cp_ignore() {
 
   if rsync -a "${rsync_args[@]}" "$src/" "$dest/"; then
     echo "${BGreen}[Done]:${Color_Off} Copied ${BICyan}$src${Color_Off} → ${BICyan}$dest${Color_Off}"
+    # Say what was left behind at the top level, so a `cp -r project backup`
+    # never silently drops .git. Deeper matches are excluded too.
+    local -a skipped
+    local pattern
+    for pattern in "${excludes[@]}"; do
+      [[ -e "$src/$pattern" ]] && skipped+=("$pattern")
+    done
+    if (( ${#skipped} )); then
+      echo "${BYellow}[Skipped]:${Color_Off} ${(j:, :)skipped} (top level; the same patterns are excluded deeper down)."
+      echo "           Use ${BICyan}cp -r --no-ignore${Color_Off} or ${BICyan}command cp -r${Color_Off} for a full copy."
+    fi
   else
     echo "${BIRed}[Error]:${Color_Off} Failed to copy ${BICyan}$src${Color_Off} → ${BICyan}$dest${Color_Off}"
     return 1

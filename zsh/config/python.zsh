@@ -19,10 +19,9 @@ fi
 
 # Add user base binary directory (for pip --user installs)
 # macOS + Python often installs user scripts in ~/Library/Python/<version>/bin
-# Guard against nomatch error when there are no subdirectories yet.
+# (N) guards against a nomatch error when there are no subdirectories yet.
 if [ -d "$HOME/Library/Python" ]; then
-  setopt local_options null_glob 2>/dev/null
-  for py_dir in "$HOME/Library/Python"/*; do
+  for py_dir in "$HOME/Library/Python"/*(N); do
     [ -d "$py_dir/bin" ] || continue
     case :$PATH: in
       *:"$py_dir/bin":*) ;; # already in PATH
