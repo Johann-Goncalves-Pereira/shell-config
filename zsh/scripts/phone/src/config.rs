@@ -6,6 +6,8 @@ use std::path::{Path, PathBuf};
 use crate::error::{ConfigError, Result};
 
 pub const DEFAULT_ADB_PORT: u16 = 5555;
+pub const DEFAULT_SSH_PORT: u16 = 8022;
+pub const DEFAULT_SSH_USER: &str = "u0_a553";
 
 pub struct Config {
     serial: String,
@@ -75,6 +77,18 @@ impl Config {
         self.dir.join("apks")
     }
 
+    pub fn ssh_key_path(&self) -> PathBuf {
+        self.dir.join("id_phone_ed25519")
+    }
+
+    pub fn ssh_pub_key_path(&self) -> PathBuf {
+        self.dir.join("id_phone_ed25519.pub")
+    }
+
+    pub fn backup_dir(&self) -> PathBuf {
+        self.dir.join("backup")
+    }
+
     pub fn read_serial(&self) -> String {
         read_trim(&self.serial_path()).unwrap_or_else(|| self.serial.clone())
     }
@@ -97,6 +111,20 @@ impl Config {
 
     pub fn write_wan_host(&self, host: &str) -> Result<()> {
         write_line(&self.wan_host_path(), host)
+    }
+
+    pub fn pin_path(&self) -> PathBuf {
+        self.dir.join("pin")
+    }
+
+    /// Trusted lab `adbkey.pub` token (copied via `phone doctor --save`).
+    pub fn expected_adbkey_pub_path(&self) -> PathBuf {
+        self.dir.join("expected-adbkey.pub")
+    }
+
+    /// Lock-screen PIN/password from `PHONE_ADB_PIN` or gitignored `pin` file.
+    pub fn read_pin(&self) -> Option<String> {
+        env_nonempty("PHONE_ADB_PIN").or_else(|| read_trim(&self.pin_path()))
     }
 
     pub fn screen_disabled_path(&self) -> PathBuf {
@@ -136,27 +164,42 @@ impl Config {
     }
 }
 
+fn env_nonempty(key: &str) -> Option<String> {
+    std::env::var(key)
+        .ok()
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+}
+
 fn resolve_serial(dir: &Path) -> Result<String> {
-    if let Ok(s) = std::env::var("PHONE_ADB_SERIAL") {
-        let s = s.trim().to_string();
-        if !s.is_empty() {
-            return Ok(s);
-        }
+    if let Some(s) = env_nonempty("PHONE_ADB_SERIAL") {
+        return Ok(s);
     }
     if let Some(s) = read_trim(&dir.join("serial")) {
+        return Ok(s);
+    }
+    if let Some(s) = discover_serial_from_adb() {
         return Ok(s);
     }
     Err(ConfigError::MissingSerial.into())
 }
 
-fn resolve_tailscale_peer(dir: &Path) -> String {
-    if let Ok(s) = std::env::var("PHONE_TAILSCALE_PEER") {
-        let s = s.trim().to_string();
-        if !s.is_empty() {
-            return s;
-        }
+fn discover_serial_from_adb() -> Option<String> {
+    let out = std::process::Command::new("adb")
+        .arg("devices")
+        .output()
+        .ok()?;
+    if !out.status.success() {
+        return None;
     }
-    read_trim(&dir.join("tailscale-peer")).unwrap_or_default()
+    let text = String::from_utf8_lossy(&out.stdout);
+    crate::adb::discover_usb_serial(&text)
+}
+
+fn resolve_tailscale_peer(dir: &Path) -> String {
+    env_nonempty("PHONE_TAILSCALE_PEER")
+        .or_else(|| read_trim(&dir.join("tailscale-peer")))
+        .unwrap_or_default()
 }
 
 fn config_dir() -> PathBuf {

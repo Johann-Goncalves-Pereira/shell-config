@@ -34,6 +34,7 @@ pub fn print_err(err: &Error) {
 pub fn error_code(err: &Error) -> &'static str {
     match err {
         Error::Config(ConfigError::MissingSerial) => "missing_serial",
+        Error::Config(ConfigError::MissingPin) => "missing_pin",
         Error::Config(ConfigError::CreateDir { .. }) => "config_create_dir",
         Error::Config(ConfigError::Write { .. }) => "config_write",
         Error::Adb(AdbError::MissingBinary) => "missing_adb",
@@ -46,11 +47,13 @@ pub fn error_code(err: &Error) -> &'static str {
         Error::Adb(AdbError::Spawn { .. }) => "spawn_failed",
         Error::Adb(AdbError::ExitStatus { .. }) => "exit_status",
         Error::Adb(AdbError::JsonUnsupported { .. }) => "json_unsupported",
+        Error::Adb(AdbError::DoctorFailed) => "doctor_failed",
         Error::Harden(HardenError::SettingsPut { .. }) => "harden_put",
         Error::Wan(WanError::ApkDownload) => "apk_download",
         Error::Wan(WanError::ApkInstall { .. }) => "apk_install",
         Error::Control(e) => e.code(),
         Error::Agent(e) => e.code(),
+        Error::Ssh(e) => e.code(),
         Error::Io(_) => "io",
     }
 }

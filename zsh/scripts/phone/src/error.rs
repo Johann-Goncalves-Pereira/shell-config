@@ -20,6 +20,8 @@ pub enum Error {
     #[error(transparent)]
     Agent(#[from] AgentError),
     #[error(transparent)]
+    Ssh(#[from] SshError),
+    #[error(transparent)]
     Io(#[from] io::Error),
 }
 
@@ -33,6 +35,10 @@ pub enum ConfigError {
         "phone serial unknown — set PHONE_ADB_SERIAL or write it to the gitignored config serial file"
     )]
     MissingSerial,
+    #[error(
+        "lock PIN unknown — set PHONE_ADB_PIN or write it to the gitignored config pin file"
+    )]
+    MissingPin,
 }
 
 #[derive(Debug, Error)]
@@ -48,7 +54,7 @@ pub enum AdbError {
     )]
     Unreachable,
     #[error(
-        "USB device {serial} not in 'device' state — plug cable and authorize"
+        "USB device {serial} not authorized on this Mac — the phone stores one RSA key per computer; with a dead panel copy ~/.android/adbkey* from a Mac that already runs pm, or accept Allow USB debugging once on a working display"
     )]
     UsbUnauthorized { serial: String },
     #[error("could not read wlan0 IP — is Wi‑Fi connected?")]
@@ -63,6 +69,8 @@ pub enum AdbError {
         "--json is not supported for `{cmd}` (interactive or long-running)"
     )]
     JsonUnsupported { cmd: String },
+    #[error("doctor found failing checks — run: phone doctor")]
+    DoctorFailed,
 }
 
 #[derive(Debug, Error)]
@@ -121,6 +129,29 @@ impl AgentError {
             Self::WritePlist { .. } => "agent_write_plist",
             Self::MissingBinary { .. } => "agent_missing_bin",
             Self::Bootstrap { .. } => "agent_bootstrap",
+        }
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum SshError {
+    #[error("ssh target unreachable (tried LAN {lan:?} and WAN {wan:?})")]
+    TargetUnreachable {
+        lan: Option<String>,
+        wan: Option<String>,
+    },
+    #[error("ssh command failed: {0}")]
+    CommandFailed(String),
+    #[error("backup failed: {0}")]
+    BackupFailed(String),
+}
+
+impl SshError {
+    pub fn code(&self) -> &'static str {
+        match self {
+            Self::TargetUnreachable { .. } => "ssh_target_unreachable",
+            Self::CommandFailed(_) => "ssh_command_failed",
+            Self::BackupFailed(_) => "ssh_backup_failed",
         }
     }
 }

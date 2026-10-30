@@ -22,7 +22,9 @@ Rulebook for AI working on the **phone** lab CLI. Humans: see [README.md](README
 | `src/control.rs` | Agent control: shot / ui / tap / type / key / launch |
 | `src/transport.rs` | connect / tcpip / mirror / prep / status (+ mDNS) |
 | `src/persist.rs` | always-on: tcpip + persist props + Tailscale whitelist |
+| `src/doctor.rs` | host/USB diagnose (ioreg mode, adbkey match, watch) |
 | `src/agent.rs` | LaunchAgent watch / unwatch / guard |
+| `src/ssh_ops.rs` | Out-of-band SSH + rsync backup |
 | `src/wan.rs` | WebRTC probe + Tailscale WAN |
 | `tests/` | integration with fake `adb` on `PATH` |
 | `validate.sh` | fmt + clippy `-D warnings` + nextest |
@@ -43,11 +45,15 @@ Rulebook for AI working on the **phone** lab CLI. Humans: see [README.md](README
 ```bash
 ./validate.sh
 phone --json status
+phone doctor [--save]
 phone shot
 phone --json ui
 phone tap 100 200
+phone unlock
 phone persist      # USB always-on arm
 phone watch        # LaunchAgent re-arm / reconnect
+phone ssh          # Out-of-band SSH into Termux (port 8022)
+phone backup       # Delta-sync /sdcard to Mac
 phone prep         # persist on USB, else soft prep
 pm                 # USB → Tailscale → LAN → mDNS
 phone screen off   # dim + sleep broken panel

@@ -28,6 +28,56 @@ pub fn adb(runner: &dyn CommandRunner, args: &[&str]) -> Result<Output> {
     runner.output("adb", args)
 }
 
+const ADB_CONNECT_TIMEOUT_SECS: &str = "8";
+
+/// `adb connect` with a wall-clock cap when `timeout`/`gtimeout` exists (Tailscale
+/// blackholes otherwise hang `pm` / `phone status` for minutes).
+pub fn adb_connect(runner: &dyn CommandRunner, host: &str) -> Result<Output> {
+    require_adb(runner)?;
+    let args = ["connect", host];
+    if which_on_path(runner, "timeout") {
+        runner.output(
+            "timeout",
+            &[ADB_CONNECT_TIMEOUT_SECS, "adb", "connect", host],
+        )
+    } else if which_on_path(runner, "gtimeout") {
+        runner.output(
+            "gtimeout",
+            &[ADB_CONNECT_TIMEOUT_SECS, "adb", "connect", host],
+        )
+    } else {
+        runner.output("adb", &args)
+    }
+}
+
+pub fn adb_connect_ok(runner: &dyn CommandRunner, host: &str) -> bool {
+    adb_connect(runner, host)
+        .map(|o| o.status.success())
+        .unwrap_or(false)
+}
+
+pub fn adb_connect_status(
+    runner: &dyn CommandRunner,
+    host: &str,
+) -> Result<()> {
+    let out = adb_connect(runner, host)?;
+    if out.status.success() {
+        return Ok(());
+    }
+    Err(AdbError::CommandFailed {
+        args: format!("connect {host}"),
+        stderr: merge_streams(&out),
+    }
+    .into())
+}
+
+fn which_on_path(runner: &dyn CommandRunner, bin: &str) -> bool {
+    runner
+        .output("which", &[bin])
+        .map(|o| o.status.success())
+        .unwrap_or(false)
+}
+
 pub fn adb_status(runner: &dyn CommandRunner, args: &[&str]) -> Result<()> {
     let out = adb(runner, args)?;
     if out.status.success() {
@@ -62,6 +112,15 @@ pub fn is_device(runner: &dyn CommandRunner, id: &str) -> bool {
     authorized_transports(runner)
         .ok()
         .is_some_and(|t| t.iter().any(|x| x == id))
+}
+
+/// State from `adb devices` for a given id (`device`, `unauthorized`, `offline`, …).
+pub fn device_state(runner: &dyn CommandRunner, id: &str) -> Option<String> {
+    let text = adb_stdout(runner, &["devices"]).ok()?;
+    parse_device_lines_with_state(&text)
+        .into_iter()
+        .find(|(dev_id, _)| dev_id == id)
+        .map(|(_, state)| state)
 }
 
 pub fn shell(
@@ -236,6 +295,36 @@ fn trim_output(bytes: &[u8]) -> String {
 }
 
 fn parse_device_lines(text: &str) -> Vec<String> {
+    parse_device_lines_with_state(text)
+        .into_iter()
+        .filter(|(_, state)| state == "device")
+        .map(|(id, _)| id)
+        .collect()
+}
+
+/// USB serial lines from `adb devices` (id without `:port`), any connect-relevant state.
+pub fn discover_usb_serial(text: &str) -> Option<String> {
+    let mut usb: Vec<String> = parse_device_lines_with_state(text)
+        .into_iter()
+        .filter(|(id, state)| {
+            !id.contains(':')
+                && matches!(
+                    state.as_str(),
+                    "device" | "unauthorized" | "offline"
+                )
+        })
+        .map(|(id, _)| id)
+        .collect();
+    usb.sort();
+    usb.dedup();
+    if usb.len() == 1 {
+        Some(usb.remove(0))
+    } else {
+        None
+    }
+}
+
+fn parse_device_lines_with_state(text: &str) -> Vec<(String, String)> {
     let mut out = Vec::new();
     for line in text.lines().skip(1) {
         let mut parts = line.split_whitespace();
@@ -245,9 +334,7 @@ fn parse_device_lines(text: &str) -> Vec<String> {
         let Some(state) = parts.next() else {
             continue;
         };
-        if state == "device" {
-            out.push(id.to_string());
-        }
+        out.push((id.to_string(), state.to_string()));
     }
     out
 }
@@ -289,6 +376,15 @@ mod tests {
         let text = "List of devices attached\nRXC\tdevice\n1.2.3.4:5555\tunauthorized\n";
         let ids = parse_device_lines(text);
         assert_eq!(ids, vec!["RXC".to_string()]);
+        Ok(())
+    }
+
+    #[test]
+    fn discover_usb_serial_single() -> Result<()> {
+        let text = "List of devices attached\nRXCW102PVAP\tunauthorized\n";
+        assert_eq!(discover_usb_serial(text).as_deref(), Some("RXCW102PVAP"));
+        let multi = "List of devices attached\nA\tdevice\nB\tdevice\n";
+        assert!(discover_usb_serial(multi).is_none());
         Ok(())
     }
 

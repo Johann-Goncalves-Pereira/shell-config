@@ -18,6 +18,8 @@ pub struct ScriptedRunner {
     pub mdns: RefCell<Option<String>>,
     /// Recorded `adb shell …` command strings (after transport).
     pub shells: RefCell<Vec<String>>,
+    /// Optional stdout for `ioreg … SAMSUNG_Android`.
+    pub ioreg: RefCell<Option<String>>,
 }
 
 impl CommandRunner for ScriptedRunner {
@@ -43,6 +45,9 @@ fn dispatch(
     let fail = ExitStatus::from_raw(1 << 8);
     if bin == "which" && args == ["adb"] {
         return Ok(which_adb_output(runner.which_adb, ok, fail));
+    }
+    if bin == "which" && (args == ["timeout"] || args == ["gtimeout"]) {
+        return Ok(bytes_ok(fail, b""));
     }
     if bin == "adb" && (args == ["devices"] || args == ["devices", "-l"]) {
         return Ok(bytes_ok(ok, runner.devices.as_bytes()));
@@ -74,6 +79,10 @@ fn dispatch(
     }
     if bin == "tailscale" && args.len() == 3 && args[0] == "ip" {
         return Ok(bytes_ok(fail, b""));
+    }
+    if bin == "ioreg" {
+        let text = runner.ioreg.borrow().clone().unwrap_or_default();
+        return Ok(bytes_ok(ok, text.as_bytes()));
     }
     Ok(bytes_ok(fail, b"unhandled\n"))
 }

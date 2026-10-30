@@ -133,6 +133,7 @@ fn put_one(
         Err(Error::Wan(e)) => Err(Error::Wan(e)),
         Err(Error::Control(e)) => Err(Error::Control(e)),
         Err(Error::Agent(e)) => Err(Error::Agent(e)),
+        Err(Error::Ssh(e)) => Err(Error::Ssh(e)),
         Err(Error::Io(e)) => Err(Error::Io(e)),
     }
 }

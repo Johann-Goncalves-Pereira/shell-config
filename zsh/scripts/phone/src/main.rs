@@ -6,7 +6,10 @@ use phone::error::{AdbError, Result};
 use phone::harden;
 use phone::json_out;
 use phone::runner::{RealRunner, RealWait};
-use phone::{agent, control, persist, screen, transport, wan};
+use phone::{
+    agent, control, doctor, persist, screen, ssh_ops, termux_guard, transport,
+    wan,
+};
 
 #[derive(Parser)]
 #[command(
@@ -45,6 +48,19 @@ enum Commands {
     Guard,
     /// Re-assert ADB trust never-expire
     Lock,
+    /// Wake + type lock PIN/password from Mac (`PHONE_ADB_PIN` or config `pin`)
+    Unlock {
+        /// Override saved PIN for this run only (not printed)
+        pin: Option<String>,
+    },
+    /// Diagnose why cable/ADB is missing (ioreg USB mode, adbkey match, watch)
+    Doctor {
+        /// Save this Mac’s adbkey.pub as the lab expected key
+        #[arg(long)]
+        save: bool,
+    },
+    /// Install Termux boot+background USB MTP guard on the phone
+    TermuxGuard,
     /// adb connect to saved or given host
     Connect { host: Option<String> },
     /// Enable wireless ADB (USB required once)
@@ -104,6 +120,20 @@ enum Commands {
     Launch { package: String },
     /// Show focused package/activity
     Current,
+    /// Out-of-band SSH into Termux (port 8022 via LAN or Tailscale)
+    Ssh {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+    /// Incremental rsync/adb backup of phone storage to Mac
+    Backup {
+        /// Local destination directory (default: ~/.config/phone-adb/backup/)
+        #[arg(long)]
+        dest: Option<PathBuf>,
+        /// Remote directories on phone (default: DCIM, Documents, Download)
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        paths: Vec<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -131,6 +161,10 @@ fn main() {
     }
 }
 
+#[allow(
+    clippy::too_many_lines,
+    reason = "clap command dispatch table stays in one match"
+)]
 fn run(cli: Cli) -> Result<()> {
     let json = cli.json;
     let cfg = Config::load()?;
@@ -157,6 +191,14 @@ fn run(cli: Cli) -> Result<()> {
         Commands::Lock => {
             reject_json(json, "lock")?;
             transport::lock_trust(&runner, &cfg)
+        }
+        Commands::Unlock { pin } => {
+            control::unlock(&runner, &cfg, pin.as_deref(), json)
+        }
+        Commands::Doctor { save } => doctor::doctor(&runner, &cfg, save, json),
+        Commands::TermuxGuard => {
+            reject_json(json, "termux-guard")?;
+            termux_guard::install(&runner, &wait, &cfg)
         }
         Commands::Connect { host } => {
             reject_json(json, "connect")?;
@@ -208,6 +250,14 @@ fn run(cli: Cli) -> Result<()> {
             control::launch(&runner, &cfg, &package, json)
         }
         Commands::Current => control::current(&runner, &cfg, json),
+        Commands::Ssh { args } => {
+            reject_json(json, "ssh")?;
+            ssh_ops::ssh(&cfg, &args)
+        }
+        Commands::Backup { dest, paths } => {
+            reject_json(json, "backup")?;
+            ssh_ops::backup(&cfg, dest.as_deref(), &paths)
+        }
     }
 }
 

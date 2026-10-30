@@ -153,19 +153,20 @@ fn guard_tick(
     was_reachable: &mut bool,
 ) {
     let serial = cfg.read_serial();
-    let usb_now = adb::is_device(runner, &serial);
+    let sight = crate::doctor::probe_samsung_usb(runner);
+    let state = adb::device_state(runner, &serial);
+    let usb_now = state.as_deref() == Some("device");
+
+    if sight.present && !usb_now {
+        recover_silent_cable(runner, cfg, &sight, state.as_deref());
+    }
+
     if usb_now {
         // Re-force every poll while cabled — Samsung Auto Wi‑Fi / USB mode flips.
         let _ = crate::persist::force_wifi_always_on(runner, &serial, false);
         let _ = crate::persist::force_usb_lab_mode(runner, &serial, false);
         if !*usb_was_present {
-            eprintln!(
-                "USB appeared ({serial}) — re-arming tcpip {DEFAULT_PORT}"
-            );
-            match transport::tcpip(runner, wait, cfg, DEFAULT_PORT) {
-                Ok(()) => eprintln!("tcpip re-armed"),
-                Err(e) => eprintln!("tcpip re-arm failed: {e}"),
-            }
+            on_usb_authorized(runner, wait, cfg, &serial);
         }
     }
     *usb_was_present = usb_now;
@@ -176,12 +177,123 @@ fn guard_tick(
                 eprintln!("reachable via {t}");
             }
             *was_reachable = true;
+            maybe_periodic_backup(cfg);
         }
         Err(_) => {
             if *was_reachable {
                 eprintln!("unreachable — will retry");
             }
             *was_reachable = false;
+        }
+    }
+}
+
+fn on_usb_authorized(
+    runner: &dyn CommandRunner,
+    wait: &dyn Wait,
+    cfg: &Config,
+    serial: &str,
+) {
+    eprintln!("USB appeared ({serial}) — re-arming tcpip {DEFAULT_PORT}");
+    match transport::tcpip(runner, wait, cfg, DEFAULT_PORT) {
+        Ok(()) => eprintln!("tcpip re-armed"),
+        Err(e) => eprintln!("tcpip re-arm failed: {e}"),
+    }
+    if cfg.read_pin().is_some() {
+        match crate::control::unlock(runner, cfg, None, false) {
+            Ok(()) => eprintln!("unlock keystrokes sent"),
+            Err(e) => eprintln!("unlock skipped: {e}"),
+        }
+    }
+}
+
+fn recover_silent_cable(
+    runner: &dyn CommandRunner,
+    cfg: &Config,
+    sight: &crate::doctor::SamsungUsb,
+    adb_state: Option<&str>,
+) {
+    use crate::doctor::UsbMode;
+    let serial = sight.serial.as_deref().unwrap_or("?");
+    match (sight.mode, sight.adb_interface) {
+        (UsbMode::Rndis, _) => eprintln!(
+            "cable: Samsung {serial} RNDIS/tether — flipping to MTP via wireless ADB"
+        ),
+        (UsbMode::Mtp, false) => eprintln!(
+            "cable: Samsung {serial} MTP without ADB iface — unlock + force MTP via wireless"
+        ),
+        (UsbMode::Mtp, true) => {
+            eprintln!(
+                "cable: Samsung {serial} MTP+ADB but adb state={adb_state:?} — bouncing adbd client"
+            );
+            let _ = runner.output("adb", &["kill-server"]);
+            let _ = runner.output("adb", &["start-server"]);
+            poke_saved_hosts(runner, cfg);
+        }
+        (UsbMode::Other, adb_iface) => eprintln!(
+            "cable: Samsung {serial} other usb mode adb_iface={adb_iface} — force MTP via wireless"
+        ),
+        (UsbMode::Absent, _) => {}
+    }
+    if adb_state == Some("unauthorized") {
+        eprintln!(
+            "cable: unauthorized — this Mac’s adbkey ≠ lab key (phone doctor --save / copy adbkey*)"
+        );
+    }
+    // RNDIS/no-ADB-iface cannot be fixed on the cable itself — need LAN/WAN adbd.
+    let needs_mtp_flip = matches!(
+        (sight.mode, sight.adb_interface),
+        (UsbMode::Rndis, _) | (UsbMode::Mtp, false) | (UsbMode::Other, _)
+    );
+    if needs_mtp_flip {
+        repair_usb_mode_over_wireless(runner, cfg);
+    }
+}
+
+fn repair_usb_mode_over_wireless(runner: &dyn CommandRunner, cfg: &Config) {
+    if cfg.read_pin().is_some() {
+        let _ = crate::control::unlock(runner, cfg, None, false);
+    }
+    match crate::persist::force_mtp_via_reachable(runner, cfg) {
+        Ok(t) => eprintln!(
+            "cable: forced File transfer/MTP via {t} (USB ADB should reappear)"
+        ),
+        Err(e) => eprintln!(
+            "cable: cannot flip USB mode — wireless ADB down ({e}); keep Wi‑Fi/Tailscale up"
+        ),
+    }
+}
+
+fn poke_saved_hosts(runner: &dyn CommandRunner, cfg: &Config) {
+    for host in [cfg.read_host(), cfg.read_wan_host()].into_iter().flatten() {
+        let _ = adb::adb_connect(runner, &host);
+    }
+}
+
+fn maybe_periodic_backup(cfg: &Config) {
+    let stamp_file = cfg.dir().join("last_backup_epoch");
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+
+    let last = std::fs::read_to_string(&stamp_file)
+        .ok()
+        .and_then(|s| s.trim().parse::<u64>().ok())
+        .unwrap_or(0);
+
+    // 24 hours = 86400 seconds
+    if now.saturating_sub(last) >= 86400 {
+        let _ = std::fs::write(&stamp_file, now.to_string());
+        let bin = release_bin();
+        if bin.is_file() {
+            eprintln!("starting scheduled 24h background backup...");
+            let _ = std::process::Command::new(bin)
+                .arg("backup")
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .spawn();
         }
     }
 }
@@ -220,6 +332,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let wait = RecordingWait {
             calls: RefCell::new(Vec::new()),
