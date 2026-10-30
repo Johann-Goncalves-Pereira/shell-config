@@ -198,6 +198,63 @@ pub fn type_text(
     emit_ok(json, &format!("typed {text:?}"))
 }
 
+/// Wake + enter lock PIN/password from the Mac (cable or wireless ADB).
+///
+/// Numeric PINs use keyevents (Samsung PIN pad). Other secrets use `input text`.
+/// Does not print the secret. After a cold reboot Samsung may hide ADB until
+/// one unlock — then this works for the rest of the boot.
+pub fn unlock(
+    runner: &dyn CommandRunner,
+    cfg: &Config,
+    pin: Option<&str>,
+    json: bool,
+) -> Result<()> {
+    let secret = match pin.map(str::trim).filter(|s| !s.is_empty()) {
+        Some(s) => s.to_string(),
+        None => cfg
+            .read_pin()
+            .ok_or(crate::error::ConfigError::MissingPin)?,
+    };
+    let t = transport::transport(runner, cfg)?;
+    adb::adb_status(runner, &["-s", &t, "shell", "input", "keyevent", "224"])?;
+    enter_lock_secret(runner, &t, &secret)?;
+    adb::adb_status(runner, &["-s", &t, "shell", "input", "keyevent", "66"])?;
+    emit_ok(json, "unlock keystrokes sent")
+}
+
+fn enter_lock_secret(
+    runner: &dyn CommandRunner,
+    transport: &str,
+    secret: &str,
+) -> Result<()> {
+    if secret.chars().all(|c| c.is_ascii_digit()) {
+        for ch in secret.chars() {
+            let code = digit_keycode(ch)?;
+            adb::adb_status(
+                runner,
+                &["-s", transport, "shell", "input", "keyevent", &code],
+            )?;
+        }
+        return Ok(());
+    }
+    let encoded = encode_input_text(secret);
+    adb::adb_status(
+        runner,
+        &["-s", transport, "shell", "input", "text", &encoded],
+    )
+}
+
+fn digit_keycode(ch: char) -> Result<String> {
+    // KEYCODE_0=7 … KEYCODE_9=16
+    let Some(d) = ch.to_digit(10) else {
+        return Err(ControlError::UnknownKey {
+            name: ch.to_string(),
+        }
+        .into());
+    };
+    Ok((7 + d).to_string())
+}
+
 /// ADB `input text` uses `%s` for spaces.
 pub fn encode_input_text(text: &str) -> String {
     text.replace(' ', "%s")
@@ -449,6 +506,14 @@ mod tests {
     }
 
     #[test]
+    fn digit_keycode_map() -> Result<()> {
+        assert_eq!(digit_keycode('0')?, "7");
+        assert_eq!(digit_keycode('9')?, "16");
+        assert!(digit_keycode('a').is_err());
+        Ok(())
+    }
+
+    #[test]
     fn shot_writes_exec_out_bytes() -> Result<()> {
         use crate::runner::ScriptedRunner;
         use std::cell::RefCell;
@@ -464,6 +529,7 @@ mod tests {
             exec_out: RefCell::new(Some(png.clone())),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let stamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
