@@ -107,6 +107,10 @@ fi
 print "${BGreen}Installing shell tools from the Brewfile${Color_Off}"
 brew bundle --file="${zsh_root}/install/Brewfile"
 
+if [[ -x "${zsh_root}/scripts/phone/adb-unquarantine.sh" ]]; then
+  "${zsh_root}/scripts/phone/adb-unquarantine.sh" || true
+fi
+
 if ! command -v uv >/dev/null; then
   print "${BGreen}Installing uv${Color_Off}"
   curl -LsSf https://astral.sh/uv/install.sh | sh

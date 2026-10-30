@@ -9,6 +9,6 @@ auto_install = false
 # releases; an exact pin never moved. Project version files still win.
 [tools]
 go = "latest"
-node = "24"
+node = "24.22.2"
 python = "3.13"
 ruby = "3.2"
