@@ -46,7 +46,7 @@ fn try_tailscale(
     };
     let host = format!("{ip}:{port}");
     println!("Connecting via Tailscale {host}...");
-    adb::adb_status(runner, &["connect", &host])?;
+    adb::adb_connect_status(runner, &host)?;
     // Keep LAN host separate; WAN goes in wan-host for `pm` auto-fallback.
     cfg.write_wan_host(&host)?;
     println!("{}", adb::devices_l(runner)?);
@@ -58,8 +58,7 @@ fn try_saved_wan(runner: &dyn CommandRunner, cfg: &Config) -> Result<bool> {
         return Ok(false);
     };
     println!("Connecting via saved WAN host {host}...");
-    if adb::adb_ok(runner, &["connect", &host]) && adb::is_device(runner, &host)
-    {
+    if adb::adb_connect_ok(runner, &host) && adb::is_device(runner, &host) {
         println!("{}", adb::devices_l(runner)?);
         return Ok(true);
     }
@@ -100,6 +99,7 @@ fn ensure_installed(
             crate::error::Error::Wan(e) => crate::error::Error::Wan(e),
             crate::error::Error::Control(e) => crate::error::Error::Control(e),
             crate::error::Error::Agent(e) => crate::error::Error::Agent(e),
+            crate::error::Error::Ssh(e) => crate::error::Error::Ssh(e),
             crate::error::Error::Io(e) => crate::error::Error::Io(e),
         })?;
     Ok(())

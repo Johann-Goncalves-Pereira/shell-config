@@ -19,6 +19,9 @@ pub fn transport(runner: &dyn CommandRunner, cfg: &Config) -> Result<String> {
     if let Some(t) = try_connect_candidates(runner, cfg) {
         return Ok(t);
     }
+    if adb::device_state(runner, &serial).as_deref() == Some("unauthorized") {
+        return Err(AdbError::UsbUnauthorized { serial }.into());
+    }
     Err(AdbError::Unreachable.into())
 }
 
@@ -68,7 +71,7 @@ fn ensure_tcp_device(
     if adb::is_device(runner, host) {
         return Some(host.to_string());
     }
-    let _ = adb::adb(runner, &["connect", host]);
+    let _ = adb::adb_connect(runner, host);
     if adb::is_device(runner, host) {
         if host.starts_with("100.") {
             let _ = cfg.write_wan_host(host);
@@ -114,6 +117,12 @@ pub fn status(
     }
     if let Some(t) = &info.transport {
         println!("Transport:    {t} ({})", info.via.as_deref().unwrap_or("?"));
+    } else if adb::device_state(runner, &info.serial).as_deref()
+        == Some("unauthorized")
+    {
+        println!(
+            "Transport:    (USB unauthorized on this Mac — copy ~/.android/adbkey* from a Mac that already mirrors, or save LAN host after phone tcpip on a trusted Mac; wireless is tried before this message)"
+        );
     } else {
         println!("Transport:    (unreachable)");
     }
@@ -176,7 +185,7 @@ pub fn connect(
 ) -> Result<()> {
     let host = resolve_connect_host(cfg, host)?;
     println!("Connecting to {host}...");
-    adb::adb_status(runner, &["connect", &host])?;
+    adb::adb_connect_status(runner, &host)?;
     cfg.write_host(&host)?;
     println!("{}", adb::devices_l(runner)?);
     Ok(())
@@ -206,7 +215,7 @@ pub fn tcpip(
     let host = format!("{ip}:{port}");
     cfg.write_host(&host)?;
     println!("Connecting to {host}...");
-    adb::adb_status(runner, &["connect", &host])?;
+    adb::adb_connect_status(runner, &host)?;
     println!("Wireless ADB ready: {host}");
     println!("{}", adb::devices_l(runner)?);
     Ok(())
@@ -258,6 +267,10 @@ pub fn mirror(
     // brightness 0 yields a black window. Wake first; do not screen::disable
     // (that forces sleep and blacks the framebuffer).
     wake_for_mirror(runner, &t);
+    // If a PIN is saved, enter it so `pm` works without touching the panel.
+    if cfg.read_pin().is_some() {
+        let _ = crate::control::unlock(runner, cfg, None, false);
+    }
     println!("Mirroring {t} via {via} (screen off on device)...");
     let serial_flag = format!("--serial={t}");
     let mut args: Vec<&str> = vec!["-S", "--no-power-on", &serial_flag];
@@ -345,6 +358,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         }
     }
 
@@ -382,6 +396,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let wait = RecordingWait {
             calls: RefCell::new(Vec::new()),
@@ -404,6 +419,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let cfg = temp_cfg("wan")?;
         cfg.write_wan_host("100.64.0.2:5555")?;
@@ -423,6 +439,7 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let cfg = temp_cfg("usbwan")?;
         cfg.write_wan_host("100.64.0.2:5555")?;
@@ -453,12 +470,33 @@ mod tests {
             exec_out: RefCell::new(None),
             mdns: RefCell::new(None),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let cfg = temp_cfg("unr")?;
         let info = collect_status(&runner, &cfg)?;
         assert!(info.ok);
         assert!(!info.reachable);
         assert!(info.transport.is_none());
+        Ok(())
+    }
+
+    #[test]
+    fn transport_usb_unauthorized_falls_back_to_saved_host() -> Result<()> {
+        let runner = ScriptedRunner {
+            which_adb: true,
+            devices: "List of devices attached\nTESTSERIAL\tunauthorized\n192.168.131.169:5555\tdevice\n"
+                .into(),
+            shell_replies: RefCell::new(HashMap::new()),
+            puts: RefCell::new(Vec::new()),
+            exec_out: RefCell::new(None),
+            mdns: RefCell::new(None),
+            shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
+        };
+        let cfg = temp_cfg("unauth-host")?;
+        cfg.write_host("192.168.131.169:5555")?;
+        let t = transport(&runner, &cfg)?;
+        assert_eq!(t, "192.168.131.169:5555");
         Ok(())
     }
 
@@ -477,6 +515,7 @@ adb-x\t_adb-tls-connect._tcp\t192.0.2.10:37123\n"
                     .into(),
             )),
             shells: RefCell::new(Vec::new()),
+            ioreg: RefCell::new(None),
         };
         let cfg = temp_cfg("mdns")?;
         let t = transport(&runner, &cfg)?;
