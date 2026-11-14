@@ -7,3 +7,4 @@ fi
 
 # OrbStack: command-line tools and integration (kept from the previous ~/.zprofile).
 [[ -f "$HOME/.orbstack/shell/init.zsh" ]] && source "$HOME/.orbstack/shell/init.zsh"
+export PATH="$HOME/.local/bin:$PATH"
