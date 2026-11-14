@@ -59,8 +59,9 @@ typeset -f strip_image | grep -E -q -- '-newer|-nt' || fail "strip_image must sk
 # --- gpo pulls once ---
 (( $(typeset -f gpo | grep -c 'git fetch') == 0 )) || fail "gpo must not fetch again after pull"
 
-# --- update: WebUI is opt-in, cleanup runs once ---
+# --- update: WebUI is opt-in, brew upgrades without ask prompts, cleanup runs once ---
 typeset -f update | grep -F -q -- '--webui' || fail "update must take --webui to opt in to the Docker step"
+typeset -f update | grep -F -q -- 'brew upgrade --yes' || fail "update must run brew upgrade --yes so ask mode is skipped"
 (( $(typeset -f update | grep -c 'brew cleanup') == 1 )) || fail "update must run brew cleanup once"
 grep -E -q '^node = "24"$' "$root/config/mise.toml" || fail "mise.toml must pin node to the 24 line, not an exact patch"
 
