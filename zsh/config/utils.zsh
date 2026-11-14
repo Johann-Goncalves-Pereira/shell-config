@@ -174,7 +174,8 @@ function update() {
 
   echo -e "\n\n${BGreen}Updating with Homebrew...${Color_Off}\n"
   brew update
-  brew upgrade
+  # Homebrew 7 ask-mode prompts y/n before downloading; --yes accepts the plan.
+  brew upgrade --yes
   if command -v mas >/dev/null; then
     echo -e "${BGreen}Updating apps with MAS...${Color_Off}\n"
     mas upgrade
